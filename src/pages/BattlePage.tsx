@@ -1,18 +1,21 @@
 
-import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import NavBar from "@/components/NavBar";
 import RoastInput from "@/components/RoastInput";
 import BattleTimer from "@/components/BattleTimer";
 import VotingSystem from "@/components/VotingSystem";
+import ShareBattle from "@/components/ShareBattle";
+import InviteFromContacts from "@/components/InviteFromContacts";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Eye, Users, MessageSquare, ThumbsUp, Share2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "@/components/ui/sonner";
 
-// Mocked data - would be fetched from API based on battleId
+// Mocked data - would be fetched from Supabase based on battleId
 const MOCK_BATTLE = {
   id: "battle-1",
   title: "Sunday Night Flamewar",
@@ -47,16 +50,45 @@ const MOCK_BATTLE = {
 
 const BattlePage = () => {
   const { battleId } = useParams<{ battleId: string }>();
+  const navigate = useNavigate();
   const [battle, setBattle] = useState(MOCK_BATTLE);
   const [showVoting, setShowVoting] = useState(false);
   const [message, setMessage] = useState("");
   
-  const isMyTurn = true; // Would be determined by auth user ID comparison
-  const isSpectator = true; // Would be determined by checking participant status
+  // This would be determined by checking against the authenticated user ID
+  const currentUserId = "user-1"; // Mocked for now
+  
+  const isMyTurn = battle.currentTurn === currentUserId;
+  const isSpectator = !battle.participants.find(p => p.id === currentUserId);
+  
+  // In a real app, we would fetch the battle data from Supabase when the component mounts
+  useEffect(() => {
+    // Simulate fetching battle data
+    const fetchBattleData = async () => {
+      try {
+        // With Supabase, this would be:
+        // const { data, error } = await supabase
+        //   .from('battles')
+        //   .select('*, participants(*)')
+        //   .eq('id', battleId)
+        //   .single();
+        
+        // For now, just using mock data
+        console.log(`Fetching battle data for ID: ${battleId}`);
+        
+        // We would update the battle state here
+      } catch (error) {
+        console.error("Error fetching battle:", error);
+        toast.error("Failed to load battle data");
+      }
+    };
+    
+    fetchBattleData();
+  }, [battleId]);
   
   const handleSendRoast = (text: string) => {
     console.log("Sending roast:", text);
-    // Would send to backend and update battle state
+    // Would send to Supabase and update battle state
     
     // Mock adding message to state
     setBattle((prev) => ({
@@ -74,10 +106,12 @@ const BattlePage = () => {
       // Switch turns in a real implementation
     }));
     setMessage("");
+    
+    toast.success("Roast sent!");
   };
   
   const handleLike = (messageId: string) => {
-    // Would send to backend and update likes
+    // Would send to Supabase and update likes
     setBattle((prev) => ({
       ...prev,
       messages: prev.messages.map(msg => 
@@ -86,17 +120,28 @@ const BattlePage = () => {
           : msg
       )
     }));
+    
+    toast.success("Roast liked! 🔥");
   };
   
   const handleTimeout = () => {
     console.log("Time's up!");
-    // Would update turn in real implementation
+    toast.warning("Time's up! Turn switched to the next player.");
+    // Would update turn in Supabase in real implementation
   };
   
   const handleVote = (scores: Record<string, { creativity: number; humor: number; savagery: number }>) => {
     console.log("Vote submitted:", scores);
-    // Would send to backend and update battle state
+    // Would send to Supabase and update battle state
+    
+    toast.success("Vote submitted! Thanks for judging this battle.");
     setShowVoting(false);
+    navigate(`/battle/results/${battleId}`);
+  };
+  
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/battle/${battleId}`);
+    toast.success("Battle link copied to clipboard!");
   };
 
   return (
@@ -120,6 +165,26 @@ const BattlePage = () => {
               <MessageSquare className="h-3.5 w-3.5" />
               <span>{battle.messages.length} roasts</span>
             </div>
+            
+            <div className="ml-auto space-x-2">
+              <ShareBattle 
+                battleId={battleId || ""}
+                trigger={
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="flex items-center gap-1"
+                  >
+                    <Share2 className="h-4 w-4" />
+                    <span>Share</span>
+                  </Button>
+                }
+              />
+              
+              <InviteFromContacts
+                battleId={battleId || ""}
+              />
+            </div>
           </div>
         </div>
         
@@ -140,7 +205,7 @@ const BattlePage = () => {
                   <div className="flex-1 overflow-auto space-y-4">
                     {battle.messages.map((message) => {
                       const participant = battle.participants.find(p => p.id === message.userId);
-                      const isCurrentUser = message.userId === battle.currentTurn;
+                      const isCurrentUser = message.userId === currentUserId;
                       
                       return (
                         <div key={message.id} className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
@@ -148,7 +213,7 @@ const BattlePage = () => {
                             <Avatar className="h-10 w-10 mt-1">
                               <AvatarImage src={participant?.avatar} alt={participant?.name} />
                               <AvatarFallback className="bg-night-700 text-flame-500">
-                                {participant?.name.substring(0, 2).toUpperCase() || "SP"}
+                                {participant?.name?.substring(0, 2).toUpperCase() || "SP"}
                               </AvatarFallback>
                             </Avatar>
                             
@@ -179,13 +244,18 @@ const BattlePage = () => {
                                   <span>{message.likes}</span>
                                 </Button>
                                 
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="h-8 px-2 text-muted-foreground hover:text-flame-500"
-                                >
-                                  <Share2 className="h-3.5 w-3.5" />
-                                </Button>
+                                <ShareBattle
+                                  battleId={battleId || ""}
+                                  trigger={
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="h-8 px-2 text-muted-foreground hover:text-flame-500"
+                                    >
+                                      <Share2 className="h-3.5 w-3.5" />
+                                    </Button>
+                                  }
+                                />
                               </div>
                             </div>
                           </div>

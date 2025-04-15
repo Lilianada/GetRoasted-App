@@ -3,7 +3,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { SubscriptionProvider } from "./hooks/useSubscription";
 import Home from "./pages/Home";
 import BattleLobby from "./pages/BattleLobby";
 import BattlePage from "./pages/BattlePage";
@@ -20,38 +21,108 @@ import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 import Rules from "./pages/Rules";
 import Leaderboard from "./pages/Leaderboard";
+import Billing from "./pages/Billing";
 import SocketStatus from "./components/SocketStatus";
 
 const queryClient = new QueryClient();
 
+// Placeholder for authentication check
+// In a real app with Supabase, this would use the Supabase auth state
+const isAuthenticated = false; // This would be dynamic with Supabase auth
+
+// Component to handle protected routes
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/battles" element={<BattleLobby />} />
-          <Route path="/battle/new" element={<NewBattle />} />
-          <Route path="/battle/live/:battleId" element={<Battle />} />
-          <Route path="/battle/:battleId" element={<BattlePage />} />
-          <Route path="/battle/results/:battleId" element={<BattleResults />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/profile/:username" element={<Profile />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/rules" element={<Rules />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-      <SocketStatus connected={true} />
-    </TooltipProvider>
+    <SubscriptionProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            
+            {/* Protected routes */}
+            <Route path="/battles" element={
+              <ProtectedRoute>
+                <BattleLobby />
+              </ProtectedRoute>
+            } />
+            <Route path="/battle/new" element={
+              <ProtectedRoute>
+                <NewBattle />
+              </ProtectedRoute>
+            } />
+            <Route path="/battle/live/:battleId" element={
+              <ProtectedRoute>
+                <Battle />
+              </ProtectedRoute>
+            } />
+            <Route path="/battle/:battleId" element={
+              <ProtectedRoute>
+                <BattlePage />
+              </ProtectedRoute>
+            } />
+            <Route path="/battle/results/:battleId" element={
+              <ProtectedRoute>
+                <BattleResults />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile/:username" element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            } />
+            <Route path="/billing" element={
+              <ProtectedRoute>
+                <Billing />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <Admin />
+              </ProtectedRoute>
+            } />
+            <Route path="/rules" element={
+              <ProtectedRoute>
+                <Rules />
+              </ProtectedRoute>
+            } />
+            <Route path="/leaderboard" element={
+              <ProtectedRoute>
+                <Leaderboard />
+              </ProtectedRoute>
+            } />
+            
+            {/* Catch-all route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+        <SocketStatus connected={true} />
+      </TooltipProvider>
+    </SubscriptionProvider>
   </QueryClientProvider>
 );
 

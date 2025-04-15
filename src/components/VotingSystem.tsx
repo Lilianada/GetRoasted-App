@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { Star, Trophy } from "lucide-react";
 import { Button } from "./ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 interface VotingOption {
   id: string;
@@ -16,33 +17,24 @@ interface VotingSystemProps {
 }
 
 const VotingSystem = ({ options, onVote }: VotingSystemProps) => {
-  const [scores, setScores] = useState<Record<string, { creativity: number; humor: number; savagery: number }>>(() => {
-    const initialScores: Record<string, { creativity: number; humor: number; savagery: number }> = {};
-    options.forEach((option) => {
-      initialScores[option.id] = { creativity: 0, humor: 0, savagery: 0 };
-    });
-    return initialScores;
-  });
-
-  const handleRatingChange = (optionId: string, category: 'creativity' | 'humor' | 'savagery', value: number) => {
-    setScores((prev) => ({
-      ...prev,
-      [optionId]: {
-        ...prev[optionId],
-        [category]: value,
-      },
-    }));
-  };
+  const [selectedWinner, setSelectedWinner] = useState<string | null>(null);
 
   const handleSubmit = () => {
-    onVote(scores);
-  };
-
-  const isComplete = () => {
-    return options.every((option) => {
-      const score = scores[option.id];
-      return score.creativity > 0 && score.humor > 0 && score.savagery > 0;
+    if (!selectedWinner) return;
+    
+    // For backward compatibility, we still use the old scoring structure
+    // even though we've simplified the UI
+    const scores: Record<string, { creativity: number; humor: number; savagery: number }> = {};
+    
+    options.forEach((option) => {
+      if (option.id === selectedWinner) {
+        scores[option.id] = { creativity: 5, humor: 5, savagery: 5 };
+      } else {
+        scores[option.id] = { creativity: 3, humor: 3, savagery: 3 };
+      }
     });
+    
+    onVote(scores);
   };
 
   return (
@@ -52,31 +44,44 @@ const VotingSystem = ({ options, onVote }: VotingSystemProps) => {
           <Trophy className="h-5 w-5 text-flame-500" />
           Cast Your Vote
         </CardTitle>
-        <CardDescription>Rate each contestant on creativity, humor, and savagery</CardDescription>
+        <CardDescription>Who was the best roaster in this battle?</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {options.map((option) => (
-          <div key={option.id} className="space-y-4">
-            <h3 className="font-bold">{option.name}</h3>
-            
-            <div className="space-y-3">
-              <VotingCategory
-                label="Creativity"
-                value={scores[option.id].creativity}
-                onChange={(value) => handleRatingChange(option.id, 'creativity', value)}
-              />
+          <div 
+            key={option.id} 
+            className={`p-4 border rounded-lg cursor-pointer transition-all ${
+              selectedWinner === option.id 
+                ? 'border-flame-500 bg-flame-500/10' 
+                : 'border-night-700 hover:border-flame-500/50'
+            }`}
+            onClick={() => setSelectedWinner(option.id)}
+          >
+            <div className="flex items-center gap-3">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={option.avatar} alt={option.name} />
+                <AvatarFallback className="bg-night-700 text-flame-500">
+                  {option.name.substring(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
               
-              <VotingCategory
-                label="Humor"
-                value={scores[option.id].humor}
-                onChange={(value) => handleRatingChange(option.id, 'humor', value)}
-              />
+              <div className="flex-1">
+                <h3 className="font-medium">{option.name}</h3>
+                <p className="text-xs text-muted-foreground">Tap to select</p>
+              </div>
               
-              <VotingCategory
-                label="Savagery"
-                value={scores[option.id].savagery}
-                onChange={(value) => handleRatingChange(option.id, 'savagery', value)}
-              />
+              <div className="flex items-center">
+                {selectedWinner === option.id && (
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star 
+                        key={star} 
+                        className="h-4 w-4 text-flame-500 fill-flame-500" 
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         ))}
@@ -84,46 +89,13 @@ const VotingSystem = ({ options, onVote }: VotingSystemProps) => {
       <CardFooter>
         <Button 
           onClick={handleSubmit} 
-          disabled={!isComplete()} 
+          disabled={!selectedWinner} 
           className="w-full bg-gradient-flame hover:opacity-90"
         >
           Submit Vote
         </Button>
       </CardFooter>
     </Card>
-  );
-};
-
-interface VotingCategoryProps {
-  label: string;
-  value: number;
-  onChange: (value: number) => void;
-}
-
-const VotingCategory = ({ label, value, onChange }: VotingCategoryProps) => {
-  return (
-    <div className="space-y-2">
-      <div className="flex justify-between items-center">
-        <span className="text-sm text-muted-foreground">{label}</span>
-        <span className="text-sm font-mono">{value}/5</span>
-      </div>
-      <div className="flex gap-1">
-        {Array.from({ length: 5 }, (_, i) => i + 1).map((starValue) => (
-          <button
-            key={starValue}
-            type="button"
-            className={`p-1 focus:outline-none focus:ring-1 focus:ring-flame-500 rounded-md transition-colors`}
-            onClick={() => onChange(starValue)}
-          >
-            <Star
-              className={`h-5 w-5 ${
-                starValue <= value ? "text-flame-500 fill-flame-500" : "text-night-600"
-              }`}
-            />
-          </button>
-        ))}
-      </div>
-    </div>
   );
 };
 

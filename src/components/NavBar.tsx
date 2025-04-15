@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Flame,
@@ -12,21 +12,30 @@ import {
   Home,
   Trophy,
   BookOpen,
-  User
+  User,
+  Settings,
+  LogOut
 } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "@/components/ui/sonner";
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "@/components/ui/sonner";
+import UserMenu from "@/components/UserMenu";
 
 const NavBar = () => {
-  const isMobile = useIsMobile();
   const [notifications, setNotifications] = useState(3);
+  const navigate = useNavigate();
+  
+  // This would come from Supabase auth state in a real app
+  const isAuthenticated = false;
+  
+  // Responsive breakpoint for mobile/tablet menu
+  // Now set to 900px as requested
+  const isMobileOrTablet = window.innerWidth < 900;
 
   const handleNotificationClick = () => {
     toast("Notifications", {
@@ -50,24 +59,75 @@ const NavBar = () => {
           </Link>
         </div>
 
-        {!isMobile ? (
+        {!isMobileOrTablet ? (
           <>
             <nav className="flex items-center gap-6">
               <Link to="/" className="text-sm font-medium text-muted-foreground transition-colors hover:text-flame-500">
                 Home
               </Link>
-              <Link to="/battles" className="text-sm font-medium text-muted-foreground transition-colors hover:text-flame-500">
-                Battles
-              </Link>
-              <Link to="/leaderboard" className="text-sm font-medium text-muted-foreground transition-colors hover:text-flame-500">
-                Leaderboard
-              </Link>
-              <Link to="/rules" className="text-sm font-medium text-muted-foreground transition-colors hover:text-flame-500">
-                Rules
-              </Link>
+              {isAuthenticated && (
+                <>
+                  <Link to="/battles" className="text-sm font-medium text-muted-foreground transition-colors hover:text-flame-500">
+                    Battles
+                  </Link>
+                  <Link to="/leaderboard" className="text-sm font-medium text-muted-foreground transition-colors hover:text-flame-500">
+                    Leaderboard
+                  </Link>
+                  <Link to="/rules" className="text-sm font-medium text-muted-foreground transition-colors hover:text-flame-500">
+                    Rules
+                  </Link>
+                </>
+              )}
             </nav>
 
             <div className="flex items-center gap-3">
+              {isAuthenticated ? (
+                <>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="text-muted-foreground relative"
+                    onClick={handleNotificationClick}
+                  >
+                    <Bell className="h-5 w-5" />
+                    {notifications > 0 && (
+                      <Badge 
+                        variant="destructive" 
+                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                      >
+                        {notifications}
+                      </Badge>
+                    )}
+                  </Button>
+                  <UserMenu user={{ name: "FlameThrow3r", isAdmin: true }} />
+                  <Button asChild className="gap-2 bg-gradient-flame hover:opacity-90">
+                    <Link to="/battle/new">
+                      <Mic className="h-4 w-4" />
+                      <span>Start Battle</span>
+                    </Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" asChild className="gap-2">
+                    <Link to="/login">
+                      <LogIn className="h-4 w-4" />
+                      <span>Sign In</span>
+                    </Link>
+                  </Button>
+                  <Button asChild className="gap-2 bg-gradient-flame hover:opacity-90">
+                    <Link to="/signup">
+                      <User className="h-4 w-4" />
+                      <span>Sign Up</span>
+                    </Link>
+                  </Button>
+                </>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center gap-2">
+            {isAuthenticated && (
               <Button 
                 variant="ghost" 
                 size="icon" 
@@ -84,38 +144,7 @@ const NavBar = () => {
                   </Badge>
                 )}
               </Button>
-              <Button variant="outline" asChild className="gap-2">
-                <Link to="/login">
-                  <LogIn className="h-4 w-4" />
-                  <span>Sign In</span>
-                </Link>
-              </Button>
-              <Button asChild className="gap-2 bg-gradient-flame hover:opacity-90">
-                <Link to="/battle/new">
-                  <Mic className="h-4 w-4" />
-                  <span>Start Battle</span>
-                </Link>
-              </Button>
-            </div>
-          </>
-        ) : (
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-muted-foreground relative"
-              onClick={handleNotificationClick}
-            >
-              <Bell className="h-5 w-5" />
-              {notifications > 0 && (
-                <Badge 
-                  variant="destructive" 
-                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-                >
-                  {notifications}
-                </Badge>
-              )}
-            </Button>
+            )}
 
             <Sheet>
               <SheetTrigger asChild>
@@ -139,43 +168,85 @@ const NavBar = () => {
                         <span>Home</span>
                       </Link>
                     </SheetClose>
-                    <SheetClose asChild>
-                      <Link to="/battles" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
-                        <Mic className="h-5 w-5" />
-                        <span>Battles</span>
-                      </Link>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Link to="/leaderboard" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
-                        <Trophy className="h-5 w-5" />
-                        <span>Leaderboard</span>
-                      </Link>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Link to="/rules" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
-                        <BookOpen className="h-5 w-5" />
-                        <span>Rules</span>
-                      </Link>
-                    </SheetClose>
+                    
+                    {isAuthenticated ? (
+                      <>
+                        <SheetClose asChild>
+                          <Link to="/battles" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
+                            <Mic className="h-5 w-5" />
+                            <span>Battles</span>
+                          </Link>
+                        </SheetClose>
+                        <SheetClose asChild>
+                          <Link to="/leaderboard" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
+                            <Trophy className="h-5 w-5" />
+                            <span>Leaderboard</span>
+                          </Link>
+                        </SheetClose>
+                        <SheetClose asChild>
+                          <Link to="/rules" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
+                            <BookOpen className="h-5 w-5" />
+                            <span>Rules</span>
+                          </Link>
+                        </SheetClose>
+                        <SheetClose asChild>
+                          <Link to="/profile" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
+                            <User className="h-5 w-5" />
+                            <span>Profile</span>
+                          </Link>
+                        </SheetClose>
+                        <SheetClose asChild>
+                          <Link to="/settings" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
+                            <Settings className="h-5 w-5" />
+                            <span>Settings</span>
+                          </Link>
+                        </SheetClose>
+                        <SheetClose asChild>
+                          <button 
+                            className="flex items-center gap-3 py-2 text-base text-destructive hover:text-destructive/80"
+                            onClick={() => {
+                              toast.success("Logged out successfully");
+                              // In real app with Supabase: await supabase.auth.signOut()
+                              navigate("/");
+                            }}
+                          >
+                            <LogOut className="h-5 w-5" />
+                            <span>Sign Out</span>
+                          </button>
+                        </SheetClose>
+                      </>
+                    ) : (
+                      <>
+                        <SheetClose asChild>
+                          <Link to="/login" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
+                            <LogIn className="h-5 w-5" />
+                            <span>Sign In</span>
+                          </Link>
+                        </SheetClose>
+                      </>
+                    )}
                   </nav>
                   
                   <div className="space-y-3 pt-4">
-                    <SheetClose asChild>
-                      <Button variant="outline" asChild className="w-full gap-2">
-                        <Link to="/login">
-                          <LogIn className="h-4 w-4" />
-                          <span>Sign In</span>
-                        </Link>
-                      </Button>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Button asChild className="w-full gap-2 bg-gradient-flame hover:opacity-90">
-                        <Link to="/battle/new">
-                          <Mic className="h-4 w-4" />
-                          <span>Start Battle</span>
-                        </Link>
-                      </Button>
-                    </SheetClose>
+                    {isAuthenticated ? (
+                      <SheetClose asChild>
+                        <Button asChild className="w-full gap-2 bg-gradient-flame hover:opacity-90">
+                          <Link to="/battle/new">
+                            <Mic className="h-4 w-4" />
+                            <span>Start Battle</span>
+                          </Link>
+                        </Button>
+                      </SheetClose>
+                    ) : (
+                      <SheetClose asChild>
+                        <Button asChild className="w-full gap-2 bg-gradient-flame hover:opacity-90">
+                          <Link to="/signup">
+                            <User className="h-4 w-4" />
+                            <span>Sign Up</span>
+                          </Link>
+                        </Button>
+                      </SheetClose>
+                    )}
                   </div>
                 </div>
               </SheetContent>
