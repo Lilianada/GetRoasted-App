@@ -1,4 +1,5 @@
 
+import { useState, useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,8 +12,7 @@ import BattlePage from "./pages/BattlePage";
 import Battle from "./pages/Battle";
 import NewBattle from "./pages/NewBattle";
 import BattleResults from "./pages/BattleResults";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
+import Login from "./pages/Signup";  // Updated to use Signup as login/signup page
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Admin from "./pages/Admin";
@@ -23,17 +23,39 @@ import Rules from "./pages/Rules";
 import Leaderboard from "./pages/Leaderboard";
 import Billing from "./pages/Billing";
 import SocketStatus from "./components/SocketStatus";
+import { supabase } from "@/integrations/supabase/client";
+import type { User, Session } from '@supabase/supabase-js';
 
 const queryClient = new QueryClient();
 
-// Placeholder for authentication check
-// In a real app with Supabase, this would use the Supabase auth state
-const isAuthenticated = false; // This would be dynamic with Supabase auth
-
 // Component to handle protected routes
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+      setUser(data.session?.user || null);
+    };
+
+    fetchSession();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user || null);
+      }
+    );
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  if (!session) {
+    return <Navigate to="/signup" replace />;
   }
   
   return <>{children}</>;
@@ -49,8 +71,7 @@ const App = () => (
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
+            <Route path="/signup" element={<Login />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
             

@@ -6,23 +6,81 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Flame, Mail, Lock, User, AtSign, Eye, EyeOff } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [activeTab, setActiveTab] = useState("login");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const navigate = useNavigate();
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleGoogleSignIn = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/battles'
+        }
+      });
+      
+      if (error) throw error;
+    } catch (error) {
+      toast.error("Google Sign In Failed", {
+        description: error instanceof Error ? error.message : "An unknown error occurred"
+      });
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (activeTab === "login") {
-      toast.success("Login successful", {
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username: username || `user_${Math.random().toString(36).substring(7)}`
+          }
+        }
+      });
+      
+      if (error) throw error;
+      
+      toast.success("Account Created", {
+        description: "Welcome to GetRoasted! Please check your email to verify your account."
+      });
+      
+      navigate('/battles');
+    } catch (error) {
+      toast.error("Sign Up Failed", {
+        description: error instanceof Error ? error.message : "An unknown error occurred"
+      });
+    }
+  };
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) throw error;
+      
+      toast.success("Login Successful", {
         description: "Welcome back to GetRoasted!"
       });
-    } else {
-      toast.success("Account created", {
-        description: "Welcome to GetRoasted! Let's set up your profile."
+      
+      navigate('/battles');
+    } catch (error) {
+      toast.error("Login Failed", {
+        description: error instanceof Error ? error.message : "An unknown error occurred"
       });
     }
   };
@@ -46,12 +104,7 @@ const Signup = () => {
           </Link>
         </div>
         
-        <Tabs 
-          defaultValue="login" 
-          value={activeTab} 
-          onValueChange={setActiveTab} 
-          className="w-full"
-        >
+        <Tabs defaultValue="signup" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6 bg-night-800 border border-night-700">
             <TabsTrigger value="login" className="data-[state=active]:bg-flame-600">
               Login
@@ -69,10 +122,14 @@ const Signup = () => {
                   Sign in to your account to continue
                 </CardDescription>
               </CardHeader>
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSignIn}>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Button className="w-full bg-night-700 hover:bg-night-600 flex items-center gap-2">
+                    <Button 
+                      type="button"
+                      className="w-full bg-night-700 hover:bg-night-600 flex items-center gap-2"
+                      onClick={handleGoogleSignIn}
+                    >
                       <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                         <path
                           d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -113,6 +170,8 @@ const Signup = () => {
                             type="email"
                             placeholder="name@example.com"
                             className="pl-9 border-night-700 focus-visible:ring-flame-500"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             required
                           />
                         </div>
@@ -130,6 +189,8 @@ const Signup = () => {
                             id="password"
                             type={showPassword ? "text" : "password"}
                             className="pl-9 pr-9 border-night-700 focus-visible:ring-flame-500"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             required
                           />
                           <button 
@@ -149,7 +210,10 @@ const Signup = () => {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full bg-gradient-flame hover:opacity-90" type="submit">
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-flame hover:opacity-90"
+                  >
                     Sign In
                   </Button>
                 </CardFooter>
@@ -165,10 +229,14 @@ const Signup = () => {
                   Enter your info to get started
                 </CardDescription>
               </CardHeader>
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSignUp}>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Button className="w-full bg-night-700 hover:bg-night-600 flex items-center gap-2">
+                    <Button 
+                      type="button"
+                      className="w-full bg-night-700 hover:bg-night-600 flex items-center gap-2"
+                      onClick={handleGoogleSignIn}
+                    >
                       <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                         <path
                           d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -209,7 +277,8 @@ const Signup = () => {
                             type="text"
                             placeholder="FlameThrow3r"
                             className="pl-9 border-night-700 focus-visible:ring-flame-500"
-                            required
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
                           />
                         </div>
                       </div>
@@ -222,6 +291,8 @@ const Signup = () => {
                             type="email"
                             placeholder="name@example.com"
                             className="pl-9 border-night-700 focus-visible:ring-flame-500"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             required
                           />
                         </div>
@@ -235,6 +306,8 @@ const Signup = () => {
                             type={showPassword ? "text" : "password"}
                             className="pl-9 pr-9 border-night-700 focus-visible:ring-flame-500"
                             placeholder="6+ characters"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             required
                           />
                           <button 
@@ -254,7 +327,10 @@ const Signup = () => {
                   </div>
                 </CardContent>
                 <CardFooter className="flex flex-col items-center">
-                  <Button className="w-full bg-gradient-flame hover:opacity-90" type="submit">
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-flame hover:opacity-90"
+                  >
                     Create Account
                   </Button>
                   <p className="mt-4 text-xs text-muted-foreground">

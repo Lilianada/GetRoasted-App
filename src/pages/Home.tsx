@@ -1,52 +1,55 @@
 
+import { useState, useEffect } from "react";
 import NavBar from "@/components/NavBar";
 import BattleCard from "@/components/BattleCard";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, User, Users, Timer, Crown, Flame } from "lucide-react";
-
-// Mock data - would be fetched from API
-const MOCK_BATTLES = [
-  {
-    id: "battle-1",
-    title: "Sunday Night Flamewar",
-    participants: [
-      { id: "user-1", name: "FlameKing", avatar: undefined },
-      { id: "user-2", name: "RoastMaster", avatar: undefined },
-    ],
-    spectatorCount: 24,
-    status: 'active' as const,
-    timeRemaining: 120,
-    type: 'public' as const,
-    roundCount: 3,
-  },
-  {
-    id: "battle-2",
-    title: "Midnight Roast Session",
-    participants: [
-      { id: "user-3", name: "WittyBurn", avatar: undefined },
-    ],
-    spectatorCount: 5,
-    status: 'waiting' as const,
-    type: 'public' as const,
-    roundCount: 3,
-  },
-  {
-    id: "battle-3",
-    title: "Pro Roasters Only",
-    participants: [
-      { id: "user-4", name: "SavageComedy", avatar: undefined },
-      { id: "user-5", name: "FlameQueen", avatar: undefined },
-      { id: "user-6", name: "RoastKing", avatar: undefined },
-    ],
-    spectatorCount: 42,
-    status: 'completed' as const,
-    type: 'private' as const,
-    roundCount: 3,
-  },
-];
+import { supabase } from "@/integrations/supabase/client";
+import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
 
 const Home = () => {
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [battles, setBattles] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+      setUser(data.session?.user || null);
+    };
+
+    const fetchBattles = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('battles')
+          .select('*')
+          .limit(3);
+        
+        if (error) throw error;
+        
+        setBattles(data || []);
+      } catch (error) {
+        console.error('Error fetching battles:', error);
+      }
+    };
+
+    fetchSession();
+    fetchBattles();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user || null);
+      }
+    );
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-night flex flex-col">
       <NavBar />
@@ -72,15 +75,24 @@ const Home = () => {
               </p>
               
               <div className="flex flex-wrap justify-center gap-4">
-                <Button asChild size="lg" className="gap-2 bg-gradient-flame hover:opacity-90">
-                  <Link to="/battle/new">
-                    Start a Battle
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </Button>
+                {session ? (
+                  <Button asChild size="lg" className="gap-2 bg-gradient-flame hover:opacity-90">
+                    <Link to="/battle/new">
+                      Start a Battle
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button asChild size="lg" className="gap-2 bg-gradient-flame hover:opacity-90">
+                    <Link to="/signup">
+                      Get Started
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                )}
                 
                 <Button asChild size="lg" variant="outline" className="border-night-700 gap-2">
-                  <Link to="/battles">
+                  <Link to={session ? "/battles" : "/signup"}>
                     Watch Battles
                   </Link>
                 </Button>
@@ -140,14 +152,14 @@ const Home = () => {
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-3xl font-bold">Live Battles</h2>
               <Button asChild variant="ghost" className="text-muted-foreground">
-                <Link to="/battles" className="flex items-center gap-2">
+                <Link to={session ? "/battles" : "/signup"} className="flex items-center gap-2">
                   View All <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {MOCK_BATTLES.map((battle) => (
+              {battles.map((battle) => (
                 <BattleCard key={battle.id} {...battle} />
               ))}
             </div>
@@ -164,14 +176,23 @@ const Home = () => {
                 earn badges, and climb the ranks of roast royalty.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
-                <Button asChild size="lg" className="gap-2 bg-gradient-flame hover:opacity-90">
-                  <Link to="/login">
-                    <User className="h-4 w-4" />
-                    Sign Up Free
-                  </Link>
-                </Button>
+                {session ? (
+                  <Button asChild size="lg" className="gap-2 bg-gradient-flame hover:opacity-90">
+                    <Link to="/battle/new">
+                      <Sparkles className="h-4 w-4" />
+                      Start Battle
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button asChild size="lg" className="gap-2 bg-gradient-flame hover:opacity-90">
+                    <Link to="/signup">
+                      <User className="h-4 w-4" />
+                      Sign Up Free
+                    </Link>
+                  </Button>
+                )}
                 <Button asChild size="lg" variant="outline" className="border-night-700 gap-2">
-                  <Link to="/battles">
+                  <Link to={session ? "/battles" : "/signup"}>
                     <Sparkles className="h-4 w-4" />
                     Browse Battles
                   </Link>

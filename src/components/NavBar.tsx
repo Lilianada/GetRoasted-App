@@ -1,11 +1,10 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Flame,
   Mic,
-  LogIn,
   Bell,
   Menu,
   X,
@@ -25,17 +24,38 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import UserMenu from "@/components/UserMenu";
+import { supabase } from "@/integrations/supabase/client";
+import type { User, Session } from '@supabase/supabase-js';
 
 const NavBar = () => {
   const [notifications, setNotifications] = useState(3);
   const navigate = useNavigate();
-  
-  // This would come from Supabase auth state in a real app
-  const isAuthenticated = false;
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   
   // Responsive breakpoint for mobile/tablet menu
-  // Now set to 900px as requested
   const isMobileOrTablet = window.innerWidth < 900;
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+      setUser(data.session?.user || null);
+    };
+
+    fetchSession();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user || null);
+      }
+    );
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   const handleNotificationClick = () => {
     toast("Notifications", {
@@ -44,6 +64,24 @@ const NavBar = () => {
     setNotifications(0);
   };
   
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) throw error;
+      
+      toast.success("Logged out successfully", {
+        description: "See you next time!"
+      });
+      
+      navigate('/');
+    } catch (error) {
+      toast.error("Logout Failed", {
+        description: error instanceof Error ? error.message : "An unknown error occurred"
+      });
+    }
+  };
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-night-800 bg-night/80 backdrop-blur-md">
       <div className="container flex h-16 items-center justify-between">
@@ -65,7 +103,7 @@ const NavBar = () => {
               <Link to="/" className="text-sm font-medium text-muted-foreground transition-colors hover:text-flame-500">
                 Home
               </Link>
-              {isAuthenticated && (
+              {session && (
                 <>
                   <Link to="/battles" className="text-sm font-medium text-muted-foreground transition-colors hover:text-flame-500">
                     Battles
@@ -81,7 +119,7 @@ const NavBar = () => {
             </nav>
 
             <div className="flex items-center gap-3">
-              {isAuthenticated ? (
+              {session ? (
                 <>
                   <Button 
                     variant="ghost" 
@@ -99,7 +137,11 @@ const NavBar = () => {
                       </Badge>
                     )}
                   </Button>
-                  <UserMenu user={{ name: "FlameThrow3r", isAdmin: true }} />
+                  <UserMenu user={{ 
+                    name: user?.user_metadata.username || user?.email || 'User', 
+                    avatar: user?.user_metadata.avatar_url,
+                    isAdmin: user?.user_metadata.is_admin 
+                  }} />
                   <Button asChild className="gap-2 bg-gradient-flame hover:opacity-90">
                     <Link to="/battle/new">
                       <Mic className="h-4 w-4" />
@@ -109,16 +151,10 @@ const NavBar = () => {
                 </>
               ) : (
                 <>
-                  <Button variant="outline" asChild className="gap-2">
-                    <Link to="/login">
-                      <LogIn className="h-4 w-4" />
-                      <span>Sign In</span>
-                    </Link>
-                  </Button>
                   <Button asChild className="gap-2 bg-gradient-flame hover:opacity-90">
                     <Link to="/signup">
                       <User className="h-4 w-4" />
-                      <span>Sign Up</span>
+                      <span>Get Started</span>
                     </Link>
                   </Button>
                 </>
@@ -127,7 +163,7 @@ const NavBar = () => {
           </>
         ) : (
           <div className="flex items-center gap-2">
-            {isAuthenticated && (
+            {session && (
               <Button 
                 variant="ghost" 
                 size="icon" 
@@ -169,7 +205,7 @@ const NavBar = () => {
                       </Link>
                     </SheetClose>
                     
-                    {isAuthenticated ? (
+                    {session ? (
                       <>
                         <SheetClose asChild>
                           <Link to="/battles" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
@@ -204,11 +240,7 @@ const NavBar = () => {
                         <SheetClose asChild>
                           <button 
                             className="flex items-center gap-3 py-2 text-base text-destructive hover:text-destructive/80"
-                            onClick={() => {
-                              toast.success("Logged out successfully");
-                              // In real app with Supabase: await supabase.auth.signOut()
-                              navigate("/");
-                            }}
+                            onClick={handleSignOut}
                           >
                             <LogOut className="h-5 w-5" />
                             <span>Sign Out</span>
@@ -216,19 +248,17 @@ const NavBar = () => {
                         </SheetClose>
                       </>
                     ) : (
-                      <>
-                        <SheetClose asChild>
-                          <Link to="/login" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
-                            <LogIn className="h-5 w-5" />
-                            <span>Sign In</span>
-                          </Link>
-                        </SheetClose>
-                      </>
+                      <SheetClose asChild>
+                        <Link to="/signup" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
+                          <User className="h-5 w-5" />
+                          <span>Get Started</span>
+                        </Link>
+                      </SheetClose>
                     )}
                   </nav>
                   
                   <div className="space-y-3 pt-4">
-                    {isAuthenticated ? (
+                    {session ? (
                       <SheetClose asChild>
                         <Button asChild className="w-full gap-2 bg-gradient-flame hover:opacity-90">
                           <Link to="/battle/new">
@@ -242,7 +272,7 @@ const NavBar = () => {
                         <Button asChild className="w-full gap-2 bg-gradient-flame hover:opacity-90">
                           <Link to="/signup">
                             <User className="h-4 w-4" />
-                            <span>Sign Up</span>
+                            <span>Get Started</span>
                           </Link>
                         </Button>
                       </SheetClose>
