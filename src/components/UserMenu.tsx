@@ -66,12 +66,12 @@ const UserMenu = ({ user: propUser }: UserMenuProps) => {
       <DropdownMenuTrigger asChild>
         <button className="flex items-center gap-2 rounded-full bg-night-800 pl-2 pr-3 py-1 text-sm hover:bg-night-700">
           <Avatar className="h-7 w-7 border border-night-700">
-            <AvatarImage src={mockUser.avatar} alt={mockUser.name} />
+            <AvatarImage src={displayUser.avatar} alt={displayUser.name} />
             <AvatarFallback className="bg-night-700 text-flame-500">
-              {mockUser.name.substring(0, 2).toUpperCase()}
+              {displayUser.name.substring(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <span>{mockUser.name}</span>
+          <span>{displayUser.name}</span>
           <ChevronDown className="h-4 w-4 text-muted-foreground" />
         </button>
       </DropdownMenuTrigger>
@@ -97,7 +97,7 @@ const UserMenu = ({ user: propUser }: UserMenuProps) => {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         
-        {mockUser.isAdmin && (
+        {displayUser.isAdmin && (
           <>
             <DropdownMenuSeparator className="bg-night-700" />
             <DropdownMenuGroup>

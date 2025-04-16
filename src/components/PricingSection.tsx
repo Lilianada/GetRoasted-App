@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import PricingCard from "@/components/PricingCard";
 import { useAuthContext } from "@/context/AuthContext";
@@ -12,7 +12,7 @@ const PricingSection = () => {
   const [currentPlan, setCurrentPlan] = useState<string>("free");
   
   // Fetch user's subscription status
-  useState(() => {
+  useEffect(() => {
     const fetchProfile = async () => {
       if (!user) return;
       

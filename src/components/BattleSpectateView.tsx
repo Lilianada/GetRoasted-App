@@ -247,7 +247,7 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Status</p>
-                <Badge variant={battle.status === 'active' ? "success" : "secondary"}>
+                <Badge variant={battle.status === 'active' ? "default" : "secondary"}>
                   {battle.status === 'waiting' ? 'Waiting' : 
                    battle.status === 'active' ? 'Live' : 'Completed'}
                 </Badge>
@@ -325,14 +325,37 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
           {isSpectating && participants.length === 2 && battle.status === 'active' && (
             <Card className="flame-card p-4">
               <h3 className="text-lg font-bold mb-4">Vote for Winner</h3>
-              <VotingSystem 
-                battleId={battleId}
-                participants={participants.map(p => ({
-                  id: p.user_id,
-                  name: p.profile?.username,
-                  avatar: p.profile?.avatar_url
-                }))}
-              />
+              <div className="flex flex-col space-y-4">
+                {participants.map((p) => (
+                  <Button 
+                    key={p.user_id} 
+                    variant="outline" 
+                    className="flex items-center gap-3"
+                    onClick={() => {
+                      if (user) {
+                        supabase.from('votes').upsert({
+                          battle_id: battleId,
+                          voter_id: user.id,
+                          voted_for_id: p.user_id,
+                          score: 10 // Default high score for now
+                        }).then(({error}) => {
+                          if (error) {
+                            toast.error("Failed to submit vote");
+                          } else {
+                            toast.success(`Voted for ${p.profile.username}`);
+                          }
+                        });
+                      }
+                    }}
+                  >
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={p.profile.avatar_url || undefined} />
+                      <AvatarFallback>{p.profile.username.substring(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <span>Vote for {p.profile.username}</span>
+                  </Button>
+                ))}
+              </div>
             </Card>
           )}
         </div>

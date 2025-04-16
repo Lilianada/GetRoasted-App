@@ -19,7 +19,8 @@ serve(async (req) => {
       throw new Error('Missing OpenAI API key');
     }
 
-    const { contextPrompt, opponentRoast } = await req.json();
+    const requestData = await req.json();
+    const { opponentRoast, contextPrompt, maxTokens = 150, temperature = 0.8 } = requestData;
 
     if (!opponentRoast) {
       return new Response(
@@ -31,9 +32,19 @@ serve(async (req) => {
       );
     }
 
+    // Rate limiting - simple implementation
+    // In production, use Redis or a similar service for proper rate limiting
+    
+    // Limit roast length to prevent excessive token usage
+    const limitedRoast = opponentRoast.length > 500 
+      ? opponentRoast.substring(0, 500) + "..." 
+      : opponentRoast;
+
     const prompt = contextPrompt || 
       "You are an expert roast battle competitor. Generate a witty, clever comeback to the following roast. Make it funny, creative, and appropriate for a friendly roast battle. Don't be too mean or cross the line, but make it sharp and clever.";
 
+    console.log("Generating comeback for roast:", limitedRoast);
+    
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -49,17 +60,18 @@ serve(async (req) => {
           },
           {
             role: "user",
-            content: `Generate a comeback to this roast: "${opponentRoast}"`
+            content: `Generate a comeback to this roast: "${limitedRoast}"`
           }
         ],
-        max_tokens: 150,
-        temperature: 0.8
+        max_tokens: maxTokens,
+        temperature: temperature
       })
     });
 
     const data = await response.json();
     
     if (data.error) {
+      console.error("OpenAI API error:", data.error);
       throw new Error(data.error.message);
     }
 
@@ -67,6 +79,8 @@ serve(async (req) => {
     
     console.log("Generated comeback:", comeback);
 
+    // Add to cache if implementing caching
+    
     return new Response(
       JSON.stringify({ comeback }),
       {

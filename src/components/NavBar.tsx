@@ -7,13 +7,12 @@ import {
   Mic,
   Bell,
   Menu,
-  X,
   Home,
   Trophy,
   BookOpen,
-  User as UserIcon,
   Settings,
-  LogOut
+  LogOut,
+  User as UserIcon
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/sonner";
@@ -153,7 +152,7 @@ const NavBar = () => {
                 <>
                   <Button asChild className="gap-2 bg-gradient-flame hover:opacity-90">
                     <Link to="/signup">
-                      <User className="h-4 w-4" />
+                      <UserIcon className="h-4 w-4" />
                       <span>Get Started</span>
                     </Link>
                   </Button>
@@ -227,7 +226,7 @@ const NavBar = () => {
                         </SheetClose>
                         <SheetClose asChild>
                           <Link to="/profile" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
-                            <User className="h-5 w-5" />
+                            <UserIcon className="h-5 w-5" />
                             <span>Profile</span>
                           </Link>
                         </SheetClose>
@@ -250,7 +249,7 @@ const NavBar = () => {
                     ) : (
                       <SheetClose asChild>
                         <Link to="/signup" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
-                          <User className="h-5 w-5" />
+                          <UserIcon className="h-5 w-5" />
                           <span>Get Started</span>
                         </Link>
                       </SheetClose>
@@ -271,7 +270,7 @@ const NavBar = () => {
                       <SheetClose asChild>
                         <Button asChild className="w-full gap-2 bg-gradient-flame hover:opacity-90">
                           <Link to="/signup">
-                            <User className="h-4 w-4" />
+                            <UserIcon className="h-4 w-4" />
                             <span>Get Started</span>
                           </Link>
                         </Button>
