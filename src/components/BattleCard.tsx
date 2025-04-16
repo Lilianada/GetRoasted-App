@@ -83,9 +83,7 @@ const BattleCard = ({
                 <AvatarFallback className="bg-night-700 text-flame-500">{participant.name.substring(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
               <span className="text-sm font-semibold truncate max-w-[80px]">{participant.name}</span>
-              {index < participants.length - 1 && participants.length > 1 && (
-                <span className="text-flame-500 font-bold">VS</span>
-              )}
+             
             </div>
           ))}
           
@@ -94,6 +92,9 @@ const BattleCard = ({
               <div className="h-14 w-14 border-2 border-dashed border-night-700 rounded-full flex items-center justify-center">
                 <span className="text-night-400">?</span>
               </div>
+               {index < participants.length - 1 && participants.length > 1 && (
+                <span className="text-flame-500 font-bold">VS</span>
+              )}
               <span className="text-sm font-semibold text-night-400">Waiting...</span>
             </div>
           )}
