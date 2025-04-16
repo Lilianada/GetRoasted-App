@@ -11,7 +11,7 @@ import {
   Home,
   Trophy,
   BookOpen,
-  User,
+  User as UserIcon,
   Settings,
   LogOut
 } from "lucide-react";

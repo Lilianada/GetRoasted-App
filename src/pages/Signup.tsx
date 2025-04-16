@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Flame, Mail, Lock, User, AtSign, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuthContext } from "@/context/AuthContext";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,17 +15,12 @@ const Signup = () => {
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const navigate = useNavigate();
+  const { signInWithEmail, signUpWithEmail, signInWithGoogle } = useAuthContext();
   
   const handleGoogleSignIn = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin + '/battles'
-        }
-      });
-      
-      if (error) throw error;
+      await signInWithGoogle();
+      // Redirect happens automatically via options.redirectTo
     } catch (error) {
       toast.error("Google Sign In Failed", {
         description: error instanceof Error ? error.message : "An unknown error occurred"
@@ -38,17 +32,7 @@ const Signup = () => {
     e.preventDefault();
     
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            username: username || `user_${Math.random().toString(36).substring(7)}`
-          }
-        }
-      });
-      
-      if (error) throw error;
+      await signUpWithEmail(email, password, username);
       
       toast.success("Account Created", {
         description: "Welcome to GetRoasted! Please check your email to verify your account."
@@ -66,12 +50,7 @@ const Signup = () => {
     e.preventDefault();
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-      
-      if (error) throw error;
+      await signInWithEmail(email, password);
       
       toast.success("Login Successful", {
         description: "Welcome back to GetRoasted!"

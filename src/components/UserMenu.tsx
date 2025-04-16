@@ -1,6 +1,5 @@
 
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { 
   User, 
   Settings, 
@@ -19,6 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuthContext } from "@/context/AuthContext";
 import { toast } from "@/components/ui/sonner";
 
 interface UserMenuProps {
@@ -26,29 +26,37 @@ interface UserMenuProps {
     name: string;
     avatar?: string;
     isAdmin?: boolean;
-  };
+  } | null;
 }
 
-const UserMenu = ({ user }: UserMenuProps) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!user);
+const UserMenu = ({ user: propUser }: UserMenuProps) => {
+  const navigate = useNavigate();
+  const { user, signOut } = useAuthContext();
   
-  // Mock user data - would come from auth context in a real app
-  const mockUser = user || {
-    name: "FlameThrow3r",
-    avatar: "",
-    isAdmin: true
+  const isLoggedIn = !!user;
+  
+  // Use prop user if provided, otherwise use auth context user
+  const displayUser = propUser || {
+    name: user?.user_metadata?.username || user?.email?.split('@')[0] || 'User',
+    avatar: user?.user_metadata?.avatar_url,
+    isAdmin: user?.user_metadata?.is_admin
   };
   
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    toast.success("Logged out successfully");
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast.success("Logged out successfully");
+      navigate('/');
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
   
   if (!isLoggedIn) {
     return (
-      <Link to="/login" className="flex items-center gap-2 rounded-full bg-night-800 px-3 py-2 text-sm hover:bg-night-700">
+      <Link to="/signup" className="flex items-center gap-2 rounded-full bg-night-800 px-3 py-2 text-sm hover:bg-night-700">
         <User className="h-4 w-4 text-flame-500" />
-        <span>Sign In</span>
+        <span>Get Started</span>
       </Link>
     );
   }

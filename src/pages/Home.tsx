@@ -1,30 +1,25 @@
-
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import NavBar from "@/components/NavBar";
 import BattleCard from "@/components/BattleCard";
+import PricingSection from "@/components/PricingSection";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, User, Users, Timer, Crown, Flame } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
+import { useAuthContext } from "@/context/AuthContext";
 
 const Home = () => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const { user } = useAuthContext();
   const [battles, setBattles] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
-      setUser(data.session?.user || null);
-    };
-
     const fetchBattles = async () => {
       try {
         const { data, error } = await supabase
           .from('battles')
-          .select('*')
+          .select('*, profiles(username, avatar_url)')
+          .eq('status', 'active')
+          .order('created_at', { ascending: false })
           .limit(3);
         
         if (error) throw error;
@@ -35,19 +30,7 @@ const Home = () => {
       }
     };
 
-    fetchSession();
     fetchBattles();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user || null);
-      }
-    );
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
   }, []);
 
   return (
@@ -75,7 +58,7 @@ const Home = () => {
               </p>
               
               <div className="flex flex-wrap justify-center gap-4">
-                {session ? (
+                {user ? (
                   <Button asChild size="lg" className="gap-2 bg-gradient-flame hover:opacity-90">
                     <Link to="/battle/new">
                       Start a Battle
@@ -92,7 +75,7 @@ const Home = () => {
                 )}
                 
                 <Button asChild size="lg" variant="outline" className="border-night-700 gap-2">
-                  <Link to={session ? "/battles" : "/signup"}>
+                  <Link to={user ? "/battles" : "/signup"}>
                     Watch Battles
                   </Link>
                 </Button>
@@ -146,22 +129,34 @@ const Home = () => {
           </div>
         </section>
         
+        {/* Pricing Plans Section */}
+        <PricingSection />
+        
         {/* Live Battles Section */}
         <section className="py-16">
           <div className="container">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-3xl font-bold">Live Battles</h2>
               <Button asChild variant="ghost" className="text-muted-foreground">
-                <Link to={session ? "/battles" : "/signup"} className="flex items-center gap-2">
+                <Link to={user ? "/battles" : "/signup"} className="flex items-center gap-2">
                   View All <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {battles.map((battle) => (
-                <BattleCard key={battle.id} {...battle} />
-              ))}
+              {battles.length > 0 ? (
+                battles.map((battle) => (
+                  <BattleCard key={battle.id} {...battle} />
+                ))
+              ) : (
+                <div className="col-span-3 text-center py-8">
+                  <p className="text-muted-foreground">No active battles at the moment. Be the first to start one!</p>
+                  <Button asChild className="mt-4 bg-gradient-flame hover:opacity-90">
+                    <Link to={user ? "/battle/new" : "/signup"}>Start a Battle</Link>
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -176,7 +171,7 @@ const Home = () => {
                 earn badges, and climb the ranks of roast royalty.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
-                {session ? (
+                {user ? (
                   <Button asChild size="lg" className="gap-2 bg-gradient-flame hover:opacity-90">
                     <Link to="/battle/new">
                       <Sparkles className="h-4 w-4" />
@@ -192,7 +187,7 @@ const Home = () => {
                   </Button>
                 )}
                 <Button asChild size="lg" variant="outline" className="border-night-700 gap-2">
-                  <Link to={session ? "/battles" : "/signup"}>
+                  <Link to={user ? "/battles" : "/signup"}>
                     <Sparkles className="h-4 w-4" />
                     Browse Battles
                   </Link>

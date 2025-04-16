@@ -9,34 +9,84 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchSession = async () => {
-      setLoading(true);
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
-      setUser(data.session?.user || null);
-      setLoading(false);
-    };
-
-    fetchSession();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log("Auth state changed:", event, session);
         setSession(session);
-        setUser(session?.user || null);
+        setUser(session?.user ?? null);
+        setLoading(false);
       }
     );
 
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
     return () => {
-      authListener.subscription.unsubscribe();
+      subscription.unsubscribe();
     };
   }, []);
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
+      toast.error("Failed to sign out", {
+        description: error.message
+      });
       throw error;
     }
   };
 
-  return { session, user, loading, signOut };
+  const signInWithEmail = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+    
+    if (error) throw error;
+    return data;
+  };
+
+  const signUpWithEmail = async (email: string, password: string, username: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          username: username || `user_${Math.random().toString(36).substring(7)}`
+        }
+      }
+    });
+    
+    if (error) throw error;
+    return data;
+  };
+
+  const signInWithGoogle = async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + '/battles'
+      }
+    });
+    
+    if (error) throw error;
+    return data;
+  };
+
+  return { 
+    session, 
+    user, 
+    loading, 
+    signOut,
+    signInWithEmail,
+    signUpWithEmail,
+    signInWithGoogle
+  };
 };
+
+export default useAuth;
