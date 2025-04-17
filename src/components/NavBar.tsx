@@ -5,17 +5,14 @@ import { Button } from "@/components/ui/button";
 import {
   Flame,
   Mic,
-  Bell,
   Menu,
   Home,
   Trophy,
   BookOpen,
-  Settings,
+  Settings as SettingsIcon,
   LogOut,
-  User as UserIcon
+  UserIcon
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "@/components/ui/sonner";
 import {
   Sheet,
   SheetContent,
@@ -25,12 +22,16 @@ import {
 import UserMenu from "@/components/UserMenu";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
+import NotificationsModal from "./NotificationsModal";
+import SettingsToggle from "./SettingsToggle";
+import { toast } from "@/components/ui/sonner";
+import { useSettings } from "@/hooks/useSettings";
 
 const NavBar = () => {
-  const [notifications, setNotifications] = useState(3);
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const { playSound } = useSettings();
   
   // Responsive breakpoint for mobile/tablet menu
   const isMobileOrTablet = window.innerWidth < 900;
@@ -56,13 +57,6 @@ const NavBar = () => {
     };
   }, []);
 
-  const handleNotificationClick = () => {
-    toast("Notifications", {
-      description: "You have 3 new battle invitations",
-    });
-    setNotifications(0);
-  };
-  
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -72,9 +66,11 @@ const NavBar = () => {
       toast.success("Logged out successfully", {
         description: "See you next time!"
       });
+      playSound('success');
       
       navigate('/');
     } catch (error) {
+      playSound('error');
       toast.error("Logout Failed", {
         description: error instanceof Error ? error.message : "An unknown error occurred"
       });
@@ -120,22 +116,8 @@ const NavBar = () => {
             <div className="flex items-center gap-3">
               {session ? (
                 <>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="text-muted-foreground relative"
-                    onClick={handleNotificationClick}
-                  >
-                    <Bell className="h-5 w-5" />
-                    {notifications > 0 && (
-                      <Badge 
-                        variant="destructive" 
-                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-                      >
-                        {notifications}
-                      </Badge>
-                    )}
-                  </Button>
+                  <SettingsToggle />
+                  <NotificationsModal />
                   <UserMenu user={{ 
                     name: user?.user_metadata.username || user?.email || 'User', 
                     avatar: user?.user_metadata.avatar_url,
@@ -150,6 +132,7 @@ const NavBar = () => {
                 </>
               ) : (
                 <>
+                  <SettingsToggle />
                   <Button asChild className="gap-2 bg-gradient-flame hover:opacity-90">
                     <Link to="/signup">
                       <UserIcon className="h-4 w-4" />
@@ -163,23 +146,10 @@ const NavBar = () => {
         ) : (
           <div className="flex items-center gap-2">
             {session && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-muted-foreground relative"
-                onClick={handleNotificationClick}
-              >
-                <Bell className="h-5 w-5" />
-                {notifications > 0 && (
-                  <Badge 
-                    variant="destructive" 
-                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-                  >
-                    {notifications}
-                  </Badge>
-                )}
-              </Button>
+              <NotificationsModal />
             )}
+            
+            <SettingsToggle />
 
             <Sheet>
               <SheetTrigger asChild>
@@ -232,7 +202,7 @@ const NavBar = () => {
                         </SheetClose>
                         <SheetClose asChild>
                           <Link to="/settings" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
-                            <Settings className="h-5 w-5" />
+                            <SettingsIcon className="h-5 w-5" />
                             <span>Settings</span>
                           </Link>
                         </SheetClose>

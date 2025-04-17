@@ -77,29 +77,32 @@ const BattleCard = ({
       <CardContent>
         <div className="flex items-center justify-center gap-4 py-4">
           {participants.map((participant, index) => (
-            <div key={participant.id} className="flex flex-col items-center text-center gap-1.5">
-              <Avatar className="h-14 w-14 border-2 border-night-700">
-                <AvatarImage src={participant.avatar} alt={participant.name} />
-                <AvatarFallback className="bg-night-700 text-flame-500">{participant.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <span className="text-sm font-semibold truncate max-w-[80px]">{participant.name}</span>
-            </div>
+            <React.Fragment key={participant.id}>
+              <div className="flex flex-col items-center text-center gap-1.5">
+                <Avatar className="h-14 w-14 border-2 border-night-700">
+                  <AvatarImage src={participant.avatar} alt={participant.name} />
+                  <AvatarFallback className="bg-night-700 text-flame-500">{participant.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <span className="text-sm font-semibold truncate max-w-[80px]">{participant.name}</span>
+              </div>
+              
+              {/* Place VS between participants */}
+              {index < participants.length - 1 && (
+                <span className="text-flame-500 font-bold">VS</span>
+              )}
+            </React.Fragment>
           ))}
 
-          {index < participants.length - 1 && participants.length > 1 && (
-                <span className="text-flame-500 font-bold">VS</span>
-              )}
-          
           {participants.length === 1 && (
-            <div className="flex flex-col items-center text-center gap-1.5">
-              <div className="h-14 w-14 border-2 border-dashed border-night-700 rounded-full flex items-center justify-center">
-                <span className="text-night-400">?</span>
+            <>
+              <span className="text-flame-500 font-bold">VS</span>
+              <div className="flex flex-col items-center text-center gap-1.5">
+                <div className="h-14 w-14 border-2 border-dashed border-night-700 rounded-full flex items-center justify-center">
+                  <span className="text-night-400">?</span>
+                </div>
+                <span className="text-sm font-semibold text-night-400">Waiting...</span>
               </div>
-               {index < participants.length - 1 && participants.length > 1 && (
-                <span className="text-flame-500 font-bold">VS</span>
-              )}
-              <span className="text-sm font-semibold text-night-400">Waiting...</span>
-            </div>
+            </>
           )}
         </div>
       </CardContent>

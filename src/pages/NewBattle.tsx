@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import NavBar from "@/components/NavBar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -7,9 +8,103 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { ArrowRight, Copy, Users, Lock, LockOpen, Clock } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { toast } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuthContext } from "@/context/AuthContext";
+import { useSettings } from "@/hooks/useSettings";
 
 const NewBattle = () => {
+  const navigate = useNavigate();
+  const { user } = useAuthContext();
+  const { playSound } = useSettings();
+  const [isCreating, setIsCreating] = useState(false);
+  
+  // Form state
+  const [title, setTitle] = useState("");
+  const [battleType, setBattleType] = useState<'public' | 'private'>('public');
+  const [roundCount, setRoundCount] = useState("3");
+  const [timePerTurn, setTimePerTurn] = useState("180");
+  const [allowSpectators, setAllowSpectators] = useState(true);
+  const [quickMatch, setQuickMatch] = useState(false);
+  
+  // For invitation link
+  const [battleId, setBattleId] = useState<string | null>(null);
+  const [showCopied, setShowCopied] = useState(false);
+  
+  const handleCreateBattle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      toast.error("You must be logged in to create battles");
+      return;
+    }
+    
+    if (!title.trim()) {
+      toast.error("Please provide a battle title");
+      return;
+    }
+    
+    setIsCreating(true);
+    
+    try {
+      // Create the battle
+      const { data: battleData, error: battleError } = await supabase
+        .from('battles')
+        .insert({
+          title,
+          type: battleType,
+          round_count: parseInt(roundCount),
+          time_per_turn: parseInt(timePerTurn),
+          allow_spectators: allowSpectators,
+          created_by: user.id,
+          status: 'waiting' // Important: Use string, not variable reference
+        })
+        .select()
+        .single();
+        
+      if (battleError) throw battleError;
+      
+      // Add the creator as a participant
+      const { error: participantError } = await supabase
+        .from('battle_participants')
+        .insert({
+          battle_id: battleData.id,
+          user_id: user.id
+        });
+        
+      if (participantError) throw participantError;
+      
+      // Success!
+      toast.success("Battle created successfully!");
+      playSound('success');
+      
+      // If quick match, go to waiting room
+      navigate(`/battle/waiting/${battleData.id}`);
+    } catch (error) {
+      console.error('Error creating battle:', error);
+      playSound('error');
+      toast.error("Failed to create battle", {
+        description: error instanceof Error ? error.message : "An unknown error occurred"
+      });
+      setIsCreating(false);
+    }
+  };
+  
+  const handleCopyLink = () => {
+    if (!battleId) return;
+    
+    const inviteLink = `${window.location.origin}/battle/join/${battleId}`;
+    navigator.clipboard.writeText(inviteLink);
+    
+    setShowCopied(true);
+    toast.success("Invitation link copied!");
+    
+    // Hide the "Copied" message after 2 seconds
+    setTimeout(() => {
+      setShowCopied(false);
+    }, 2000);
+  };
+  
   return (
     <div className="min-h-screen bg-night flex flex-col">
       <NavBar />
@@ -23,7 +118,7 @@ const NewBattle = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
             <Card className="flame-card p-6">
-              <form className="space-y-6">
+              <form className="space-y-6" onSubmit={handleCreateBattle}>
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="title">Battle Title</Label>
@@ -31,12 +126,20 @@ const NewBattle = () => {
                       id="title" 
                       placeholder="Enter a catchy title..."
                       className="border-night-700 focus-visible:ring-flame-500"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      required
                     />
                   </div>
                   
                   <div className="space-y-2">
                     <Label>Battle Type</Label>
-                    <RadioGroup defaultValue="public" className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <RadioGroup 
+                      defaultValue="public" 
+                      value={battleType}
+                      onValueChange={(value) => setBattleType(value as 'public' | 'private')}
+                      className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                    >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="public" id="public" className="text-flame-500" />
                         <Label htmlFor="public" className="flex items-center gap-2 cursor-pointer">
@@ -62,7 +165,11 @@ const NewBattle = () => {
                   
                   <div className="space-y-2">
                     <Label>Number of Rounds</Label>
-                    <RadioGroup defaultValue="3" className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <RadioGroup 
+                      value={roundCount}
+                      onValueChange={setRoundCount}
+                      className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                    >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="1" id="r1" className="text-flame-500" />
                         <Label htmlFor="r1" className="cursor-pointer">1 Round (Quick)</Label>
@@ -80,7 +187,11 @@ const NewBattle = () => {
                   
                   <div className="space-y-2">
                     <Label>Time Per Turn</Label>
-                    <RadioGroup defaultValue="180" className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <RadioGroup 
+                      value={timePerTurn}
+                      onValueChange={setTimePerTurn}
+                      className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                    >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="60" id="t1" className="text-flame-500" />
                         <Label htmlFor="t1" className="flex items-center gap-2 cursor-pointer">
@@ -114,7 +225,12 @@ const NewBattle = () => {
                         Spectators can watch and vote
                       </p>
                     </div>
-                    <Switch id="spectators" defaultChecked className="data-[state=checked]:bg-flame-500" />
+                    <Switch 
+                      id="spectators" 
+                      checked={allowSpectators}
+                      onCheckedChange={setAllowSpectators}
+                      className="data-[state=checked]:bg-flame-500" 
+                    />
                   </div>
                   
                   <div className="flex items-center justify-between">
@@ -124,16 +240,23 @@ const NewBattle = () => {
                         Auto pair with a random opponent
                       </p>
                     </div>
-                    <Switch id="auto-match" className="data-[state=checked]:bg-flame-500" />
+                    <Switch 
+                      id="auto-match" 
+                      checked={quickMatch}
+                      onCheckedChange={setQuickMatch}
+                      className="data-[state=checked]:bg-flame-500" 
+                    />
                   </div>
                 </div>
                 
                 <div className="pt-4 flex justify-end">
-                  <Button asChild className="gap-2 bg-gradient-flame hover:opacity-90">
-                    <Link to="/battle/waiting">
-                      Create Battle
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
+                  <Button 
+                    type="submit"
+                    className="gap-2 bg-gradient-flame hover:opacity-90"
+                    disabled={isCreating}
+                  >
+                    {isCreating ? "Creating..." : "Create Battle"}
+                    <ArrowRight className="h-4 w-4" />
                   </Button>
                 </div>
               </form>
@@ -149,25 +272,32 @@ const NewBattle = () => {
               
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  Share this link with people you want to battle with.
+                  After creating your battle, you'll get a link to share with people you want to battle with.
                 </p>
                 
-                <div className="flex items-center gap-2">
-                  <Input
-                    value="https://getroasted.app/join/a1b2c3d4"
-                    readOnly
-                    className="border-night-700"
-                  />
-                  <Button variant="outline" size="icon" className="border-night-700">
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
-                
-                <div className="pt-2">
-                  <Button variant="outline" className="w-full border-night-700">
-                    Invite from Contacts
-                  </Button>
-                </div>
+                {battleId && (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={`${window.location.origin}/battle/join/${battleId}`}
+                        readOnly
+                        className="border-night-700"
+                      />
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="border-night-700" 
+                        onClick={handleCopyLink}
+                      >
+                        {showCopied ? (
+                          <span className="text-xs font-medium text-green-500">Copied!</span>
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </>
+                )}
               </div>
             </Card>
             

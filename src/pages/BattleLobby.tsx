@@ -1,90 +1,102 @@
 
+import { useState, useEffect } from "react";
 import NavBar from "@/components/NavBar";
 import BattleCard from "@/components/BattleCard";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Link as LinkIcon } from "lucide-react";
+import { Plus, Link as LinkIcon } from "lucide-react";
+import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import BattleSearch from "@/components/BattleSearch";
+import JoinPrivateBattleDialog from "@/components/JoinPrivateBattleDialog";
+import { toast } from "@/components/ui/sonner";
+import { useAuthContext } from "@/context/AuthContext";
 
-// Mock data - would be fetched from API
-const MOCK_BATTLES = [
-  {
-    id: "battle-1",
-    title: "Sunday Night Flamewar",
-    participants: [
-      { id: "user-1", name: "FlameKing", avatar: undefined },
-      { id: "user-2", name: "RoastMaster", avatar: undefined },
-    ],
-    spectatorCount: 24,
-    status: 'active' as const,
-    timeRemaining: 120,
-    type: 'public' as const,
-    roundCount: 3,
-  },
-  {
-    id: "battle-2",
-    title: "Midnight Roast Session",
-    participants: [
-      { id: "user-3", name: "WittyBurn", avatar: undefined },
-    ],
-    spectatorCount: 5,
-    status: 'waiting' as const,
-    type: 'public' as const,
-    roundCount: 3,
-  },
-  {
-    id: "battle-3",
-    title: "Pro Roasters Only",
-    participants: [
-      { id: "user-4", name: "SavageComedy", avatar: undefined },
-      { id: "user-5", name: "FlameQueen", avatar: undefined },
-      { id: "user-6", name: "RoastKing", avatar: undefined },
-    ],
-    spectatorCount: 42,
-    status: 'completed' as const,
-    type: 'private' as const,
-    roundCount: 3,
-  },
-  {
-    id: "battle-4",
-    title: "Comedy Showdown",
-    participants: [
-      { id: "user-7", name: "JokeKing", avatar: undefined },
-      { id: "user-8", name: "HumorQueen", avatar: undefined },
-    ],
-    spectatorCount: 18,
-    status: 'active' as const,
-    timeRemaining: 90,
-    type: 'public' as const,
-    roundCount: 3,
-  },
-  {
-    id: "battle-5",
-    title: "Roast Rookies",
-    participants: [
-      { id: "user-9", name: "NewGuy", avatar: undefined },
-    ],
-    spectatorCount: 3,
-    status: 'waiting' as const,
-    type: 'public' as const,
-    roundCount: 2,
-  },
-  {
-    id: "battle-6",
-    title: "Late Night Laughs",
-    participants: [
-      { id: "user-10", name: "NightOwl", avatar: undefined },
-      { id: "user-11", name: "StandupPro", avatar: undefined },
-    ],
-    spectatorCount: 15,
-    status: 'active' as const,
-    timeRemaining: 150,
-    type: 'public' as const,
-    roundCount: 3,
-  },
-];
+interface BattleData {
+  id: string;
+  title: string;
+  participants: {
+    id: string;
+    name: string;
+    avatar?: string;
+  }[];
+  spectatorCount: number;
+  status: 'waiting' | 'active' | 'completed';
+  timeRemaining?: number;
+  type: 'public' | 'private';
+  roundCount: number;
+}
 
 const BattleLobby = () => {
+  const [battles, setBattles] = useState<BattleData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuthContext();
+  
+  useEffect(() => {
+    const fetchBattles = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('battles')
+          .select(`
+            *,
+            battle_participants(
+              *,
+              profiles:user_id(*)
+            ),
+            battle_spectators(count)
+          `)
+          .order('created_at', { ascending: false });
+          
+        if (error) throw error;
+        
+        // Format the data to match our BattleCard props
+        const formattedBattles = data.map(battle => ({
+          id: battle.id,
+          title: battle.title,
+          participants: battle.battle_participants.map((p: any) => ({
+            id: p.user_id,
+            name: p.profiles.username,
+            avatar: p.profiles.avatar_url
+          })),
+          spectatorCount: battle.battle_spectators,
+          status: battle.status,
+          timeRemaining: undefined, // We don't have this info yet
+          type: battle.type,
+          roundCount: battle.round_count
+        }));
+        
+        setBattles(formattedBattles);
+      } catch (error) {
+        console.error('Error fetching battles:', error);
+        toast.error("Failed to load battles");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchBattles();
+    
+    // Set up real-time subscription for new battles
+    const channel = supabase
+      .channel('battle_changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'battles' }, 
+        () => {
+          // Just refetch all battles when any changes occur
+          fetchBattles();
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+  
+  const handleSearch = (results: BattleData[]) => {
+    setBattles(results);
+  };
+  
   return (
     <div className="min-h-screen bg-night flex flex-col">
       <NavBar />
@@ -99,23 +111,16 @@ const BattleLobby = () => {
           {/* Search and Create Section */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search battles..." 
-                className="pl-9 border-night-700 focus-visible:ring-flame-500" 
-              />
+              <BattleSearch onSearch={handleSearch} />
             </div>
             <div className="flex gap-4">
               <Button asChild className="gap-2 bg-gradient-flame hover:opacity-90">
-                <a href="/battle/new">
+                <Link to="/battle/new">
                   <Plus className="h-4 w-4" />
                   Create Battle
-                </a>
+                </Link>
               </Button>
-              <Button variant="outline" className="gap-2 border-night-700">
-                <LinkIcon className="h-4 w-4" />
-                Join Private
-              </Button>
+              <JoinPrivateBattleDialog />
             </div>
           </div>
           
@@ -129,35 +134,73 @@ const BattleLobby = () => {
             </TabsList>
             
             <TabsContent value="all" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {MOCK_BATTLES.map((battle) => (
-                  <BattleCard key={battle.id} {...battle} />
-                ))}
-              </div>
+              {loading ? (
+                <div className="text-center py-12">Loading battles...</div>
+              ) : battles.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {battles.map((battle) => (
+                    <BattleCard key={battle.id} {...battle} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground mb-4">No battles found</p>
+                  <Button asChild className="gap-2 bg-gradient-flame hover:opacity-90">
+                    <Link to="/battle/new">
+                      <Plus className="h-4 w-4" />
+                      Create a Battle
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </TabsContent>
             
             <TabsContent value="active" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {MOCK_BATTLES.filter(battle => battle.status === 'active').map((battle) => (
-                  <BattleCard key={battle.id} {...battle} />
-                ))}
-              </div>
+              {loading ? (
+                <div className="text-center py-12">Loading battles...</div>
+              ) : battles.filter(battle => battle.status === 'active').length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {battles.filter(battle => battle.status === 'active').map((battle) => (
+                    <BattleCard key={battle.id} {...battle} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">No active battles</p>
+                </div>
+              )}
             </TabsContent>
             
             <TabsContent value="waiting" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {MOCK_BATTLES.filter(battle => battle.status === 'waiting').map((battle) => (
-                  <BattleCard key={battle.id} {...battle} />
-                ))}
-              </div>
+              {loading ? (
+                <div className="text-center py-12">Loading battles...</div>
+              ) : battles.filter(battle => battle.status === 'waiting').length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {battles.filter(battle => battle.status === 'waiting').map((battle) => (
+                    <BattleCard key={battle.id} {...battle} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">No battles waiting for players</p>
+                </div>
+              )}
             </TabsContent>
             
             <TabsContent value="completed" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {MOCK_BATTLES.filter(battle => battle.status === 'completed').map((battle) => (
-                  <BattleCard key={battle.id} {...battle} />
-                ))}
-              </div>
+              {loading ? (
+                <div className="text-center py-12">Loading battles...</div>
+              ) : battles.filter(battle => battle.status === 'completed').length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {battles.filter(battle => battle.status === 'completed').map((battle) => (
+                    <BattleCard key={battle.id} {...battle} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">No completed battles</p>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>
