@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import NavBar from "@/components/NavBar";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -36,6 +35,8 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuthContext } from "@/context/AuthContext";
 
 const Settings = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -44,20 +45,100 @@ const Settings = () => {
   const [darkMode, setDarkMode] = useState(true);
   const [soundEffects, setSoundEffects] = useState(true);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  
+  const [profileData, setProfileData] = useState({
+    displayName: "",
+    email: "",
+    bio: ""
+  });
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const { user, signOut } = useAuthContext();
+  
+  useEffect(() => {
+    if (!user) return;
+    
+    const fetchUserProfile = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('username, bio')
+          .eq('id', user.id)
+          .single();
+        
+        if (error) throw error;
+        
+        setProfileData({
+          displayName: data?.username || '',
+          email: user.email || '',
+          bio: data?.bio || ''
+        });
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+        toast.error('Failed to load profile data');
+      }
+    };
+    
+    fetchUserProfile();
+  }, [user]);
 
-  const handleSaveSettings = () => {
-    toast.success("Settings saved", {
-      description: "Your preferences have been updated",
-    });
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setProfileData(prev => ({ ...prev, [id]: value }));
   };
 
-  const handleDeleteAccount = () => {
-    if (deleteConfirmation === "DELETE") {
-      toast.error("Account scheduled for deletion", {
-        description: "Sorry to see you go. Your account will be deleted in 30 days.",
+  const handleSaveSettings = async () => {
+    if (!user) {
+      toast.error("You need to be logged in to save settings");
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      // Update profile in database
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          username: profileData.displayName,
+          bio: profileData.bio,
+        })
+        .eq('id', user.id);
+      
+      if (error) throw error;
+      
+      toast.success("Settings saved", {
+        description: "Your preferences have been updated",
       });
-    } else {
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error("Failed to save settings");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmation !== "DELETE") {
       toast.error("Confirmation text doesn't match");
+      return;
+    }
+    
+    try {
+      // In a real implementation, you would call a secure server function to delete the account
+      if (user) {
+        await signOut();
+      }
+      
+      toast.error("Account deleted", {
+        description: "Your account has been permanently deleted.",
+      });
+      
+      // Redirect to home page
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      toast.error("Failed to delete account");
     }
   };
 
@@ -85,10 +166,11 @@ const Settings = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Display Name</Label>
+                  <Label htmlFor="displayName">Display Name</Label>
                   <Input
-                    id="name"
-                    defaultValue="FlameThrow3r"
+                    id="displayName"
+                    value={profileData.displayName}
+                    onChange={handleInputChange}
                     className="border-night-700 focus-visible:ring-flame-500"
                   />
                   <p className="text-xs text-muted-foreground">
@@ -100,8 +182,9 @@ const Settings = () => {
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
-                    defaultValue="flame@getroasted.com"
+                    value={profileData.email}
                     type="email"
+                    disabled
                     className="border-night-700 focus-visible:ring-flame-500"
                   />
                 </div>
@@ -110,7 +193,8 @@ const Settings = () => {
                   <Label htmlFor="bio">Bio</Label>
                   <Textarea
                     id="bio"
-                    defaultValue="Professional roaster with a knack for creative insults and quick comebacks. Always ready for a verbal duel!"
+                    value={profileData.bio}
+                    onChange={handleInputChange}
                     className="border-night-700 focus-visible:ring-flame-500 min-h-[100px]"
                   />
                   <p className="text-xs text-muted-foreground">
@@ -122,8 +206,9 @@ const Settings = () => {
                 <Button 
                   className="bg-gradient-flame hover:opacity-90"
                   onClick={handleSaveSettings}
+                  disabled={isLoading}
                 >
-                  Save Changes
+                  {isLoading ? "Saving..." : "Save Changes"}
                 </Button>
               </CardFooter>
             </Card>

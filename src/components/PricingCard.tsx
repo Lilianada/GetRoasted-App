@@ -63,3 +63,6 @@ export const PricingCardWrapper: React.FC<PricingCardWrapperProps> = ({
     </div>
   );
 };
+
+// Add a default export that re-exports PricingCardWrapper
+export default PricingCardWrapper;

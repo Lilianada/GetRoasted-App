@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import NavBar from "@/components/NavBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,6 +8,7 @@ import { CreditCard, File, AlertCircle, PlusCircle } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import PricingCard from "@/components/PricingCard";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { PricingCardWrapper } from "@/components/PricingCard";
 
 // Mock data - would come from Supabase in a real implementation
 const mockSubscription = {
@@ -280,7 +280,7 @@ const Billing = () => {
           </DialogHeader>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-            <PricingCard
+            <PricingCardWrapper
               title="Free"
               price="Free"
               description="Basic roasting capabilities"
@@ -290,7 +290,7 @@ const Billing = () => {
               currentPlan={mockSubscription.plan === "free"}
             />
             
-            <PricingCard
+            <PricingCardWrapper
               title="Pro"
               price="$5"
               description="Premium roasting experience"

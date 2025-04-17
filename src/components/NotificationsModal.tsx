@@ -38,11 +38,41 @@ const NotificationsModal = ({ children }: NotificationsModalProps) => {
   const [open, setOpen] = useState(false);
   const { user } = useAuthContext();
   
+  // Mock notifications for now - in a real implementation, you would fetch from the database
+  const mockNotifications: Notification[] = [
+    {
+      id: "1",
+      user_id: user?.id || "",
+      title: "Battle Invitation",
+      message: "RoastMaster has invited you to a battle!",
+      read: false,
+      created_at: new Date().toISOString(),
+      type: 'battle_invite',
+      action_url: "/battle/join/123"
+    },
+    {
+      id: "2",
+      user_id: user?.id || "",
+      title: "Your Battle is Starting",
+      message: "Your battle with ComebackKing is about to begin!",
+      read: true,
+      created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      type: 'battle_start',
+      action_url: "/battle/live/456"
+    }
+  ];
+  
   useEffect(() => {
     if (!user) return;
     
+    // For the temporary implementation, use the mock data
+    setNotifications(mockNotifications);
+    setUnreadCount(mockNotifications.filter(n => !n.read).length);
+    
+    /* Real implementation would be something like:
     const fetchNotifications = async () => {
       try {
+        // This assumes you have a notifications table in your database
         const { data, error } = await supabase
           .from('notifications')
           .select('*')
@@ -82,9 +112,17 @@ const NotificationsModal = ({ children }: NotificationsModalProps) => {
     return () => {
       supabase.removeChannel(channel);
     };
+    */
   }, [user]);
   
   const markAsRead = async (id: string) => {
+    // In a real implementation, you would update the database
+    setNotifications(notifications.map(n => 
+      n.id === id ? { ...n, read: true } : n
+    ));
+    setUnreadCount(prev => Math.max(0, prev - 1));
+    
+    /* Real implementation would be something like:
     try {
       await supabase
         .from('notifications')
@@ -98,11 +136,18 @@ const NotificationsModal = ({ children }: NotificationsModalProps) => {
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
+    */
   };
   
   const markAllAsRead = async () => {
     if (notifications.length === 0) return;
     
+    // In a real implementation, you would update the database
+    setNotifications(notifications.map(n => ({ ...n, read: true })));
+    setUnreadCount(0);
+    toast.success("All notifications marked as read");
+    
+    /* Real implementation would be something like:
     try {
       await supabase
         .from('notifications')
@@ -118,6 +163,7 @@ const NotificationsModal = ({ children }: NotificationsModalProps) => {
       console.error('Error marking all notifications as read:', error);
       toast.error("Failed to mark all as read");
     }
+    */
   };
   
   const getNotificationIcon = (type: string) => {
