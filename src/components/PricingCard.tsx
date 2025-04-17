@@ -27,7 +27,7 @@ export const PricingCardWrapper: React.FC<PricingCardWrapperProps> = ({
   return (
     <div className="relative">
       {isPopular && (
-        <div className="absolute -top-4 left-0 right-0 mx-auto w-fit px-4 py-1 bg-flame-500 text-white text-xs font-bold rounded-full">
+        <div className="absolute -top-4 left-0 right-0 mx-auto w-fit px-4 py-1 bg-flame-500 text-white text-xs font-bold rounded-full z-10">
           Most Popular
         </div>
       )}
