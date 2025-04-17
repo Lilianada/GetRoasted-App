@@ -190,7 +190,7 @@ const NotificationsModal = ({ children }: NotificationsModalProps) => {
             )}
           </DialogTitle>
           <DialogDescription>
-            Stay updated on battle invites and account activity
+            Stay updated on battle invites and account activities
           </DialogDescription>
         </DialogHeader>
         
