@@ -33,34 +33,34 @@ const queryClient = new QueryClient();
 // Component to handle protected routes
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuthContext();
-  
+
   if (loading) {
     return <div className="flex h-screen items-center justify-center bg-night">Loading...</div>;
   }
-  
+
   if (!user) {
     return <Navigate to="/signup" replace />;
   }
-  
+
   return <>{children}</>;
 };
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <SettingsProvider>
-        <SubscriptionProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+    <SettingsProvider>
+      <SubscriptionProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AuthProvider>
               <Routes>
                 {/* Public routes */}
                 <Route path="/" element={<Home />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />
-                
+
                 {/* Protected routes */}
                 <Route path="/battles" element={
                   <ProtectedRoute>
@@ -132,16 +132,16 @@ const App = () => (
                     <Leaderboard />
                   </ProtectedRoute>
                 } />
-                
+
                 {/* Catch-all route */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </BrowserRouter>
-            <SocketStatus connected={true} />
-          </TooltipProvider>
-        </SubscriptionProvider>
-      </SettingsProvider>
-    </AuthProvider>
+            </AuthProvider>
+          </BrowserRouter>
+          <SocketStatus connected={true} />
+        </TooltipProvider>
+      </SubscriptionProvider>
+    </SettingsProvider>
   </QueryClientProvider>
 );
 

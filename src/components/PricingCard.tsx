@@ -9,7 +9,7 @@ interface PricingCardWrapperProps {
   title: string;
   price: string;
   description: string;
-  features: string[];
+  features: { name: string; included: boolean }[];
   buttonText: string;
   isPopular?: boolean;
   onSubscribe: () => void;
@@ -41,18 +41,18 @@ export const PricingCardWrapper: React.FC<PricingCardWrapperProps> = ({
           <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <ul className="space-y-2">
+          <ul>
             {features.map((feature, index) => (
-              <li key={index} className="flex items-start gap-2">
-                <CheckCircle2 className="h-5 w-5 text-flame-500 flex-shrink-0" />
-                <span>{feature}</span>
+              <li key={index} className="flex items-start gap-2 opacity-{feature.included ? '100' : '50'}">
+                <CheckCircle2 className={`h-5 w-5 ${feature.included ? 'text-flame-500' : 'text-gray-400'} flex-shrink-0`} />
+                <span>{feature.name}</span>
               </li>
             ))}
           </ul>
         </CardContent>
         <CardFooter>
-          <Button 
-            onClick={onSubscribe} 
+          <Button
+            onClick={onSubscribe}
             className={`w-full ${isPopular ? 'bg-gradient-flame hover:opacity-90' : ''}`}
             variant={isPopular ? 'default' : 'outline'}
           >
