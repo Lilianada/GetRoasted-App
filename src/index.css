@@ -5,7 +5,7 @@
 @layer base {
   :root {
     /* Neobrutalist color palette (inspired by attached image) */
-    --background: 230 24% 14%;        /* Deep blue-black */
+    --background: 245 29% 22%;        /* Deep blue-black */
     --foreground: 0 0% 98%;           /* White */
     --background-pink: 340 55% 90%;   /* Pale pink: #F9D7E3 */
     --background-blue: 216 78% 85%;   /* Soft blue: #A6C7F7 */
