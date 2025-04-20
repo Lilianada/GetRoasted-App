@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -67,13 +68,13 @@ const NavBar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-night-800 bg-night/80 backdrop-blur-md">
+    <header className="neo-nav w-full border-b-2 border-black bg-night-900 backdrop-blur-md sticky top-0 z-40">
       <div className="container flex h-16 items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-90">
-          <div className="relative h-8 w-8">
-            <Flame className="h-8 w-8 text-flame-600 animate-flame-pulse" />
+        <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-90 z-20">
+          <div className="relative h-8 w-8 border-2 border-black p-1 bg-flame-500 neo-shadow neo-hover">
+            <Flame className="h-6 w-6 text-black animate-flame-pulse" />
           </div>
-          <span className="font-geist text-xl font-bold">
+          <span className="font-geist text-xl font-black tracking-tighter">
             <span className="text-flame-500">Get</span>
             <span className="text-ember-500">Roasted</span>
           </span>
@@ -89,18 +90,20 @@ const NavBar = () => {
               {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </SheetTrigger>
-          <SheetContent className="w-[300px] bg-night-800 border-night-700">
-            <SheetHeader className="border-b border-night-700 pb-4">
+          <SheetContent className="w-[300px] bg-night-800 border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+            <SheetHeader className="border-b-2 border-black pb-4">
               <div className="flex items-center gap-2">
-                <Flame className="h-6 w-6 text-flame-600" />
-                <span className="font-geist text-lg font-bold">
+                <div className="bg-flame-500 p-1 border-2 border-black">
+                  <Flame className="h-6 w-6 text-black" />
+                </div>
+                <span className="font-geist text-lg font-black tracking-tighter">
                   <span className="text-flame-500">Get</span>
                   <span className="text-ember-500">Roasted</span>
                 </span>
               </div>
             </SheetHeader>
 
-            <nav className="mt-4 flex flex-col gap-2">
+            <nav className="mt-6 flex flex-col gap-3">
               <SheetClose asChild>
                 <Link to="/" className="neo-button w-full text-center p-2">
                   Home

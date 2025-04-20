@@ -28,6 +28,7 @@
 .shadcn-dialog [role="dialog"] {
   border: 2px solid black !important;
   box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1) !important;
+  border-radius: 0 !important;
 }
 
 /* Button overrides */
@@ -37,6 +38,7 @@ button[class*="bg-gradient-flame"] {
   border: 2px solid black !important;
   box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1) !important;
   transition: all 0.2s !important;
+  border-radius: 0 !important;
 }
 
 button[class*="bg-gradient-flame"]:hover {
@@ -48,4 +50,59 @@ button[class*="bg-gradient-flame"]:hover {
 [data-state="open"] > .neo-button {
   transform: translate(-1px, -1px);
   box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
+}
+
+/* Forcefully remove border radius from all UI elements */
+* {
+  border-radius: 0 !important;
+}
+
+/* Exception for explicit border radius needs */
+.needs-radius {
+  border-radius: 50% !important;
+}
+
+/* Raw input styling */
+input, textarea, select {
+  font-family: 'Geist Mono', monospace !important;
+  border: 2px solid black !important;
+}
+
+input:focus, textarea:focus, select:focus {
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1) !important;
+  transform: translate(-1px, -1px);
+  transition: all 0.2s !important;
+  outline: none !important;
+}
+
+/* Asymmetric container */
+.neo-asymmetric-container {
+  position: relative;
+  margin-left: 1rem;
+  margin-right: -1rem;
+  transform: skew(-1deg);
+}
+
+/* Neo-brutalist table */
+table.neo-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  border: 2px solid black;
+}
+
+table.neo-table th,
+table.neo-table td {
+  border: 1px solid black;
+  padding: 0.75rem;
+}
+
+table.neo-table th {
+  background-color: #F8C537;
+  color: black;
+  font-weight: bold;
+}
+
+table.neo-table tr:nth-child(odd) {
+  background-color: rgba(255,255,255,0.05);
 }

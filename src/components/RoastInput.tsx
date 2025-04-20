@@ -82,7 +82,7 @@ const RoastInput = ({
           onChange={handleChange}
           placeholder={placeholder}
           disabled={isDisabled}
-          className={`min-h-[100px] pr-24 resize-none border-2 border-black rounded-xl bg-white text-black font-medium placeholder:text-black/50 ${
+          className={`min-h-[100px] pr-24 resize-none border-2 border-black bg-white text-black font-medium placeholder:text-black/50 neo-input ${
             isWarning ? "border-[#F97316]" : ""
           }`}
         />
@@ -101,7 +101,7 @@ const RoastInput = ({
                   type="button"
                   size="icon"
                   variant="ghost"
-                  className={`border-2 border-black bg-[#C5B4F0] text-black ${!canUseVoiceRecording ? "opacity-50" : ""}`}
+                  className={`border-2 border-black bg-[#C5B4F0] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:translate-x-0.5 ${!canUseVoiceRecording ? "opacity-50" : ""}`}
                   onClick={handleVoiceButtonClick}
                   disabled={isDisabled || timeRemaining === 0}
                 >
@@ -156,7 +156,7 @@ const RoastInput = ({
       )}
       
       <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
-        <DialogContent className="bg-[#C5B4F0] border-4 border-black rounded-xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+        <DialogContent className="bg-[#C5B4F0] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
           <DialogHeader>
             <DialogTitle className="text-black text-2xl font-black">Unlock Pro Features</DialogTitle>
             <DialogDescription className="text-black/70 font-medium">
@@ -165,8 +165,8 @@ const RoastInput = ({
           </DialogHeader>
           
           <div className="space-y-4 py-4">
-            <div className="flex items-center gap-3 bg-[#A6C7F7] p-4 border-2 border-black rounded-lg">
-              <div className="bg-[#F8C537] p-2 rounded-full border-2 border-black">
+            <div className="flex items-center gap-3 bg-[#A6C7F7] p-4 border-2 border-black">
+              <div className="bg-[#F8C537] p-2 border-2 border-black">
                 <Mic className="h-5 w-5 text-black" />
               </div>
               <div>
@@ -177,8 +177,8 @@ const RoastInput = ({
               </div>
             </div>
             
-            <div className="flex items-center gap-3 bg-[#A6C7F7] p-4 border-2 border-black rounded-lg">
-              <div className="bg-[#F8C537] p-2 rounded-full border-2 border-black">
+            <div className="flex items-center gap-3 bg-[#A6C7F7] p-4 border-2 border-black">
+              <div className="bg-[#F8C537] p-2 border-2 border-black">
                 <AlertCircle className="h-5 w-5 text-black" />
               </div>
               <div>
@@ -189,8 +189,8 @@ const RoastInput = ({
               </div>
             </div>
             
-            <div className="flex items-center gap-3 bg-[#A6C7F7] p-4 border-2 border-black rounded-lg">
-              <div className="bg-[#F8C537] p-2 rounded-full border-2 border-black">
+            <div className="flex items-center gap-3 bg-[#A6C7F7] p-4 border-2 border-black">
+              <div className="bg-[#F8C537] p-2 border-2 border-black">
                 <Lock className="h-5 w-5 text-black" />
               </div>
               <div>
@@ -204,7 +204,7 @@ const RoastInput = ({
           
           <DialogFooter className="gap-3">
             <Button variant="outline" onClick={() => setShowUpgradeModal(false)} 
-              className="bg-[#FFB4A8] text-black border-2 border-black hover:bg-[#FFB4A8]/90">
+              className="bg-[#FFB4A8] text-black border-2 border-black hover:bg-[#FFB4A8]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:translate-x-0.5">
               Not Now
             </Button>
             <Button 

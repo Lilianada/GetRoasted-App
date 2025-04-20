@@ -34,25 +34,50 @@
     --input: 230 24% 20%;
     --ring: 24 95% 53%;
 
-    --radius: 0.75rem;
+    --radius: 0rem; /* Reduced radius for neobrutalism */
   }
 }
 
 @layer base {
   * {
     @apply border-border;
+    box-sizing: border-box;
   }
 
   html {
     @apply scroll-smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
     @apply bg-night font-geist text-foreground antialiased;
+    overflow-x: hidden;
   }
 
   ::selection {
     @apply bg-flame-500/30 text-white;
+  }
+
+  /* Heading typography */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-geist font-black tracking-tight;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl mb-6;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl mb-4;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl mb-3;
+  }
+
+  h4 {
+    @apply text-xl md:text-2xl mb-2;
   }
   
   /* Neo-brutalism button styles */
@@ -64,9 +89,16 @@
            transition-all font-bold;
   }
   
+  /* Core card styles */
   .neo-card {
-    @apply border-2 border-black rounded-xl overflow-hidden 
-           shadow-[8px_8px_0px_0px_rgba(0,0,0,1)];
+    @apply border-2 border-black rounded-none overflow-hidden 
+           shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]
+           transform transition-all duration-300;
+  }
+  
+  .neo-card:hover {
+    @apply -translate-y-1 translate-x-1
+           shadow-[10px_10px_0px_0px_rgba(0,0,0,1)];
   }
   
   /* Neo-brutalism card variants */
@@ -88,12 +120,10 @@
   
   /* Input styles */
   .neo-input {
-    @apply border-2 border-black rounded-lg bg-white text-black;
-  }
-
-  /* Glassmorphism effects */
-  .glass-card {
-    @apply bg-night-800/50 backdrop-blur-md border border-night-700/50;
+    @apply border-2 border-black rounded-none bg-white text-black 
+           focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
+           focus:-translate-y-1 focus:translate-x-1
+           transition-all;
   }
 
   /* Interactive elements */
@@ -110,6 +140,31 @@
     @apply active:translate-y-1 active:-translate-x-1 
            active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)];
   }
+
+  /* Container with asymmetric alignment */
+  .neo-container {
+    @apply container mx-auto px-4 sm:px-6 relative;
+    max-width: 1400px;
+  }
+
+  /* Tilted elements */
+  .neo-tilt {
+    @apply transform rotate-[1deg] hover:rotate-0 transition-all;
+  }
+
+  .neo-tilt-reverse {
+    @apply transform -rotate-[1deg] hover:rotate-0 transition-all;
+  }
+
+  /* Badge style */
+  .neo-badge {
+    @apply inline-block bg-[#F8C537] px-3 py-1 border-2 border-black text-black font-bold rotate-[2deg] hover:rotate-0 transition-transform;
+  }
+
+  /* Section style */
+  .neo-section {
+    @apply border-b-2 border-black py-8 md:py-12 relative;
+  }
 }
 
 @layer components {
@@ -117,9 +172,68 @@
     @apply bg-gradient-flame bg-clip-text text-transparent;
   }
 
-  .flame-card {
-    @apply relative overflow-hidden rounded-lg border border-night-700 
-           bg-gradient-to-br from-night-800 to-night-900 p-6 shadow-lg 
-           transition-all duration-300 hover:shadow-flame-500/20;
+  /* Utilities */
+  .neo-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
   }
+
+  /* Navigation styles */
+  .neo-nav {
+    @apply border-b-2 border-black bg-night sticky top-0 z-40;
+  }
+  
+  .neo-nav-link {
+    @apply text-white font-bold hover:text-flame-500 transition-colors;
+  }
+  
+  /* Form elements */
+  .neo-label {
+    @apply block text-sm font-bold mb-2;
+  }
+  
+  .neo-checkbox {
+    @apply h-5 w-5 border-2 border-black rounded-none focus:ring-0 focus:ring-offset-0 checked:bg-[#F8C537];
+  }
+  
+  /* Dialog/Modal styles */
+  .neo-dialog {
+    @apply bg-night-800 border-2 border-black rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-0;
+  }
+
+  /* Image with border */
+  .neo-image {
+    @apply border-2 border-black;
+  }
+
+  /* Decorative elements */
+  .neo-marker {
+    @apply bg-[#F8C537] text-black p-1 font-bold skew-x-3;
+  }
+
+  /* Animation utilities */
+  .neo-wiggle {
+    animation: wiggle 0.5s ease-in-out;
+  }
+
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(5deg); }
+    75% { transform: rotate(-5deg); }
+  }
+}
+
+/* Custom animations */
+@keyframes slide-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in {
+  animation: slide-in 0.3s ease forwards;
 }

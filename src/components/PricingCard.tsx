@@ -26,21 +26,21 @@ export const PricingCardWrapper: React.FC<PricingCardWrapperProps> = ({
   currentPlan = false,
 }) => {
   return (
-    <div className="relative group">
+    <div className="relative group neo-tilt">
       {isPopular && (
-        <div className="absolute -top-4 left-0 right-0 mx-auto w-fit px-6 py-1.5 bg-[#F8C537] text-black text-sm font-bold rounded-full z-10 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black transform -rotate-[4deg] transition-transform group-hover:rotate-0">
+        <div className="absolute -top-4 left-0 right-0 mx-auto w-fit px-6 py-1.5 bg-[#F8C537] text-black text-sm font-bold border-2 border-black z-10 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transform -rotate-[4deg] transition-transform group-hover:rotate-0">
           Most Popular
         </div>
       )}
       <Card 
         className={`
           relative transform transition-all duration-200 
-          hover:-translate-y-1 hover:translate-x-1
+          ${isPopular ? 'neo-tilt' : 'neo-tilt-reverse'}
           ${isPopular ? 'bg-[#C5B4F0]' : 'bg-[#FFB4A8]'} 
-          border-2 border-black rounded-xl overflow-hidden
+          border-2 border-black overflow-hidden
           shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]
           hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]
-          ${isPopular ? 'rotate-1 hover:rotate-0' : ''}
+          hover:-translate-y-1 hover:translate-x-1
           ${currentPlan ? 'ring-4 ring-[#F8C537]' : ''}
         `}
       >
@@ -82,7 +82,7 @@ export const PricingCardWrapper: React.FC<PricingCardWrapperProps> = ({
             onClick={onSubscribe}
             className={`
               w-full h-12 text-lg font-bold transition-all duration-200
-              border-2 border-black rounded-lg
+              border-2 border-black
               transform hover:-translate-y-1 hover:translate-x-1
               ${isPopular 
                 ? 'bg-[#F8C537] text-black hover:bg-[#F8C537]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]' 

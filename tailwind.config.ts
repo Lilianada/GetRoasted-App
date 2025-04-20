@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -144,12 +145,27 @@ export default {
 					from: { backgroundPosition: '200% 0' },
 					to: { backgroundPosition: '0 0' },
 				},
+				'wiggle': {
+					'0%, 100%': { transform: 'rotate(-2deg)' },
+					'50%': { transform: 'rotate(2deg)' },
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-10px)' },
+				},
+				'skew': {
+					'0%, 100%': { transform: 'skewX(0)' },
+					'50%': { transform: 'skewX(-2deg)' },
+				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'flame-pulse': 'flame-pulse 3s ease-in-out infinite',
 				'background-shine': 'background-shine 8s linear infinite',
+				'wiggle': 'wiggle 1s ease-in-out infinite',
+				'float': 'float 6s ease-in-out infinite',
+				'skew': 'skew 4s ease-in-out infinite',
 			},
 			backgroundImage: {
 				'gradient-orange': 'linear-gradient(90deg, hsla(29, 92%, 70%, 1) 0%, hsla(0, 87%, 73%, 1) 100%)',
@@ -157,6 +173,13 @@ export default {
 				'gradient-ember': 'linear-gradient(90deg, hsla(24, 100%, 83%, 1) 0%, hsla(341, 91%, 68%, 1) 100%)',
 				'gradient-shine': 'linear-gradient(110deg, transparent 25%, rgba(255, 255, 255, 0.1) 50%, transparent 75%)',
 				'gradient-radial': 'radial-gradient(circle at center, var(--tw-gradient-stops))',
+				'grid-pattern': 'linear-gradient(to right, black 1px, transparent 1px), linear-gradient(to bottom, black 1px, transparent 1px)',
+			},
+			boxShadow: {
+				'neo': '4px 4px 0px 0px rgba(0,0,0,1)',
+				'neo-hover': '6px 6px 0px 0px rgba(0,0,0,1)',
+				'neo-lg': '8px 8px 0px 0px rgba(0,0,0,1)',
+				'neo-xl': '12px 12px 0px 0px rgba(0,0,0,1)',
 			}
 		}
 	},
