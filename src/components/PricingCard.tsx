@@ -12,6 +12,7 @@ interface PricingCardWrapperProps {
   buttonText: string;
   isPopular?: boolean;
   onSubscribe: () => void;
+  currentPlan?: boolean;
 }
 
 export const PricingCardWrapper: React.FC<PricingCardWrapperProps> = ({
@@ -22,6 +23,7 @@ export const PricingCardWrapper: React.FC<PricingCardWrapperProps> = ({
   buttonText,
   isPopular = false,
   onSubscribe,
+  currentPlan = false,
 }) => {
   return (
     <div className="relative group">
@@ -39,6 +41,7 @@ export const PricingCardWrapper: React.FC<PricingCardWrapperProps> = ({
           shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]
           hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]
           ${isPopular ? 'rotate-1 hover:rotate-0' : ''}
+          ${currentPlan ? 'ring-4 ring-[#F8C537]' : ''}
         `}
       >
         <CardHeader className="border-b-2 border-black">
@@ -85,6 +88,7 @@ export const PricingCardWrapper: React.FC<PricingCardWrapperProps> = ({
                 ? 'bg-[#F8C537] text-black hover:bg-[#F8C537]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]' 
                 : 'bg-[#A6C7F7] text-black hover:bg-[#A6C7F7]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]'
               }
+              ${currentPlan ? 'bg-green-500 text-white hover:bg-green-600' : ''}
             `}
           >
             {buttonText}

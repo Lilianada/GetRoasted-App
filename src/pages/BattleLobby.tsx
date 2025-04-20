@@ -60,9 +60,10 @@ const BattleLobby = () => {
           })),
           // Fix: Extract the count number from the array
           spectatorCount: battle.battle_spectators?.[0]?.count || 0,
-          status: battle.status,
+          // Explicitly cast status to the correct type
+          status: battle.status as 'waiting' | 'active' | 'completed',
           timeRemaining: undefined, // We don't have this info yet
-          type: battle.type,
+          type: battle.type as 'public' | 'private',
           roundCount: battle.round_count
         }));
         

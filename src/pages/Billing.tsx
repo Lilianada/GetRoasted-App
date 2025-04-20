@@ -10,7 +10,6 @@ import PricingCard from "@/components/PricingCard";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { PricingCardWrapper } from "@/components/PricingCard";
 
-// Mock data - would come from Supabase in a real implementation
 const mockSubscription = {
   plan: "free", // "free" or "pro"
   status: "active",
@@ -41,7 +40,6 @@ const Billing = () => {
     });
   };
 
-  // Plan features
   const freeFeatures = [
     { name: "Join unlimited roast battles", included: true },
     { name: "Up to 280 characters per roast", included: true },
@@ -75,7 +73,6 @@ const Billing = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Main Content */}
           <div className="md:col-span-2 space-y-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid grid-cols-3 mb-6 bg-night-800 border border-night-700">
@@ -233,7 +230,6 @@ const Billing = () => {
             </Tabs>
           </div>
           
-          {/* Sidebar */}
           <div>
             <Card className="flame-card">
               <CardHeader>
@@ -286,7 +282,7 @@ const Billing = () => {
               description="Basic roasting capabilities"
               features={freeFeatures}
               buttonText="Current Plan"
-              onButtonClick={() => setSelectedPlan("free")}
+              onSubscribe={() => setSelectedPlan("free")}
               currentPlan={mockSubscription.plan === "free"}
             />
             
@@ -296,8 +292,8 @@ const Billing = () => {
               description="Premium roasting experience"
               features={proFeatures}
               buttonText="Upgrade to Pro"
-              popular={true}
-              onButtonClick={() => setSelectedPlan("pro")}
+              isPopular={true}
+              onSubscribe={() => setSelectedPlan("pro")}
               currentPlan={mockSubscription.plan === "pro"}
             />
           </div>
