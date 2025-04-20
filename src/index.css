@@ -4,39 +4,37 @@
 
 @layer base {
   :root {
-    /* Neobrutalist color palette (inspired by attached image) */
-    --background: 245 29% 22%;        /* Deep blue-black */
-    --foreground: 0 0% 98%;           /* White */
-    --background-pink: 340 55% 90%;   /* Pale pink: #F9D7E3 */
-    --background-blue: 216 78% 85%;   /* Soft blue: #A6C7F7 */
-    --background-yellow: 44 92% 58%;  /* Yellow: #F8C537 */
-    --background-purple: 260 82% 75%; /* Purple: #C5B4F0 */
-    --background-coral: 6 83% 74%;    /* Coral: #FFB4A8 */
+    /* Updated neobrutalist color palette */
+    --background: 230 25% 12%;    /* Dark navy background */
+    --foreground: 0 0% 98%;       /* Off-white text */
+    --background-pink: 340 85% 95%;
+    --background-blue: 230 90% 92%;
+    --background-yellow: 45 100% 62%;
+    --background-purple: 255 85% 80%;
+    --background-coral: 6 100% 80%;
 
-    --card: 230 24% 18%;              /* Slightly lighter than background */
-    --card-foreground: 0 0% 98%;      /* White */
+    --card: 230 25% 15%;          /* Slightly lighter than background */
+    --card-foreground: 0 0% 98%;  /* Off-white */
 
     /* Accent colors */
-    --primary: 44 92% 58%;            /* Yellow */
-    --primary-foreground: 0 0% 0%;    /* Black */
-    --secondary: 260 82% 75%;         /* Purple */
-    --secondary-foreground: 0 0% 0%;  /* Black */
-    --accent: 6 83% 74%;              /* Coral */
-    --accent-foreground: 0 0% 0%;     /* Black */
-    --blue: 216 78% 85%;              /* Blue */
-    --blue-foreground: 0 0% 0%;       /* Black */
-    --pink: 340 55% 90%;              /* Pale pink */
-    --pink-foreground: 0 0% 0%;       /* Black */
+    --primary: 45 100% 62%;       /* Vibrant yellow */
+    --primary-foreground: 0 0% 0%;
+    --secondary: 255 85% 80%;     /* Bright purple */
+    --secondary-foreground: 0 0% 0%;
+    --accent: 6 100% 80%;         /* Coral */
+    --accent-foreground: 0 0% 0%;
+    --blue: 230 90% 92%;          /* Bright blue */
+    --blue-foreground: 0 0% 0%;
+    --pink: 340 85% 95%;          /* Vibrant pink */
+    --pink-foreground: 0 0% 0%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 15%;               /* Black border */
-    --ring: 44 92% 58%;               /* Yellow for focus ring */
+    --border: 0 0% 15%;           /* Dark border */
+    --ring: 45 100% 62%;          /* Yellow ring for focus */
   }
-}
 
-@layer base {
   * {
     @apply border-border;
     box-sizing: border-box;
@@ -157,7 +155,7 @@
 
 @layer components {
   .gradient-text {
-    @apply bg-gradient-to-r from-[#F8C537] via-[#C5B4F0] to-[#A6C7F7] bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-[#FF6B35] via-[#7B61FF] to-[#FF3366] bg-clip-text text-transparent;
   }
 
   .neo-grid {

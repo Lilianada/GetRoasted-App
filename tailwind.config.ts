@@ -55,24 +55,26 @@ export default {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))'
         },
-        sidebar: {
-          DEFAULT: 'hsl(var(--sidebar-background))',
-          foreground: 'hsl(var(--sidebar-foreground))',
-          primary: 'hsl(var(--sidebar-primary))',
-          'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-          accent: 'hsl(var(--sidebar-accent))',
-          'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-          border: 'hsl(var(--sidebar-border))',
-          ring: 'hsl(var(--sidebar-ring))'
+        night: {
+          DEFAULT: '#171923',
+          50: '#f8f9fa',
+          100: '#e9ecef',
+          200: '#dee2e6',
+          300: '#ced4da',
+          400: '#8E9196',
+          500: '#6c757d',
+          600: '#495057',
+          700: '#343a40',
+          800: '#212529',
+          900: '#171923',
         },
-        // GetRoasted theme colors
         flame: {
           50: '#FFF7ED',
           100: '#FFEDD5',
           200: '#FED7AA',
           300: '#FDBA74',
           400: '#FB923C',
-          500: '#F97316', // logo orange
+          500: '#FF6B35',
           600: '#EA580C',
           700: '#C2410C',
           800: '#9A3412',
@@ -85,27 +87,14 @@ export default {
           300: '#FCA5A5',
           400: '#F87171',
           500: '#EF4444',
-          600: '#DC2626', // logo red
+          600: '#FF3366',
           700: '#B91C1C',
           800: '#991B1B',
           900: '#7F1D1D',
         },
-        night: {
-          DEFAULT: '#1A1F2C', // dark purple/black for background
-          50: '#f6f6f9',
-          100: '#e7e8ec',
-          200: '#d4d6de',
-          300: '#b1b5c6',
-          400: '#8E9196', // neutral gray
-          500: '#6b707e',
-          600: '#4d5363',
-          700: '#3b4051',
-          800: '#2e3342',
-          900: '#1A1F2C', // dark background
-        },
         glow: {
-          DEFAULT: '#9b87f5', // highlight purple
-          lighter: '#b5a6f8'
+          DEFAULT: '#7B61FF',
+          lighter: '#9B87F5'
         },
       },
       borderRadius: {

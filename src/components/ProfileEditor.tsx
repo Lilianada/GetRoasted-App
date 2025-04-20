@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Edit } from "lucide-react";
+import { Edit, Upload } from "lucide-react";
 import { useAuthContext } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
@@ -25,11 +25,49 @@ interface ProfileEditorProps {
 const ProfileEditor = ({ initialData, onSave, onCancel }: ProfileEditorProps) => {
   const [formData, setFormData] = useState<ProfileData>(initialData);
   const [isLoading, setIsLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const { user } = useAuthContext();
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploading(true);
+      
+      if (!event.target.files || event.target.files.length === 0) {
+        throw new Error('You must select an image to upload.');
+      }
+
+      const file = event.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user?.id}-${Math.random()}.${fileExt}`;
+
+      // Upload image to Supabase Storage
+      const { error: uploadError, data } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Update form data with new avatar URL
+      setFormData(prev => ({ ...prev, avatar_url: publicUrl }));
+      toast.success('Avatar uploaded successfully');
+    } catch (error) {
+      toast.error('Error uploading avatar');
+      console.error('Error uploading avatar:', error);
+    } finally {
+      setUploading(false);
+    }
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,6 +86,7 @@ const ProfileEditor = ({ initialData, onSave, onCancel }: ProfileEditorProps) =>
         .update({
           username: formData.username,
           bio: formData.bio,
+          avatar_url: formData.avatar_url,
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
@@ -68,20 +107,26 @@ const ProfileEditor = ({ initialData, onSave, onCancel }: ProfileEditorProps) =>
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
         <div className="relative">
-          <Avatar className="h-24 w-24 border-2 border-flame-500">
+          <Avatar className="h-24 w-24 border-2 border-black">
             <AvatarImage src={formData.avatar_url} alt={formData.username} />
-            <AvatarFallback className="bg-night-700 text-flame-500 text-xl">
+            <AvatarFallback className="bg-[#C5B4F0] text-black text-xl">
               {formData.username.substring(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <Button 
-            size="icon" 
-            variant="outline" 
-            className="absolute -right-2 -bottom-2 h-7 w-7 rounded-full bg-night border-night-700"
-            type="button"
-          >
-            <Edit className="h-3.5 w-3.5" />
-          </Button>
+          <div className="absolute -right-2 -bottom-2 flex gap-2">
+            <label 
+              className="cursor-pointer h-7 w-7 rounded-full bg-night border-2 border-black flex items-center justify-center hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+            >
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                className="hidden"
+                disabled={uploading}
+              />
+              <Upload className="h-3.5 w-3.5 text-white" />
+            </label>
+          </div>
         </div>
         
         <div className="flex-1 space-y-4 w-full">
