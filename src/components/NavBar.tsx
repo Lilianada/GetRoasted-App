@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
 import { useSettings } from "@/hooks/useSettings";
 import { toast } from "@/components/ui/sonner";
+import { Loader } from "@/components/ui/loader";
 
 const NavBar = () => {
   const navigate = useNavigate();
@@ -25,12 +26,15 @@ const NavBar = () => {
   const [user, setUser] = useState<User | null>(null);
   const { playSound } = useSettings();
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchSession = async () => {
+      setIsLoading(true);
       const { data } = await supabase.auth.getSession();
       setSession(data.session);
       setUser(data.session?.user || null);
+      setIsLoading(false);
     };
 
     fetchSession();
@@ -49,6 +53,7 @@ const NavBar = () => {
 
   const handleSignOut = async () => {
     try {
+      setIsLoading(true);
       const { error } = await supabase.auth.signOut();
       
       if (error) throw error;
@@ -64,6 +69,10 @@ const NavBar = () => {
       toast.error("Logout Failed", {
         description: error instanceof Error ? error.message : "An unknown error occurred"
       });
+    } finally {
+      setIsLoading(false);
+      // Make sure the menu is closed after sign out
+      setIsOpen(false);
     }
   };
 
@@ -87,7 +96,7 @@ const NavBar = () => {
               size="icon"
               className="neo-button p-2"
             >
-              {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
           <SheetContent className="w-[300px] bg-night-800 border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
@@ -110,7 +119,11 @@ const NavBar = () => {
                 </Link>
               </SheetClose>
 
-              {session ? (
+              {isLoading ? (
+                <div className="flex justify-center py-4">
+                  <Loader variant="colorful" />
+                </div>
+              ) : session ? (
                 <>
                   <SheetClose asChild>
                     <Link to="/battles" className="neo-button w-full text-center p-2">
@@ -142,14 +155,13 @@ const NavBar = () => {
                       Settings
                     </Link>
                   </SheetClose>
-                  <SheetClose asChild>
-                    <button 
-                      onClick={handleSignOut}
-                      className="neo-button w-full p-2 bg-red-500 text-white hover:bg-red-600"
-                    >
-                      Sign Out
-                    </button>
-                  </SheetClose>
+                  <button 
+                    onClick={handleSignOut}
+                    className="neo-button w-full p-2 bg-red-500 text-white hover:bg-red-600"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? <Loader size="small" /> : "Sign Out"}
+                  </button>
                 </>
               ) : (
                 <SheetClose asChild>

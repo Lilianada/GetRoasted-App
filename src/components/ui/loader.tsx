@@ -3,7 +3,8 @@ import { useEffect, useRef } from 'react';
 import * as animeLib from 'animejs';
 import { cn } from '@/lib/utils';
 
-// Use the proper way to import anime
+// Handle anime.js import properly
+// @ts-ignore - Ignore TypeScript error as anime.js has a different export structure than its types suggest
 const anime = animeLib.default || animeLib;
 
 interface LoaderProps {
@@ -63,17 +64,17 @@ export function Loader({
       <div className={cn(
         dotSizeClass[size], 
         dotColors[0], 
-        'loader-dot border-2 border-black'
+        'loader-dot rounded-full'
       )}></div>
       <div className={cn(
         dotSizeClass[size], 
         dotColors[1], 
-        'loader-dot border-2 border-black'
+        'loader-dot rounded-full'
       )}></div>
       <div className={cn(
         dotSizeClass[size], 
         dotColors[2], 
-        'loader-dot border-2 border-black'
+        'loader-dot rounded-full'
       )}></div>
     </div>
   );

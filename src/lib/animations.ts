@@ -1,8 +1,8 @@
-
 import * as animeLib from 'animejs';
 import React from 'react';
 
-// Use the proper way to import anime
+// Handle anime.js import properly
+// @ts-ignore - Ignore TypeScript error as anime.js has a different export structure than its types suggest
 const anime = animeLib.default || animeLib;
 
 // Utility functions for animations
