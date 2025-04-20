@@ -1,11 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
-  Flame,
   Menu,
-  X,
 } from "lucide-react";
 import {
   Sheet,
@@ -88,18 +85,17 @@ const NavBar = () => {
           </span>
         </Link>
 
-        {/* Fixed Sheet component to properly work with controlled state */}
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
             <Button 
               variant="outline" 
               size="icon"
-              className="neo-button p-2"
+              className="neo-button p-2 menu-button"
             >
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent className="w-[300px] bg-night-800 border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+          <SheetContent className="w-[300px] bg-night-800 border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] menu-content">
             <SheetHeader className="border-b-2 border-black pb-4">
               <div className="flex items-center gap-2">
                 <div className="bg-flame-500 p-1 border-2 border-black">
