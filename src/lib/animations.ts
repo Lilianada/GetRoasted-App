@@ -1,9 +1,15 @@
+
 import * as animeLib from 'animejs';
 import React from 'react';
 
-// Handle anime.js import properly
-// @ts-ignore - Ignore TypeScript error as anime.js has a different export structure than its types suggest
-const anime = animeLib.default || animeLib;
+// Handle anime.js import properly - create a function that safely returns the anime instance
+const getAnime = () => {
+  // @ts-ignore - Ignore TypeScript error as anime.js has a different export structure than its types suggest
+  return animeLib.default || animeLib;
+};
+
+// Get the anime instance
+const anime = getAnime();
 
 // Utility functions for animations
 export const animations = {
@@ -111,22 +117,13 @@ export const animateOnMount = (selector: string, container: HTMLElement | null) 
 
 // Component loader animation - fixed by returning a proper React component
 export const LoaderAnimation: React.FC = () => {
-  return React.createElement('div', {
-    className: "flex items-center justify-center space-x-2"
-  }, [
-    React.createElement('div', {
-      key: "dot1",
-      className: "w-4 h-4 bg-[#F8C537] border-2 border-black loader-item"
-    }),
-    React.createElement('div', {
-      key: "dot2",
-      className: "w-4 h-4 bg-[#C5B4F0] border-2 border-black loader-item"
-    }),
-    React.createElement('div', {
-      key: "dot3",
-      className: "w-4 h-4 bg-[#A6C7F7] border-2 border-black loader-item"
-    })
-  ]);
+  return (
+    <div className="flex items-center justify-center space-x-2">
+      <div className="w-4 h-4 bg-[#F8C537] border-2 border-black loader-item"></div>
+      <div className="w-4 h-4 bg-[#C5B4F0] border-2 border-black loader-item"></div>
+      <div className="w-4 h-4 bg-[#A6C7F7] border-2 border-black loader-item"></div>
+    </div>
+  );
 };
 
 // Create a button click animation directive

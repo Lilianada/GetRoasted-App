@@ -9,10 +9,10 @@ import {
 } from "lucide-react";
 import {
   Sheet,
-  SheetContent,
-  SheetTrigger,
   SheetClose,
+  SheetContent,
   SheetHeader,
+  SheetTrigger,
 } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
@@ -71,8 +71,7 @@ const NavBar = () => {
       });
     } finally {
       setIsLoading(false);
-      // Make sure the menu is closed after sign out
-      setIsOpen(false);
+      setIsOpen(false); // Make sure menu closes after sign out
     }
   };
 
@@ -89,6 +88,7 @@ const NavBar = () => {
           </span>
         </Link>
 
+        {/* Fixed Sheet component to properly work with controlled state */}
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
             <Button 

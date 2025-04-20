@@ -3,9 +3,14 @@ import { useEffect, useRef } from 'react';
 import * as animeLib from 'animejs';
 import { cn } from '@/lib/utils';
 
-// Handle anime.js import properly
-// @ts-ignore - Ignore TypeScript error as anime.js has a different export structure than its types suggest
-const anime = animeLib.default || animeLib;
+// Handle anime.js import properly - create a function that safely returns the anime instance
+const getAnime = () => {
+  // @ts-ignore - Ignore TypeScript error as anime.js has a different export structure than its types suggest
+  return animeLib.default || animeLib;
+};
+
+// Get the anime instance
+const anime = getAnime();
 
 interface LoaderProps {
   size?: 'small' | 'medium' | 'large';
