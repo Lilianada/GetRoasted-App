@@ -1,40 +1,33 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Core neobrutalist colors */
-    --background: 230 24% 14%; /* night-900 */
-    --foreground: 0 0% 98%;
+    /* Neobrutalist color palette */
+    --background: 230 24% 14%; /* Dark background - night-900 */
+    --foreground: 0 0% 98%; /* Light text for contrast */
 
-    --card: 230 24% 18%;
+    /* Card and interactive elements */
+    --card: 230 24% 18%; /* Slightly lighter than background */
     --card-foreground: 0 0% 98%;
 
-    --popover: 230 24% 16%;
-    --popover-foreground: 0 0% 98%;
+    /* Accent colors from our palette */
+    --primary: 44 92% 58%; /* Primary Yellow: #F8C537 */
+    --primary-foreground: 0 0% 0%; /* Black text on yellow */
 
-    --primary: 24 95% 53%; /* flame-500 - vibrant orange */
-    --primary-foreground: 0 0% 100%;
+    --secondary: 260 82% 75%; /* Secondary Purple: #C5B4F0 */
+    --secondary-foreground: 0 0% 0%; /* Black text on purple */
 
-    --secondary: 260 82% 75%; /* glow - bright purple */
-    --secondary-foreground: 0 0% 100%;
+    --accent: 6 83% 74%; /* Accent Coral: #FFB4A8 */
+    --accent-foreground: 0 0% 0%; /* Black text on coral */
 
-    --muted: 230 24% 24%;
-    --muted-foreground: 220 8% 76%;
-
-    --accent: 0 91% 71%; /* ember-500 - coral red */
-    --accent-foreground: 0 0% 100%;
-
+    /* Additional theming */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 230 24% 26%;
-    --input: 230 24% 20%;
-    --ring: 24 95% 53%;
-
-    --radius: 0rem; /* Reduced radius for neobrutalism */
+    --border: 0 0% 15%; /* Dark border */
+    --ring: 44 92% 58%; /* Yellow ring for focus states */
   }
 }
 
