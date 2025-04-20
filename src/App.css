@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -5,38 +6,58 @@
   text-align: center;
 }
 
+/* Neobrutalist specific overrides */
 .logo {
   height: 6em;
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
+  filter: drop-shadow(4px 4px 0px rgba(0, 0, 0, 1));
 }
+
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+  filter: drop-shadow(6px 6px 0px rgba(0, 0, 0, 1));
+  transform: translate(-1px, -1px);
 }
 
 .card {
   padding: 2em;
+  border: 2px solid black;
+  border-radius: 0.75rem;
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+  transition: all 0.2s;
+}
+
+.card:hover {
+  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
+  transform: translate(-1px, -1px);
 }
 
 .read-the-docs {
   color: #888;
+  font-weight: bold;
+}
+
+/* Dialog overrides for neobrutalism */
+.shadcn-dialog [data-radix-popper-content-wrapper] {
+  font-family: 'Geist Mono', monospace !important;
+}
+
+.shadcn-dialog [role="dialog"] {
+  border: 2px solid black !important;
+  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+/* Button overrides */
+button[class*="bg-gradient-flame"] {
+  background: #F8C537 !important;
+  color: black !important;
+  border: 2px solid black !important;
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1) !important;
+  transition: all 0.2s !important;
+}
+
+button[class*="bg-gradient-flame"]:hover {
+  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1) !important;
+  transform: translate(-1px, -1px) !important;
 }

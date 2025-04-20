@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import PricingCard from "@/components/PricingCard";
@@ -63,7 +64,7 @@ const PricingSection = () => {
   ];
 
   return (
-    <section className="py-16">
+    <section className="py-16 bg-night">
       <div className="container">
         <div className="text-center mb-10">
           <h2 className="text-3xl font-bold mb-3">Choose Your Plan</h2>
@@ -78,7 +79,7 @@ const PricingSection = () => {
             price="Free"
             description="Perfect for casual burn enthusiasts who want to test the waters"
             features={freePlanFeatures}
-            buttonText="Current Plan"
+            buttonText={currentPlan === 'free' ? "Current Plan" : "Choose Free"}
             onSubscribe={() => handleUpgrade('free')}
             isPopular={false}
           />
@@ -88,7 +89,7 @@ const PricingSection = () => {
             price="$9.99"
             description="For serious flame throwers who want the complete experience"
             features={proPlanFeatures}
-            buttonText="Upgrade Now"
+            buttonText={currentPlan === 'pro' ? "Current Plan" : "Upgrade Now"}
             onSubscribe={() => handleUpgrade('pro')}
             isPopular={true}
           />

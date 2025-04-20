@@ -82,14 +82,14 @@ const RoastInput = ({
           onChange={handleChange}
           placeholder={placeholder}
           disabled={isDisabled}
-          className={`min-h-[100px] pr-24 resize-none transition-colors focus-visible:ring-flame-500 ${
-            isWarning ? "border-amber-500" : ""
+          className={`min-h-[100px] pr-24 resize-none border-2 border-black rounded-xl bg-white text-black font-medium placeholder:text-black/50 ${
+            isWarning ? "border-[#F97316]" : ""
           }`}
         />
         
         <div className="absolute right-3 bottom-3 flex items-center gap-2">
-          <span className={`text-xs ${
-            isWarning ? "text-amber-500" : "text-muted-foreground"
+          <span className={`text-xs font-bold ${
+            isWarning ? "text-[#F97316]" : "text-black/70"
           }`}>
             {text.length}/{effectiveMaxLength}
           </span>
@@ -101,19 +101,19 @@ const RoastInput = ({
                   type="button"
                   size="icon"
                   variant="ghost"
-                  className={`text-muted-foreground ${!canUseVoiceRecording ? "opacity-50" : ""}`}
+                  className={`border-2 border-black bg-[#C5B4F0] text-black ${!canUseVoiceRecording ? "opacity-50" : ""}`}
                   onClick={handleVoiceButtonClick}
                   disabled={isDisabled || timeRemaining === 0}
                 >
                   {!canUseVoiceRecording && (
-                    <span className="absolute -top-1 -right-1 text-flame-500">
+                    <span className="absolute -top-1 -right-1 text-[#F97316]">
                       <Lock className="h-3 w-3" />
                     </span>
                   )}
                   <Mic className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent className="bg-black text-white border-2 border-[#F8C537]">
                 <p>{canUseVoiceRecording ? "Voice input" : "Pro feature: Voice input"}</p>
               </TooltipContent>
             </Tooltip>
@@ -123,7 +123,7 @@ const RoastInput = ({
             type="submit"
             size="icon"
             disabled={isDisabled || text.trim().length === 0 || timeRemaining === 0}
-            className={`bg-gradient-flame hover:opacity-90 ${
+            className={`bg-[#F8C537] text-black border-2 border-black hover:bg-[#F8C537]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:translate-x-1 transition-all ${
               text.trim().length === 0 ? "opacity-50" : ""
             }`}
           >
@@ -133,21 +133,21 @@ const RoastInput = ({
       </div>
       
       {isWarning && (
-        <div className="flex items-center gap-1 mt-1 text-amber-500 text-xs">
+        <div className="flex items-center gap-1 mt-1 text-[#F97316] text-xs font-bold">
           <AlertCircle className="h-3 w-3" />
           <span>Approaching character limit</span>
         </div>
       )}
       
       {timeRemaining !== undefined && timeRemaining <= 30 && (
-        <div className="flex items-center gap-1 mt-1 text-ember-500 text-xs">
+        <div className="flex items-center gap-1 mt-1 text-[#F97316] text-xs font-bold">
           <AlertCircle className="h-3 w-3" />
           <span>{timeRemaining === 0 ? "Time's up!" : `${timeRemaining}s remaining!`}</span>
         </div>
       )}
       
       {!isPro && (
-        <div className="flex items-center gap-1 mt-1 text-flame-500 text-xs">
+        <div className="flex items-center gap-1 mt-1 text-[#F8C537] text-xs font-bold">
           <Crown className="h-3 w-3" />
           <span>
             Upgrade to Pro for {700 - effectiveMaxLength} more characters and voice recording
@@ -156,58 +156,59 @@ const RoastInput = ({
       )}
       
       <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
-        <DialogContent className="bg-night-800 border-night-700">
+        <DialogContent className="bg-[#C5B4F0] border-4 border-black rounded-xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
           <DialogHeader>
-            <DialogTitle>Unlock Pro Features</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-black text-2xl font-black">Unlock Pro Features</DialogTitle>
+            <DialogDescription className="text-black/70 font-medium">
               Upgrade to Pro to access voice recording, extended character limits, and more!
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
-            <div className="flex items-center gap-3">
-              <div className="bg-flame-500/20 p-2 rounded-full">
-                <Mic className="h-5 w-5 text-flame-500" />
+            <div className="flex items-center gap-3 bg-[#A6C7F7] p-4 border-2 border-black rounded-lg">
+              <div className="bg-[#F8C537] p-2 rounded-full border-2 border-black">
+                <Mic className="h-5 w-5 text-black" />
               </div>
               <div>
-                <h3 className="font-medium">Voice Recording</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="font-bold text-black">Voice Recording</h3>
+                <p className="text-sm text-black/70 font-medium">
                   Record your roasts with your voice for added effect
                 </p>
               </div>
             </div>
             
-            <div className="flex items-center gap-3">
-              <div className="bg-flame-500/20 p-2 rounded-full">
-                <AlertCircle className="h-5 w-5 text-flame-500" />
+            <div className="flex items-center gap-3 bg-[#A6C7F7] p-4 border-2 border-black rounded-lg">
+              <div className="bg-[#F8C537] p-2 rounded-full border-2 border-black">
+                <AlertCircle className="h-5 w-5 text-black" />
               </div>
               <div>
-                <h3 className="font-medium">Extended Character Limit</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="font-bold text-black">Extended Character Limit</h3>
+                <p className="text-sm text-black/70 font-medium">
                   700 characters per roast instead of 280
                 </p>
               </div>
             </div>
             
-            <div className="flex items-center gap-3">
-              <div className="bg-flame-500/20 p-2 rounded-full">
-                <Lock className="h-5 w-5 text-flame-500" />
+            <div className="flex items-center gap-3 bg-[#A6C7F7] p-4 border-2 border-black rounded-lg">
+              <div className="bg-[#F8C537] p-2 rounded-full border-2 border-black">
+                <Lock className="h-5 w-5 text-black" />
               </div>
               <div>
-                <h3 className="font-medium">Private Battle Rooms</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="font-bold text-black">Private Battle Rooms</h3>
+                <p className="text-sm text-black/70 font-medium">
                   Create invite-only rooms for your friends
                 </p>
               </div>
             </div>
           </div>
           
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowUpgradeModal(false)}>
+          <DialogFooter className="gap-3">
+            <Button variant="outline" onClick={() => setShowUpgradeModal(false)} 
+              className="bg-[#FFB4A8] text-black border-2 border-black hover:bg-[#FFB4A8]/90">
               Not Now
             </Button>
             <Button 
-              className="bg-gradient-flame hover:opacity-90"
+              className="bg-[#F8C537] text-black border-2 border-black hover:bg-[#F8C537]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:translate-x-1 transition-all font-bold"
               onClick={() => {
                 setShowUpgradeModal(false);
                 // Navigate to billing page in a real app
