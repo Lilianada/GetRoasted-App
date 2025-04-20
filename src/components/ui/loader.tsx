@@ -1,7 +1,8 @@
-
 import { useEffect, useRef } from 'react';
-import anime from 'animejs';
+import * as animeLib from 'animejs';
 import { cn } from '@/lib/utils';
+
+const anime = animeLib.default || animeLib;
 
 interface LoaderProps {
   size?: 'small' | 'medium' | 'large';

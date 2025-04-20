@@ -1,6 +1,8 @@
 
-import anime from 'animejs';
-import React from 'react';
+import * as animeLib from 'animejs';
+
+// Use the default export from the library
+const anime = animeLib.default || animeLib;
 
 // Utility functions for animations
 export const animations = {
