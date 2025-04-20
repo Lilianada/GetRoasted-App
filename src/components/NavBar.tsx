@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -74,6 +73,11 @@ const NavBar = () => {
     }
   };
 
+  const handleMenuPress = () => {
+    // Perform action when Menu button is pressed
+    console.log("Menu button pressed");
+  };
+
   return (
     <header className="neo-nav w-full border-b-2 border-black bg-night-900 backdrop-blur-md sticky top-0 z-40">
       <div className="container flex h-16 items-center justify-between px-4">
@@ -93,6 +97,7 @@ const NavBar = () => {
               variant="outline" 
               size="icon"
               className="neo-button p-2 menu-button"
+              onClick={handleMenuPress} // call handleMenuPress
             >
               <Menu className="h-5 w-5" />
             </Button>
