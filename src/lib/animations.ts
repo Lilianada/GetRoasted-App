@@ -1,5 +1,6 @@
 
 import anime from 'animejs';
+import React from 'react';
 
 // Utility functions for animations
 export const animations = {
@@ -105,15 +106,24 @@ export const animateOnMount = (selector: string, container: HTMLElement | null) 
   }
 };
 
-// Component loader animation
-export const LoaderAnimation = () => {
-  return (
-    <div className="flex items-center justify-center space-x-2">
-      <div className="w-4 h-4 bg-[#F8C537] border-2 border-black loader-item"></div>
-      <div className="w-4 h-4 bg-[#C5B4F0] border-2 border-black loader-item"></div>
-      <div className="w-4 h-4 bg-[#A6C7F7] border-2 border-black loader-item"></div>
-    </div>
-  );
+// Component loader animation - fixed by returning a proper React component
+export const LoaderAnimation: React.FC = () => {
+  return React.createElement('div', {
+    className: "flex items-center justify-center space-x-2"
+  }, [
+    React.createElement('div', {
+      key: "dot1",
+      className: "w-4 h-4 bg-[#F8C537] border-2 border-black loader-item"
+    }),
+    React.createElement('div', {
+      key: "dot2",
+      className: "w-4 h-4 bg-[#C5B4F0] border-2 border-black loader-item"
+    }),
+    React.createElement('div', {
+      key: "dot3",
+      className: "w-4 h-4 bg-[#A6C7F7] border-2 border-black loader-item"
+    })
+  ]);
 };
 
 // Create a button click animation directive
