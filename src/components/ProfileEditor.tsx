@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,6 +26,7 @@ const ProfileEditor = ({ initialData, onSave, onCancel }: ProfileEditorProps) =>
   const [formData, setFormData] = useState<ProfileData>(initialData);
   const [isLoading, setIsLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const { user } = useAuthContext();
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -35,13 +36,18 @@ const ProfileEditor = ({ initialData, onSave, onCancel }: ProfileEditorProps) =>
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
-      setUploading(true);
-      
       if (!event.target.files || event.target.files.length === 0) {
-        throw new Error('You must select an image to upload.');
+        return;
       }
 
       const file = event.target.files[0];
+      
+      // Create preview immediately for better UX
+      const objectUrl = URL.createObjectURL(file);
+      setPreviewImage(objectUrl);
+      
+      setUploading(true);
+      
       const fileExt = file.name.split('.').pop();
       const filePath = `${user?.id}-${Math.random()}.${fileExt}`;
 
@@ -69,6 +75,15 @@ const ProfileEditor = ({ initialData, onSave, onCancel }: ProfileEditorProps) =>
       setUploading(false);
     }
   };
+  
+  // Clean up preview image URL when component unmounts
+  useEffect(() => {
+    return () => {
+      if (previewImage) {
+        URL.revokeObjectURL(previewImage);
+      }
+    };
+  }, [previewImage]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,10 +123,17 @@ const ProfileEditor = ({ initialData, onSave, onCancel }: ProfileEditorProps) =>
       <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
         <div className="relative">
           <Avatar className="h-24 w-24 border-2 border-black">
-            <AvatarImage src={formData.avatar_url} alt={formData.username} />
-            <AvatarFallback className="bg-[#C5B4F0] text-black text-xl">
-              {formData.username.substring(0, 2).toUpperCase()}
-            </AvatarFallback>
+            {(previewImage || formData.avatar_url) ? (
+              <AvatarImage 
+                src={previewImage || formData.avatar_url} 
+                alt={formData.username}
+                className="object-cover" 
+              />
+            ) : (
+              <AvatarFallback className="bg-[#C5B4F0] text-black text-xl">
+                {formData.username.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            )}
           </Avatar>
           <div className="absolute -right-2 -bottom-2 flex gap-2">
             <label 
@@ -137,7 +159,7 @@ const ProfileEditor = ({ initialData, onSave, onCancel }: ProfileEditorProps) =>
               name="username"
               value={formData.username}
               onChange={handleChange}
-              className="border-night-700 focus-visible:ring-flame-500"
+              className="border-2 border-black focus-visible:ring-flame-500"
             />
             <p className="text-xs text-muted-foreground mt-1">
               This is how you'll appear in battles and on the leaderboard.
@@ -151,7 +173,7 @@ const ProfileEditor = ({ initialData, onSave, onCancel }: ProfileEditorProps) =>
               name="bio"
               value={formData.bio}
               onChange={handleChange}
-              className="border-night-700 focus-visible:ring-flame-500 min-h-[100px]"
+              className="border-2 border-black focus-visible:ring-flame-500 min-h-[100px]"
               placeholder="Tell others about your roasting style..."
             />
             <p className="text-xs text-muted-foreground mt-1">
@@ -166,13 +188,15 @@ const ProfileEditor = ({ initialData, onSave, onCancel }: ProfileEditorProps) =>
           type="button" 
           variant="outline" 
           onClick={onCancel}
+          className="border-2 border-black"
         >
           Cancel
         </Button>
         <Button 
           type="submit" 
-          className="bg-gradient-flame hover:opacity-90"
+          variant="default"
           disabled={isLoading}
+          className="border-2 border-black shadow-neo"
         >
           {isLoading ? "Saving..." : "Save Changes"}
         </Button>

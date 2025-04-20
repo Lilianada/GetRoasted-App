@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -56,7 +57,7 @@ export default {
           foreground: 'hsl(var(--card-foreground))'
         },
         night: {
-          DEFAULT: '#171923',
+          DEFAULT: '#181B23',  // Updated darker navy blue
           50: '#f8f9fa',
           100: '#e9ecef',
           200: '#dee2e6',
@@ -66,7 +67,7 @@ export default {
           600: '#495057',
           700: '#343a40',
           800: '#212529',
-          900: '#171923',
+          900: '#181B23',  // Updated to match DEFAULT
         },
         flame: {
           50: '#FFF7ED',
@@ -74,7 +75,7 @@ export default {
           200: '#FED7AA',
           300: '#FDBA74',
           400: '#FB923C',
-          500: '#FF6B35',
+          500: '#FF6B35',  // Signature flame orange
           600: '#EA580C',
           700: '#C2410C',
           800: '#9A3412',
@@ -87,13 +88,13 @@ export default {
           300: '#FCA5A5',
           400: '#F87171',
           500: '#EF4444',
-          600: '#FF3366',
+          600: '#FF3366',  // Vibrant coral pink
           700: '#B91C1C',
           800: '#991B1B',
           900: '#7F1D1D',
         },
         glow: {
-          DEFAULT: '#7B61FF',
+          DEFAULT: '#7B61FF',  // Bright purple
           lighter: '#9B87F5'
         },
       },
@@ -144,6 +145,19 @@ export default {
         'skew': {
           '0%, 100%': { transform: 'skewX(0)' },
           '50%': { transform: 'skewX(-2deg)' },
+        },
+        'pop': {
+          '0%': { transform: 'scale(0.95)', opacity: '0' },
+          '70%': { transform: 'scale(1.05)' },
+          '100%': { transform: 'scale(1)', opacity: '1' }
+        },
+        'fade-in': {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' }
+        },
+        'slide-in-right': {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(0)' }
         }
       },
       animation: {
@@ -154,6 +168,9 @@ export default {
         'wiggle': 'wiggle 1s ease-in-out infinite',
         'float': 'float 6s ease-in-out infinite',
         'skew': 'skew 4s ease-in-out infinite',
+        'pop': 'pop 0.3s ease-out',
+        'fade-in': 'fade-in 0.5s ease-out',
+        'slide-in-right': 'slide-in-right 0.3s ease-out'
       },
       backgroundImage: {
         'gradient-orange': 'linear-gradient(90deg, hsla(29, 92%, 70%, 1) 0%, hsla(0, 87%, 73%, 1) 100%)',

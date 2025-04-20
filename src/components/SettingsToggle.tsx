@@ -2,7 +2,6 @@
 import { Moon, Sun, Volume2, VolumeX } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 import { Button } from "@/components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface SettingsToggleProps {
   variant?: 'horizontal' | 'vertical';
@@ -15,19 +14,19 @@ const SettingsToggle = ({ variant = 'horizontal', className = '' }: SettingsTogg
   return (
     <div className={`flex ${variant === 'vertical' ? 'flex-col' : 'flex-row'} gap-2 ${className}`}>
       <Button 
-        variant="outline" 
+        variant={darkMode ? "default" : "outline"} 
         size="icon" 
         onClick={toggleDarkMode}
-        className={darkMode ? 'bg-night-700 text-flame-500' : 'bg-transparent text-gray-500'}
+        className={`border-2 border-black transition-all ${darkMode ? 'bg-[#F8C537] text-black' : 'bg-night-800 text-white'}`}
       >
         {darkMode ? <Moon className="h-[1.2rem] w-[1.2rem]" /> : <Sun className="h-[1.2rem] w-[1.2rem]" />}
       </Button>
       
       <Button
-        variant="outline"
+        variant={soundEnabled ? "default" : "outline"}
         size="icon"
         onClick={toggleSound}
-        className={soundEnabled ? 'bg-night-700 text-flame-500' : 'bg-transparent text-gray-500'}
+        className={`border-2 border-black transition-all ${soundEnabled ? 'bg-[#F8C537] text-black' : 'bg-night-800 text-white'}`}
       >
         {soundEnabled ? <Volume2 className="h-[1.2rem] w-[1.2rem]" /> : <VolumeX className="h-[1.2rem] w-[1.2rem]" />}
       </Button>
