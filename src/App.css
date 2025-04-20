@@ -20,24 +20,6 @@
   transform: translate(-1px, -1px);
 }
 
-.card {
-  padding: 2em;
-  border: 2px solid black;
-  border-radius: 0.75rem;
-  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
-  transition: all 0.2s;
-}
-
-.card:hover {
-  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
-  transform: translate(-1px, -1px);
-}
-
-.read-the-docs {
-  color: #888;
-  font-weight: bold;
-}
-
 /* Dialog overrides for neobrutalism */
 .shadcn-dialog [data-radix-popper-content-wrapper] {
   font-family: 'Geist Mono', monospace !important;
@@ -60,4 +42,10 @@ button[class*="bg-gradient-flame"] {
 button[class*="bg-gradient-flame"]:hover {
   box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1) !important;
   transform: translate(-1px, -1px) !important;
+}
+
+/* Sheet animation overrides */
+[data-state="open"] > .neo-button {
+  transform: translate(-1px, -1px);
+  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
 }

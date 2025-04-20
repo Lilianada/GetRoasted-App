@@ -1,40 +1,29 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Flame,
-  Mic,
   Menu,
-  Home,
-  Trophy,
-  BookOpen,
-  Settings as SettingsIcon,
-  LogOut,
-  UserIcon
+  X,
 } from "lucide-react";
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
   SheetClose,
+  SheetHeader,
 } from "@/components/ui/sheet";
-import UserMenu from "@/components/UserMenu";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
-import NotificationsModal from "./NotificationsModal";
-import SettingsToggle from "./SettingsToggle";
-import { toast } from "@/components/ui/sonner";
 import { useSettings } from "@/hooks/useSettings";
+import { toast } from "@/components/ui/sonner";
 
 const NavBar = () => {
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const { playSound } = useSettings();
-  
-  // Responsive breakpoint for mobile/tablet menu
-  const isMobileOrTablet = window.innerWidth < 900;
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -79,179 +68,96 @@ const NavBar = () => {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-night-800 bg-night/80 backdrop-blur-md">
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-90">
-            <div className="relative h-8 w-8">
-              <Flame className="h-8 w-8 text-flame-600 animate-flame-pulse" />
-            </div>
-            <span className="font-geist text-xl font-bold">
-              <span className="text-flame-500">Get</span>
-              <span className="text-ember-500">Roasted</span>
-            </span>
-          </Link>
-        </div>
+      <div className="container flex h-16 items-center justify-between px-4">
+        <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-90">
+          <div className="relative h-8 w-8">
+            <Flame className="h-8 w-8 text-flame-600 animate-flame-pulse" />
+          </div>
+          <span className="font-geist text-xl font-bold">
+            <span className="text-flame-500">Get</span>
+            <span className="text-ember-500">Roasted</span>
+          </span>
+        </Link>
 
-        {!isMobileOrTablet ? (
-          <>
-            <nav className="flex items-center gap-6">
-              <Link to="/" className="text-sm font-medium text-muted-foreground transition-colors hover:text-flame-500">
-                Home
-              </Link>
-              {session && (
-                <>
-                  <Link to="/battles" className="text-sm font-medium text-muted-foreground transition-colors hover:text-flame-500">
-                    Battles
-                  </Link>
-                  <Link to="/leaderboard" className="text-sm font-medium text-muted-foreground transition-colors hover:text-flame-500">
-                    Leaderboard
-                  </Link>
-                  <Link to="/rules" className="text-sm font-medium text-muted-foreground transition-colors hover:text-flame-500">
-                    Rules
-                  </Link>
-                </>
-              )}
-            </nav>
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <SheetTrigger asChild>
+            <Button 
+              variant="outline" 
+              size="icon"
+              className="neo-button p-2"
+            >
+              {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
+          </SheetTrigger>
+          <SheetContent className="w-[300px] bg-night-800 border-night-700">
+            <SheetHeader className="border-b border-night-700 pb-4">
+              <div className="flex items-center gap-2">
+                <Flame className="h-6 w-6 text-flame-600" />
+                <span className="font-geist text-lg font-bold">
+                  <span className="text-flame-500">Get</span>
+                  <span className="text-ember-500">Roasted</span>
+                </span>
+              </div>
+            </SheetHeader>
 
-            <div className="flex items-center gap-3">
+            <nav className="mt-4 flex flex-col gap-2">
+              <SheetClose asChild>
+                <Link to="/" className="neo-button w-full text-center p-2">
+                  Home
+                </Link>
+              </SheetClose>
+
               {session ? (
                 <>
-                  <SettingsToggle />
-                  <NotificationsModal />
-                  <UserMenu user={{ 
-                    name: user?.user_metadata.username || user?.email || 'User', 
-                    avatar: user?.user_metadata.avatar_url,
-                    isAdmin: user?.user_metadata.is_admin 
-                  }} />
-                  <Button asChild className="gap-2 bg-gradient-flame hover:opacity-90">
-                    <Link to="/battle/new">
-                      <Mic className="h-4 w-4" />
-                      <span>Start Battle</span>
+                  <SheetClose asChild>
+                    <Link to="/battles" className="neo-button w-full text-center p-2">
+                      Battles
                     </Link>
-                  </Button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link to="/leaderboard" className="neo-button w-full text-center p-2">
+                      Leaderboard
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link to="/rules" className="neo-button w-full text-center p-2">
+                      Rules
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link to="/battle/new" className="neo-button w-full text-center p-2 bg-[#F8C537]">
+                      Start Battle
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link to="/profile" className="neo-button w-full text-center p-2">
+                      Profile
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link to="/settings" className="neo-button w-full text-center p-2">
+                      Settings
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <button 
+                      onClick={handleSignOut}
+                      className="neo-button w-full p-2 bg-red-500 text-white hover:bg-red-600"
+                    >
+                      Sign Out
+                    </button>
+                  </SheetClose>
                 </>
               ) : (
-                <>
-                  <SettingsToggle />
-                  <Button asChild className="gap-2 bg-gradient-flame hover:opacity-90">
-                    <Link to="/signup">
-                      <UserIcon className="h-4 w-4" />
-                      <span>Get Started</span>
-                    </Link>
-                  </Button>
-                </>
+                <SheetClose asChild>
+                  <Link to="/signup" className="neo-button w-full text-center p-2 bg-[#F8C537]">
+                    Get Started
+                  </Link>
+                </SheetClose>
               )}
-            </div>
-          </>
-        ) : (
-          <div className="flex items-center gap-2">
-            {session && (
-              <NotificationsModal />
-            )}
-            
-            <SettingsToggle />
-
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="bg-night-800 border-night-700">
-                <div className="flex flex-col space-y-6 pt-6">
-                  <div className="flex items-center gap-2">
-                    <Flame className="h-6 w-6 text-flame-600" />
-                    <span className="font-geist text-lg font-bold">
-                      <span className="text-flame-500">Get</span>
-                      <span className="text-ember-500">Roasted</span>
-                    </span>
-                  </div>
-                  <nav className="flex flex-col gap-4">
-                    <SheetClose asChild>
-                      <Link to="/" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
-                        <Home className="h-5 w-5" />
-                        <span>Home</span>
-                      </Link>
-                    </SheetClose>
-                    
-                    {session ? (
-                      <>
-                        <SheetClose asChild>
-                          <Link to="/battles" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
-                            <Mic className="h-5 w-5" />
-                            <span>Battles</span>
-                          </Link>
-                        </SheetClose>
-                        <SheetClose asChild>
-                          <Link to="/leaderboard" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
-                            <Trophy className="h-5 w-5" />
-                            <span>Leaderboard</span>
-                          </Link>
-                        </SheetClose>
-                        <SheetClose asChild>
-                          <Link to="/rules" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
-                            <BookOpen className="h-5 w-5" />
-                            <span>Rules</span>
-                          </Link>
-                        </SheetClose>
-                        <SheetClose asChild>
-                          <Link to="/profile" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
-                            <UserIcon className="h-5 w-5" />
-                            <span>Profile</span>
-                          </Link>
-                        </SheetClose>
-                        <SheetClose asChild>
-                          <Link to="/settings" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
-                            <SettingsIcon className="h-5 w-5" />
-                            <span>Settings</span>
-                          </Link>
-                        </SheetClose>
-                        <SheetClose asChild>
-                          <button 
-                            className="flex items-center gap-3 py-2 text-base text-destructive hover:text-destructive/80"
-                            onClick={handleSignOut}
-                          >
-                            <LogOut className="h-5 w-5" />
-                            <span>Sign Out</span>
-                          </button>
-                        </SheetClose>
-                      </>
-                    ) : (
-                      <SheetClose asChild>
-                        <Link to="/signup" className="flex items-center gap-3 py-2 text-base text-muted-foreground hover:text-flame-500">
-                          <UserIcon className="h-5 w-5" />
-                          <span>Get Started</span>
-                        </Link>
-                      </SheetClose>
-                    )}
-                  </nav>
-                  
-                  <div className="space-y-3 pt-4">
-                    {session ? (
-                      <SheetClose asChild>
-                        <Button asChild className="w-full gap-2 bg-gradient-flame hover:opacity-90">
-                          <Link to="/battle/new">
-                            <Mic className="h-4 w-4" />
-                            <span>Start Battle</span>
-                          </Link>
-                        </Button>
-                      </SheetClose>
-                    ) : (
-                      <SheetClose asChild>
-                        <Button asChild className="w-full gap-2 bg-gradient-flame hover:opacity-90">
-                          <Link to="/signup">
-                            <UserIcon className="h-4 w-4" />
-                            <span>Get Started</span>
-                          </Link>
-                        </Button>
-                      </SheetClose>
-                    )}
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        )}
+            </nav>
+          </SheetContent>
+        </Sheet>
       </div>
     </header>
   );
