@@ -1,7 +1,9 @@
+
 import { useEffect, useRef } from 'react';
 import * as animeLib from 'animejs';
 import { cn } from '@/lib/utils';
 
+// Use the proper way to import anime
 const anime = animeLib.default || animeLib;
 
 interface LoaderProps {

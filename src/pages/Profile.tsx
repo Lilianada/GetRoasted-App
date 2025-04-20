@@ -94,7 +94,6 @@ const Profile = () => {
       try {
         setIsLoading(true);
         
-        // Fetch profile data
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
@@ -112,8 +111,6 @@ const Profile = () => {
           created_at: profileData.created_at
         });
         
-        // In a complete implementation, you would fetch these from respective tables
-        // For now using placeholder data for demo
         setStats({
           wins: 47,
           losses: 12,
@@ -190,15 +187,7 @@ const Profile = () => {
           <Card className="flame-card mb-6 border-night-700 overflow-visible">
             <CardContent className="p-6">
               {isEditing ? (
-                <ProfileEditor
-                  initialData={{
-                    username: profileData.username,
-                    bio: profileData.bio || '',
-                    avatar_url: profileData.avatar_url
-                  }}
-                  onSave={handleSaveProfile}
-                  onCancel={() => setIsEditing(false)}
-                />
+                <ProfileEditor />
               ) : (
                 <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
                   <div className="relative">

@@ -1,7 +1,8 @@
 
 import * as animeLib from 'animejs';
+import React from 'react';
 
-// Use the default export from the library
+// Use the proper way to import anime
 const anime = animeLib.default || animeLib;
 
 // Utility functions for animations

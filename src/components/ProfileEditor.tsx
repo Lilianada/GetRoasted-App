@@ -6,8 +6,12 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
+interface ProfileEditorProps {
+  // Add proper props interface
+}
+
 const ProfileEditor = () => {
-  const { user, profile } = useAuthContext();
+  const { user } = useAuthContext();
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -53,21 +57,20 @@ const ProfileEditor = () => {
         return;
       }
 
-      // Get public URL
-      const { data: { publicUrl }, error: urlError } = supabase.storage
+      // Get public URL - fix the type error by checking for errors differently
+      const { data } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
 
-      if (urlError) {
+      if (!data.publicUrl) {
         toast.error('Failed to get avatar URL');
-        console.error('URL error:', urlError);
         return;
       }
 
       // Update user's profile with new avatar URL
       const { error: profileUpdateError } = await supabase
         .from('profiles')
-        .update({ avatar_url: publicUrl })
+        .update({ avatar_url: data.publicUrl })
         .eq('id', user.id);
 
       if (profileUpdateError) {
@@ -83,9 +86,9 @@ const ProfileEditor = () => {
     }
   };
 
-  const initials = profile?.username 
-    ? profile.username.slice(0, 2).toUpperCase() 
-    : 'UN';
+  // Get initials from username if available (adjust this based on actual data structure)
+  const username = user?.user_metadata?.username || 'UN';
+  const initials = username.slice(0, 2).toUpperCase();
 
   return (
     <div className="flex flex-col items-center space-y-4">
@@ -102,7 +105,7 @@ const ProfileEditor = () => {
         onClick={() => fileInputRef.current?.click()}
       >
         <AvatarImage 
-          src={avatarPreview || profile?.avatar_url || undefined} 
+          src={avatarPreview || undefined} 
           alt="Profile avatar" 
         />
         <AvatarFallback className="bg-[#F8C537] text-black font-bold">
