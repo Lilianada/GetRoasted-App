@@ -1,6 +1,5 @@
 
-// The file is read-only, but we can create a custom component to handle this
-
+import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,27 +24,53 @@ export const PricingCardWrapper: React.FC<PricingCardWrapperProps> = ({
   onSubscribe,
 }) => {
   return (
-    <div className="relative">
+    <div className="relative group">
       {isPopular && (
-        <div className="absolute -top-4 left-0 right-0 mx-auto w-fit px-4 py-1 bg-flame-500 text-white text-xs font-bold rounded-full z-10">
+        <div className="absolute -top-4 left-0 right-0 mx-auto w-fit px-6 py-1.5 bg-[#FF5733] text-white text-sm font-bold rounded-full z-10 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black transform -rotate-[4deg] transition-transform group-hover:rotate-0">
           Most Popular
         </div>
       )}
-      <Card className={`flame-card h-full ${isPopular ? 'border-flame-500 shadow-lg' : ''}`}>
-        <CardHeader>
-          <CardTitle>{title}</CardTitle>
-          <div>
-            <span className="text-3xl font-bold">{price}</span>
-            {price !== 'Free' && <span className="text-muted-foreground">/mo</span>}
+      <Card 
+        className={`
+          relative transform transition-all duration-200 
+          hover:-translate-y-1 hover:translate-x-1
+          ${isPopular ? 'border-[#FF5733]' : 'border-black'} 
+          border-2 rounded-xl overflow-hidden
+          shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]
+          hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]
+          bg-white
+          ${isPopular ? 'rotate-1 hover:rotate-0' : ''}
+        `}
+      >
+        <CardHeader className="border-b-2 border-black">
+          <CardTitle className="text-2xl font-black">{title}</CardTitle>
+          <div className="flex items-baseline gap-1">
+            <span className="text-4xl font-black tracking-tight">{price}</span>
+            {price !== 'Free' && (
+              <span className="text-lg font-bold text-gray-600">/mo</span>
+            )}
           </div>
-          <CardDescription>{description}</CardDescription>
+          <CardDescription className="font-medium text-black/70">
+            {description}
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <ul>
+        <CardContent className="space-y-4 pt-6">
+          <ul className="space-y-3">
             {features.map((feature, index) => (
-              <li key={index} className="flex items-start gap-2 opacity-{feature.included ? '100' : '50'}">
-                <CheckCircle2 className={`h-5 w-5 ${feature.included ? 'text-flame-500' : 'text-gray-400'} flex-shrink-0`} />
-                <span>{feature.name}</span>
+              <li 
+                key={index} 
+                className={`
+                  flex items-start gap-3 
+                  ${feature.included ? 'opacity-100' : 'opacity-50'}
+                `}
+              >
+                <CheckCircle2 
+                  className={`
+                    h-5 w-5 flex-shrink-0
+                    ${feature.included ? 'text-[#FF5733]' : 'text-gray-400'}
+                  `} 
+                />
+                <span className="font-medium">{feature.name}</span>
               </li>
             ))}
           </ul>
@@ -53,8 +78,15 @@ export const PricingCardWrapper: React.FC<PricingCardWrapperProps> = ({
         <CardFooter>
           <Button
             onClick={onSubscribe}
-            className={`w-full ${isPopular ? 'bg-gradient-flame hover:opacity-90' : ''}`}
-            variant={isPopular ? 'default' : 'outline'}
+            className={`
+              w-full h-12 text-lg font-bold transition-all duration-200
+              border-2 border-black rounded-lg
+              transform hover:-translate-y-1 hover:translate-x-1
+              ${isPopular 
+                ? 'bg-[#FF5733] text-white hover:bg-[#FF5733]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]' 
+                : 'bg-white text-black hover:bg-gray-50 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]'
+              }
+            `}
           >
             {buttonText}
           </Button>
@@ -64,5 +96,4 @@ export const PricingCardWrapper: React.FC<PricingCardWrapperProps> = ({
   );
 };
 
-// Add a default export that re-exports PricingCardWrapper
 export default PricingCardWrapper;
