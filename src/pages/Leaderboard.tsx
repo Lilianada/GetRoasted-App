@@ -51,10 +51,10 @@ const Leaderboard = () => {
   };
 
   const getRankStyle = (rank: number) => {
-    if (rank === 1) return "bg-gradient-flame text-white";
-    if (rank === 2) return "bg-night-600 text-white";
-    if (rank === 3) return "bg-night-700 text-ember-400";
-    return "bg-night-800 text-muted-foreground";
+    if (rank === 1) return "bg-[#F8C537]";
+    if (rank === 2) return "bg-[#C5B4F0]";
+    if (rank === 3) return "bg-[#A6C7F7]";
+    return "bg-[#FFB4A8]";
   };
 
   return (
@@ -63,21 +63,23 @@ const Leaderboard = () => {
       
       <main className="container flex-1 py-12">
         <div className="max-w-4xl mx-auto">
-          <div className="mb-8 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Award className="h-8 w-8 text-flame-500" />
-              <h1 className="text-3xl font-bold gradient-text">Leaderboard</h1>
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <div className="p-2 bg-[#F8C537] border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <Award className="h-8 w-8 text-black" />
+              </div>
+              <h1 className="text-3xl font-black">Leaderboard</h1>
             </div>
             
             <Tabs defaultValue={period} onValueChange={setPeriod} className="w-auto">
-              <TabsList className="bg-night-800 border border-night-700">
-                <TabsTrigger value="today" className="data-[state=active]:bg-flame-600">
+              <TabsList className="bg-[#C5B4F0] border-2 border-black p-1">
+                <TabsTrigger value="today" className="data-[state=active]:bg-[#F8C537] data-[state=active]:text-black">
                   Today
                 </TabsTrigger>
-                <TabsTrigger value="week" className="data-[state=active]:bg-flame-600">
+                <TabsTrigger value="week" className="data-[state=active]:bg-[#F8C537] data-[state=active]:text-black">
                   This Week
                 </TabsTrigger>
-                <TabsTrigger value="alltime" className="data-[state=active]:bg-flame-600">
+                <TabsTrigger value="alltime" className="data-[state=active]:bg-[#F8C537] data-[state=active]:text-black">
                   All Time
                 </TabsTrigger>
               </TabsList>
@@ -87,12 +89,12 @@ const Leaderboard = () => {
           {loading ? (
             <div className="flex justify-center py-12">
               <div className="relative h-12 w-12">
-                <Flame className="h-12 w-12 text-flame-600 animate-flame-pulse" />
+                <Flame className="h-12 w-12 text-[#F8C537] animate-flame-pulse" />
               </div>
             </div>
           ) : (
-            <div className="glass-card rounded-lg overflow-hidden">
-              <div className="grid grid-cols-12 py-4 px-6 border-b border-night-700 text-sm font-medium text-muted-foreground">
+            <div className="border-2 border-black bg-night-800">
+              <div className="grid grid-cols-12 py-4 px-6 border-b-2 border-black text-sm font-bold text-white">
                 <div className="col-span-1">Rank</div>
                 <div className="col-span-7">User</div>
                 <div className="col-span-2 text-right">Score</div>
@@ -102,38 +104,35 @@ const Leaderboard = () => {
               {users.map((user) => (
                 <div 
                   key={user.id}
-                  className="grid grid-cols-12 py-3 px-6 items-center border-b border-night-700/50 hover:bg-night-800/50 transition-colors"
+                  className="grid grid-cols-12 py-3 px-6 items-center border-b-2 border-black hover:bg-night-700/50 transition-colors"
                 >
                   <div className="col-span-1">
-                    <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold ${getRankStyle(user.rank)}`}>
+                    <div className={`flex items-center justify-center w-8 h-8 font-bold border-2 border-black ${getRankStyle(user.rank)}`}>
                       {user.rank}
                     </div>
                   </div>
                   
                   <div className="col-span-7 flex items-center gap-3">
-                    <Avatar className="h-10 w-10 border border-night-700">
-                      <AvatarImage src={user.avatar} alt={user.username} />
-                      <AvatarFallback className="bg-night-700 text-flame-500">
-                        {user.username.substring(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
+                    <div className="h-10 w-10 border-2 border-black bg-[#C5B4F0] flex items-center justify-center font-bold">
+                      {user.username.substring(0, 2).toUpperCase()}
+                    </div>
                     
                     <div className="flex flex-col">
                       <div className="flex items-center gap-1.5">
-                        <span className="font-semibold">{user.username}</span>
+                        <span className="font-bold text-white">{user.username}</span>
                         {user.badge && getBadgeIcon(user.badge)}
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-white/70">
                         {user.wins} battles won
                       </div>
                     </div>
                   </div>
                   
-                  <div className="col-span-2 font-mono font-medium text-right">
+                  <div className="col-span-2 font-mono font-bold text-right text-white">
                     {user.score.toLocaleString()}
                   </div>
                   
-                  <div className="col-span-2 font-mono text-right">
+                  <div className="col-span-2 font-mono text-right text-white">
                     {user.wins}
                   </div>
                 </div>
@@ -141,7 +140,7 @@ const Leaderboard = () => {
             </div>
           )}
           
-          <div className="mt-8 text-center text-sm text-muted-foreground">
+          <div className="mt-8 text-center text-sm text-white/70">
             <p>Leaderboards reset weekly. Earn points by winning battles and getting high ratings.</p>
           </div>
         </div>
