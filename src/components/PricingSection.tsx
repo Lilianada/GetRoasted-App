@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import PricingCard from "@/components/PricingCard";
@@ -11,7 +10,6 @@ const PricingSection = () => {
   const navigate = useNavigate();
   const [currentPlan, setCurrentPlan] = useState<string>("free");
   
-  // Fetch user's subscription status
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) return;
@@ -81,8 +79,8 @@ const PricingSection = () => {
             description="Perfect for casual burn enthusiasts who want to test the waters"
             features={freePlanFeatures}
             buttonText="Current Plan"
-            onButtonClick={() => handleUpgrade('free')}
-            currentPlan={currentPlan === 'free'}
+            onSubscribe={() => handleUpgrade('free')}
+            isPopular={false}
           />
           
           <PricingCard 
@@ -91,9 +89,8 @@ const PricingSection = () => {
             description="For serious flame throwers who want the complete experience"
             features={proPlanFeatures}
             buttonText="Upgrade Now"
-            popular={true}
-            onButtonClick={() => handleUpgrade('pro')}
-            currentPlan={currentPlan === 'pro'}
+            onSubscribe={() => handleUpgrade('pro')}
+            isPopular={true}
           />
         </div>
       </div>

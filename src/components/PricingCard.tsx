@@ -26,7 +26,7 @@ export const PricingCardWrapper: React.FC<PricingCardWrapperProps> = ({
   return (
     <div className="relative group">
       {isPopular && (
-        <div className="absolute -top-4 left-0 right-0 mx-auto w-fit px-6 py-1.5 bg-[#FF5733] text-white text-sm font-bold rounded-full z-10 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black transform -rotate-[4deg] transition-transform group-hover:rotate-0">
+        <div className="absolute -top-4 left-0 right-0 mx-auto w-fit px-6 py-1.5 bg-[#F8C537] text-black text-sm font-bold rounded-full z-10 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black transform -rotate-[4deg] transition-transform group-hover:rotate-0">
           Most Popular
         </div>
       )}
@@ -34,20 +34,19 @@ export const PricingCardWrapper: React.FC<PricingCardWrapperProps> = ({
         className={`
           relative transform transition-all duration-200 
           hover:-translate-y-1 hover:translate-x-1
-          ${isPopular ? 'border-[#FF5733]' : 'border-black'} 
-          border-2 rounded-xl overflow-hidden
+          ${isPopular ? 'bg-[#C5B4F0]' : 'bg-[#FFB4A8]'} 
+          border-2 border-black rounded-xl overflow-hidden
           shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]
           hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]
-          bg-white
           ${isPopular ? 'rotate-1 hover:rotate-0' : ''}
         `}
       >
         <CardHeader className="border-b-2 border-black">
-          <CardTitle className="text-2xl font-black">{title}</CardTitle>
+          <CardTitle className="text-2xl font-black text-black">{title}</CardTitle>
           <div className="flex items-baseline gap-1">
-            <span className="text-4xl font-black tracking-tight">{price}</span>
+            <span className="text-4xl font-black tracking-tight text-black">{price}</span>
             {price !== 'Free' && (
-              <span className="text-lg font-bold text-gray-600">/mo</span>
+              <span className="text-lg font-bold text-black/70">/mo</span>
             )}
           </div>
           <CardDescription className="font-medium text-black/70">
@@ -67,10 +66,10 @@ export const PricingCardWrapper: React.FC<PricingCardWrapperProps> = ({
                 <CheckCircle2 
                   className={`
                     h-5 w-5 flex-shrink-0
-                    ${feature.included ? 'text-[#FF5733]' : 'text-gray-400'}
+                    ${feature.included ? 'text-black' : 'text-black/40'}
                   `} 
                 />
-                <span className="font-medium">{feature.name}</span>
+                <span className="font-medium text-black">{feature.name}</span>
               </li>
             ))}
           </ul>
@@ -83,8 +82,8 @@ export const PricingCardWrapper: React.FC<PricingCardWrapperProps> = ({
               border-2 border-black rounded-lg
               transform hover:-translate-y-1 hover:translate-x-1
               ${isPopular 
-                ? 'bg-[#FF5733] text-white hover:bg-[#FF5733]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]' 
-                : 'bg-white text-black hover:bg-gray-50 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]'
+                ? 'bg-[#F8C537] text-black hover:bg-[#F8C537]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]' 
+                : 'bg-[#A6C7F7] text-black hover:bg-[#A6C7F7]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]'
               }
             `}
           >

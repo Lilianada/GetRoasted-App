@@ -1,4 +1,4 @@
-
+import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -33,9 +33,9 @@ const BattleCard = ({
 }: BattleCardProps) => {
   const getStatusColor = () => {
     switch (status) {
-      case 'waiting': return 'bg-amber-500/20 text-amber-500';
-      case 'active': return 'bg-green-500/20 text-green-500';
-      case 'completed': return 'bg-gray-500/20 text-gray-400';
+      case 'waiting': return 'bg-[#F8C537] text-black border-2 border-black';
+      case 'active': return 'bg-[#C5B4F0] text-black border-2 border-black';
+      case 'completed': return 'bg-[#FFB4A8] text-black border-2 border-black';
       default: return '';
     }
   };
@@ -48,15 +48,21 @@ const BattleCard = ({
   };
 
   return (
-    <Card className="flame-card w-full h-full">
-      <CardHeader className="pb-3">
+    <Card className={`
+      relative transform transition-all duration-200 
+      hover:-translate-y-1 hover:translate-x-1
+      bg-[#A6C7F7] border-2 border-black rounded-xl overflow-hidden
+      shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]
+      hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]
+    `}>
+      <CardHeader className="pb-3 border-b-2 border-black">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-lg">{title}</CardTitle>
+          <CardTitle className="text-lg text-black">{title}</CardTitle>
           <Badge variant="outline" className={`${getStatusColor()} uppercase text-xs font-bold`}>
             {status}
           </Badge>
         </div>
-        <CardDescription className="flex items-center gap-2">
+        <CardDescription className="flex items-center gap-2 text-black">
           <span className="inline-flex items-center gap-1">
             <Users className="h-3.5 w-3.5" />
             {participants.length}/3
@@ -86,7 +92,6 @@ const BattleCard = ({
                 <span className="text-sm font-semibold truncate max-w-[80px]">{participant.name}</span>
               </div>
               
-              {/* Place VS between participants */}
               {index < participants.length - 1 && (
                 <span className="text-flame-500 font-bold">VS</span>
               )}
@@ -107,13 +112,16 @@ const BattleCard = ({
         </div>
       </CardContent>
       
-      <CardFooter className="justify-between border-t border-night-800 pt-4">
-        <div className="text-xs text-muted-foreground">
+      <CardFooter className="justify-between border-t-2 border-black pt-4">
+        <div className="text-xs text-black font-medium">
           <span className="inline-flex items-center gap-1">
             {roundCount} Rounds • {type === 'private' ? 'Private' : 'Public'}
           </span>
         </div>
-        <Button asChild>
+        <Button 
+          asChild
+          className="bg-[#F8C537] text-black border-2 border-black hover:bg-[#F8C537]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+        >
           <Link to={`/battle/${id}`}>
             {status === 'waiting' ? 'Join Battle' : status === 'active' ? 'Watch' : 'View Results'}
           </Link>
