@@ -49,7 +49,8 @@ const NewBattle = () => {
           round_count: parseInt(roundCount),
           time_per_turn: parseInt(timePerTurn),
           created_by: user.id,
-          status: 'waiting'
+          status: 'waiting',
+          allow_spectators: allowSpectators
         })
         .select()
         .single();

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import AuthDivider from "./AuthDivider";
 import PasswordInput from "./PasswordInput";
 import Loader from "@/components/ui/loader";
 import FancyDialog from "@/components/ui/FancyDialog";
+import AccountCreatedDialog from "./AccountCreatedDialog";
 
 const SignupForm = () => {
   const [email, setEmail] = useState('');
@@ -19,18 +19,20 @@ const SignupForm = () => {
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState("");
   const navigate = useNavigate();
   const { signUpWithEmail, signInWithGoogle } = useAuthContext();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setIsSubmitting(true);
     try {
       await signUpWithEmail(email, password, username);
-      setLoading(false); // hide loader
-      setShowDialog(true);
+      setSubmittedEmail(email);
+      setShowSuccessDialog(true);
     } catch (error) {
-      setLoading(false);
       window.setTimeout(() =>
         alert(
           error instanceof Error
@@ -39,6 +41,8 @@ const SignupForm = () => {
         ),
         100
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -116,16 +120,16 @@ const SignupForm = () => {
         <CardFooter className="flex flex-col items-center">
           <Button 
             type="submit" 
-            className="w-full bg-yellow hover:opacity-90"
-            disabled={loading}
+            className="w-full"
+            disabled={isSubmitting}
           >
-            {loading ? (
+            {isSubmitting ? (
               <>
-                <Loader size="small" variant="colorful" className="mr-2" />
+                <Loader size="small" className="mr-2" />
                 Creating Account...
               </>
             ) : (
-              "Create Account"
+              "Sign Up"
             )}
           </Button>
           <p className="mt-4 text-xs text-muted-foreground">
@@ -140,26 +144,11 @@ const SignupForm = () => {
           </p>
         </CardFooter>
       </form>
-      <FancyDialog
-        open={showDialog}
-        onOpenChange={(open) => {
-          setShowDialog(open);
-          if (!open) {
-            navigate("/signup");
-          }
-        }}
-        title="Account Created!"
-      >
-        <div className="flex flex-col items-center justify-center">
-          <Loader size="large" variant="colorful" className="mb-4" />
-          <p className="text-lg font-bold mb-2 text-night-900">
-            Get ready to roast some asses off — or maybe you'll get roasted?
-          </p>
-          <p className="mb-2 text-night-400">
-            Either way, check your email for a confirmation link, and we'll soon find out which category you fall into!
-          </p>
-        </div>
-      </FancyDialog>
+      <AccountCreatedDialog
+        open={showSuccessDialog}
+        onOpenChange={setShowSuccessDialog}
+        email={submittedEmail}
+      />
     </>
   );
 };

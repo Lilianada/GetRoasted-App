@@ -83,6 +83,7 @@ export type Database = {
       }
       battles: {
         Row: {
+          allow_spectators: boolean
           created_at: string
           created_by: string | null
           id: string
@@ -93,6 +94,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          allow_spectators?: boolean
           created_at?: string
           created_by?: string | null
           id?: string
@@ -103,6 +105,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          allow_spectators?: boolean
           created_at?: string
           created_by?: string | null
           id?: string
