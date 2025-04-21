@@ -22,20 +22,18 @@ export default function FancyDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={`
         p-0 relative overflow-hidden shadow-neo-lg
-        bg-gradient-to-br from-night-800 to-night-900 
-        border-2 border-night-600 text-white
+        bg-secondary border-2 border-black text-black
         ${className}
       `}>
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow to-coral"></div>
         <button 
           onClick={() => onOpenChange(false)}
-          className="absolute right-4 top-4 rounded-full p-1 text-night-300 hover:bg-night-700 hover:text-white transition-colors"
+          className="absolute right-4 top-4 rounded-full p-1 text-night-300 hover:bg-night-700 hover:text-black transition-colors"
           aria-label="Close"
         >
           <X size={18} />
         </button>
         <DialogHeader>
-          <DialogTitle className="text-2xl font-black text-white py-6 text-center">{title}</DialogTitle>
+          <DialogTitle className="text-2xl font-black text-black py-6 text-center">{title}</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col py-6 px-6 items-center">
           {children}

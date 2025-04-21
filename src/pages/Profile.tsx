@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuthContext } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,7 +18,6 @@ const Profile = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [bio, setBio] = useState("");
 
-  // Fetch user profile data
   useEffect(() => {
     if (!user) return;
     setLoading(true);
@@ -56,7 +54,6 @@ const Profile = () => {
         
       if (error) throw error;
       
-      // Update the local profile object with the new bio
       setProfile({ ...profile, bio });
       setIsEditing(false);
       toast.success("Profile updated successfully");
@@ -83,9 +80,7 @@ const Profile = () => {
         </div>
         
         <div className="lg:col-span-2 space-y-6">
-          <Card className="p-6 bg-gradient-to-br from-night-800 to-night-900 border-2 border-night-600 text-white shadow-neo-lg relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow to-purple"></div>
-            
+          <Card className="p-6 bg-secondary border-2 border-black text-black shadow-neo-lg relative overflow-hidden">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold">Profile Details</h2>
               
@@ -164,8 +159,7 @@ const Profile = () => {
             )}
           </Card>
           
-          <Card className="p-6 bg-gradient-to-br from-night-800 to-night-900 border-2 border-night-600 text-white shadow-neo-lg relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue to-purple"></div>
+          <Card className="p-6 bg-blue border-2 border-black text-black shadow-neo-lg relative overflow-hidden">
             <h2 className="text-xl font-bold mb-6">Avatar</h2>
             
             {loading ? (

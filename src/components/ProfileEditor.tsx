@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
@@ -6,10 +5,6 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader } from '@/components/ui/loader';
-
-interface ProfileEditorProps {
-  // Add proper props interface
-}
 
 const ProfileEditor = () => {
   const { user } = useAuthContext();
@@ -21,9 +16,8 @@ const ProfileEditor = () => {
     const file = event.target.files?.[0];
     if (!file || !user) return;
 
-    // Validate file type and size
     const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024;
 
     if (!validTypes.includes(file.type)) {
       toast.error('Invalid file type. Please upload a JPEG, PNG, GIF, or WebP image.');
@@ -38,19 +32,16 @@ const ProfileEditor = () => {
     try {
       setUploading(true);
       
-      // Create a preview of the image
       const reader = new FileReader();
       reader.onloadend = () => {
         setAvatarPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
 
-      // Generate a unique filename
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/avatar_${Date.now()}.${fileExt}`;
       const filePath = `${fileName}`;
 
-      // Upload to Supabase storage
       const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(filePath, file);
@@ -61,7 +52,6 @@ const ProfileEditor = () => {
         return;
       }
 
-      // Get public URL - fix the type error by checking for errors differently
       const { data } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
@@ -71,7 +61,6 @@ const ProfileEditor = () => {
         return;
       }
 
-      // Update user's profile with new avatar URL
       const { error: profileUpdateError } = await supabase
         .from('profiles')
         .update({ avatar_url: data.publicUrl })
@@ -92,7 +81,6 @@ const ProfileEditor = () => {
     }
   };
 
-  // Get initials from username if available (adjust this based on actual data structure)
   const username = user?.user_metadata?.username || 'UN';
   const initials = username.slice(0, 2).toUpperCase();
 

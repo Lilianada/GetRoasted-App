@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -46,11 +45,15 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
   const [loading, setLoading] = useState(true);
   const [currentRound, setCurrentRound] = useState(1);
   
-  // Fetch battle data
   useEffect(() => {
     const fetchBattleData = async () => {
       try {
-        // Fetch battle details
+        if (!battleId || battleId === 'new' || !(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(battleId))) {
+          console.error('Invalid battle ID format');
+          setLoading(false);
+          return;
+        }
+        
         const { data: battleData, error: battleError } = await supabase
           .from('battles')
           .select('*, profiles(username, avatar_url)')
@@ -60,7 +63,6 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
         if (battleError) throw battleError;
         setBattle(battleData);
         
-        // Fetch participants
         const { data: participantsData, error: participantsError } = await supabase
           .from('battle_participants')
           .select('*, profile: profiles(username, avatar_url)')
@@ -69,7 +71,6 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
         if (participantsError) throw participantsError;
         setParticipants(participantsData);
         
-        // Fetch spectator count
         const { count, error: spectatorsError } = await supabase
           .from('battle_spectators')
           .select('*', { count: 'exact', head: true })
@@ -78,7 +79,6 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
         if (spectatorsError) throw spectatorsError;
         setSpectators(count || 0);
         
-        // Check if user is already spectating
         if (user) {
           const { data: spectatorData, error: spectatorError } = await supabase
             .from('battle_spectators')
@@ -91,7 +91,6 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
           setIsSpectating(!!spectatorData);
         }
         
-        // Fetch roasts
         const { data: roastsData, error: roastsError } = await supabase
           .from('roasts')
           .select('*, profile: profiles(username, avatar_url)')
@@ -102,7 +101,6 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
         if (roastsError) throw roastsError;
         setRoasts(roastsData);
         
-        // Determine current round
         if (roastsData.length > 0) {
           const maxRound = Math.max(...roastsData.map(roast => roast.round_number));
           setCurrentRound(maxRound);
@@ -116,15 +114,17 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
       }
     };
     
-    fetchBattleData();
+    if (battleId && battleId !== 'new') {
+      fetchBattleData();
+    } else {
+      setLoading(false);
+    }
     
-    // Set up real-time subscriptions
     const roastsSubscription = supabase
       .channel('public:roasts')
       .on('postgres_changes', 
         { event: 'INSERT', schema: 'public', table: 'roasts', filter: `battle_id=eq.${battleId}` },
         async (payload) => {
-          // Fetch the complete roast with profile data
           const { data, error } = await supabase
             .from('roasts')
             .select('*, profile: profiles(username, avatar_url)')
@@ -138,7 +138,6 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
           
           setRoasts(prevRoasts => [...prevRoasts, data]);
           
-          // Update current round if needed
           if (data.round_number > currentRound) {
             setCurrentRound(data.round_number);
           }
@@ -151,7 +150,6 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'battle_spectators', filter: `battle_id=eq.${battleId}` },
         async () => {
-          // Refresh spectator count
           const { count, error } = await supabase
             .from('battle_spectators')
             .select('*', { count: 'exact', head: true })
@@ -181,7 +179,6 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
     
     try {
       if (!isSpectating) {
-        // Join as spectator
         const { error } = await supabase
           .from('battle_spectators')
           .insert({
@@ -193,7 +190,6 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
         setIsSpectating(true);
         toast.success("You are now spectating this battle");
       } else {
-        // Leave as spectator
         const { error } = await supabase
           .from('battle_spectators')
           .delete()
@@ -226,7 +222,6 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
   return (
     <div className="container py-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Sidebar */}
         <div className="lg:col-span-1 space-y-6">
           <Card className=" p-4">
             <h3 className="text-lg font-bold mb-4">Battle Info</h3>
@@ -360,7 +355,6 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
           )}
         </div>
         
-        {/* Main Content - Roast Feed */}
         <div className="lg:col-span-2">
           <Card className=" p-4 min-h-[500px]">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">

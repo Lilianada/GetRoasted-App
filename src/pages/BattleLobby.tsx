@@ -59,8 +59,10 @@ const BattleLobby = () => {
             name: p.profiles.username,
             avatar: p.profiles.avatar_url
           })),
-          // Fix: Extract the count number from the array
-          spectatorCount: battle.battle_spectators?.[0]?.count || 0,
+          // Fix: Extract the count number correctly
+          spectatorCount: Array.isArray(battle.battle_spectators) && battle.battle_spectators.length > 0 
+            ? battle.battle_spectators[0]?.count || 0 
+            : 0,
           // Explicitly cast status to the correct type
           status: battle.status as 'waiting' | 'active' | 'completed',
           timeRemaining: undefined, // We don't have this info yet
