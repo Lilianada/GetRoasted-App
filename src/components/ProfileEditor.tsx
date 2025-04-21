@@ -4,133 +4,120 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/sonner';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader } from '@/components/ui/loader';
+import { CardContent, CardFooter } from './ui/card';
+import { Label } from './ui/label';
+
+import { Link, useNavigate } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import { User, AtSign, Lock, PenIcon } from "lucide-react";
+import PasswordInput from './auth/PasswordInput';
+
 
 const ProfileEditor = () => {
   const { user } = useAuthContext();
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [profile, setProfile] = useState<any>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isEditing, setIsEditing] = useState(false)
+  const [bio, setBio] = useState("");
 
-  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !user) return;
-
-    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    const maxSize = 5 * 1024 * 1024;
-
-    if (!validTypes.includes(file.type)) {
-      toast.error('Invalid file type. Please upload a JPEG, PNG, GIF, or WebP image.');
-      return;
-    }
-
-    if (file.size > maxSize) {
-      toast.error('File is too large. Maximum size is 5MB.');
-      return;
-    }
+  const handleSave = async () => {
+    if (!user) return;
+    setIsSaving(true);
 
     try {
-      setUploading(true);
-      
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      const { error } = await supabase
+        .from("profiles")
+        .update({ bio })
+        .eq("id", user.id);
 
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/avatar_${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      if (error) throw error;
 
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file);
-
-      if (uploadError) {
-        toast.error('Failed to upload avatar');
-        console.error('Upload error:', uploadError);
-        return;
-      }
-
-      const { data } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      if (!data.publicUrl) {
-        toast.error('Failed to get avatar URL');
-        return;
-      }
-
-      const { error: profileUpdateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: data.publicUrl })
-        .eq('id', user.id);
-
-      if (profileUpdateError) {
-        toast.error('Failed to update profile');
-        console.error('Profile update error:', profileUpdateError);
-        return;
-      }
-
-      toast.success('Avatar uploaded successfully!');
+      setProfile({ ...profile, bio });
+      setIsEditing(false);
+      toast.success("Profile updated successfully");
     } catch (error) {
-      toast.error('An unexpected error occurred');
-      console.error('Unexpected error:', error);
+      console.error("Error updating profile:", error);
+      toast.error("Failed to update profile");
     } finally {
-      setUploading(false);
+      setIsSaving(false);
     }
   };
 
-  const username = user?.user_metadata?.username || 'UN';
-  const initials = username.slice(0, 2).toUpperCase();
-
   return (
     <div className="flex flex-col items-center space-y-4">
-      <input 
-        type="file" 
-        ref={fileInputRef} 
-        onChange={handleAvatarUpload} 
-        accept="image/jpeg,image/png,image/gif,image/webp" 
-        className="hidden" 
-      />
-      
-      <Avatar 
-        className="h-24 w-24 border-2 border-black cursor-pointer hover:opacity-80 transition-opacity"
-        onClick={() => fileInputRef.current?.click()}
-      >
-        {uploading ? (
-          <div className="h-full w-full flex items-center justify-center bg-night-800">
-            <Loader size="small" variant="colorful" />
+      <form onSubmit={handleSave}>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="FlameThrow3r"
+                    className="pl-9 border-night-700 focus-visible:ring-flame-500"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="signup-email">Email</Label>
+                <div className="relative">
+                  <AtSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="signup-email"
+                    type="email"
+                    placeholder="name@example.com"
+                    className="pl-9 border-night-700 focus-visible:ring-flame-500"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="bio">Bio</Label>
+                <div className="relative">
+                  <PenIcon className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <textarea
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    className="w-full p-3 bg-night-700 border border-night-600 rounded-md focus:ring-2 focus:ring-yellow focus:border-transparent transition-all"
+                    placeholder="Tell us about yourself..."
+                    rows={4}
+                  />
+                </div>
+              </div>
+
+
+            </div>
           </div>
-        ) : (
-          <>
-            <AvatarImage 
-              src={avatarPreview || undefined} 
-              alt="Profile avatar" 
-            />
-            <AvatarFallback className="bg-primary text-black font-bold">
-              {initials}
-            </AvatarFallback>
-          </>
-        )}
-      </Avatar>
-      
-      <Button 
-        variant="outline" 
-        onClick={() => fileInputRef.current?.click()}
-        disabled={uploading}
-        className="hover:bg-primary hover:text-black transition-colors"
-      >
-        {uploading ? (
-          <>
-            <Loader size="small" className="mr-2" />
-            Uploading...
-          </>
-        ) : (
-          'Change Avatar'
-        )}
-      </Button>
+        </CardContent>
+        <CardFooter className="flex flex-col items-center">
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <>
+                <Loader size="small" className="mr-2" />
+                Saving...
+              </>
+            ) : (
+              "Save"
+            )}
+          </Button>
+        </CardFooter>
+      </form>
     </div>
   );
 };

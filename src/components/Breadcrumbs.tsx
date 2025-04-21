@@ -13,7 +13,7 @@ export default function Breadcrumbs() {
   const pathname = location.pathname;
 
   // Hide breadcrumbs on the /battles home page
-  if (pathname === "/battles" || pathname === "/") {
+  if (pathname === "/battles" || pathname === "/" || pathname === "/signup" || pathname === "/terms" || pathname === "/privacy") {
     return null;
   }
 

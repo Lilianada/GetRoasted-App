@@ -128,7 +128,7 @@ const NavBar = () => {
                     </Link>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Link to="/battle/new" className="neo-button w-full text-center p-2 bg-primary">
+                    <Link to="/battles/new" className="neo-button w-full text-center p-2 bg-primary">
                       Start Battle
                     </Link>
                   </SheetClose>
