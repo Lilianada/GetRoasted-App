@@ -1,6 +1,4 @@
-
 import { useState } from "react";
-
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -21,7 +19,6 @@ const NewBattle = () => {
   const { playSound } = useSettings();
   const [isCreating, setIsCreating] = useState(false);
   
-  // Form state
   const [title, setTitle] = useState("");
   const [battleType, setBattleType] = useState<'public' | 'private'>('public');
   const [roundCount, setRoundCount] = useState("3");
@@ -29,7 +26,6 @@ const NewBattle = () => {
   const [allowSpectators, setAllowSpectators] = useState(true);
   const [quickMatch, setQuickMatch] = useState(false);
   
-  // For invitation link
   const [battleId, setBattleId] = useState<string | null>(null);
   const [showCopied, setShowCopied] = useState(false);
   
@@ -39,16 +35,12 @@ const NewBattle = () => {
       toast.error("You must be logged in to create battles");
       return;
     }
-    
     if (!title.trim()) {
       toast.error("Please provide a battle title");
       return;
     }
-    
     setIsCreating(true);
-    
     try {
-      // Create the battle
       const { data: battleData, error: battleError } = await supabase
         .from('battles')
         .insert({
@@ -56,30 +48,21 @@ const NewBattle = () => {
           type: battleType,
           round_count: parseInt(roundCount),
           time_per_turn: parseInt(timePerTurn),
-          allow_spectators: allowSpectators,
           created_by: user.id,
-          status: 'waiting' // Important: Use string, not variable reference
+          status: 'waiting'
         })
         .select()
         .single();
-        
       if (battleError) throw battleError;
-      
-      // Add the creator as a participant
       const { error: participantError } = await supabase
         .from('battle_participants')
         .insert({
           battle_id: battleData.id,
           user_id: user.id
         });
-        
       if (participantError) throw participantError;
-      
-      // Success!
       toast.success("Battle created successfully!");
       playSound('success');
-      
-      // If quick match, go to waiting room
       navigate(`/battle/waiting/${battleData.id}`);
     } catch (error) {
       console.error('Error creating battle:', error);
@@ -100,7 +83,6 @@ const NewBattle = () => {
     setShowCopied(true);
     toast.success("Invitation link copied!");
     
-    // Hide the "Copied" message after 2 seconds
     setTimeout(() => {
       setShowCopied(false);
     }, 2000);
@@ -108,9 +90,6 @@ const NewBattle = () => {
   
   return (
     <div className="min-h-screen bg-night flex flex-col">
-      
-      
-      
       <main className="container flex-1 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Create New Battle</h1>

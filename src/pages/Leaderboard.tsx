@@ -1,186 +1,72 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Award, Crown, Zap } from "lucide-react";
-import { Loader } from "@/components/ui/loader";
+import Loader from "@/components/ui/loader";
+import { Card, CardContent } from "@/components/ui/card";
 
-interface LeaderboardUser {
+type LeaderboardEntry = {
   id: string;
   username: string;
+  wins_count: number;
+  battles_count: number;
+  win_rate: number;
+  average_score: number;
   avatar_url?: string;
-  score: number;
-  wins: number;
-  badge?: string;
-  rank: number;
-}
+};
 
 const Leaderboard = () => {
-  const [period, setPeriod] = useState("week");
-  const [users, setUsers] = useState<LeaderboardUser[]>([]);
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch leaderboard data from Supabase
-    const fetchLeaderboardData = async () => {
-      setLoading(true);
-      
-      try {
-        // Query the leaderboard table
-        const { data, error } = await supabase
-          .from('leaderboard')
-          .select('id, username, avatar_url, average_score, wins_count, win_rate')
-          .order('wins_count', { ascending: false })
-          .limit(10);
-
-        if (error) {
-          throw error;
-        }
-
-        // Transform data to match our interface
-        const transformedData: LeaderboardUser[] = data.map((user, index) => ({
-          id: user.id,
-          username: user.username,
-          avatar_url: user.avatar_url || '',
-          score: Math.round(user.average_score * 100) || 0, // Convert to points
-          wins: user.wins_count || 0,
-          rank: index + 1,
-          // Assign badges based on rank or other criteria
-          badge: index === 0 ? 'legend' : (user.win_rate > 75 ? 'rising' : undefined)
-        }));
-
-        setUsers(transformedData);
-      } catch (error) {
-        console.error("Error fetching leaderboard data:", error);
-        
-        // Fallback to sample data if fetching fails
-        setUsers([
-          { id: "1", username: "FlameThrow3r", avatar_url: "", score: 1285, wins: 47, rank: 1, badge: "legend" },
-          { id: "2", username: "RoastMaster99", avatar_url: "", score: 1142, wins: 38, rank: 2 },
-          { id: "3", username: "WittyComeback", avatar_url: "", score: 1098, wins: 41, rank: 3 },
-          { id: "4", username: "BurnNotice", avatar_url: "", score: 945, wins: 32, rank: 4 },
-          { id: "5", username: "SavageModeOn", avatar_url: "", score: 892, wins: 29, rank: 5, badge: "rising" },
-          { id: "6", username: "QuipMaster", avatar_url: "", score: 867, wins: 27, rank: 6 },
-          { id: "7", username: "ComebackKid", avatar_url: "", score: 823, wins: 25, rank: 7 },
-          { id: "8", username: "VerbalAssassin", avatar_url: "", score: 791, wins: 23, rank: 8 },
-          { id: "9", username: "FlameSpit", avatar_url: "", score: 775, wins: 24, rank: 9 },
-          { id: "10", username: "RoastBeef", avatar_url: "", score: 742, wins: 20, rank: 10 },
-        ]);
-      } finally {
+    setLoading(true);
+    supabase
+      .from("leaderboard")
+      .select("*")
+      .order("win_rate", { ascending: false })
+      .then(({ data, error }) => {
         setLoading(false);
-      }
-    };
-
-    fetchLeaderboardData();
-  }, [period]);
-
-  const getBadgeIcon = (badge?: string) => {
-    switch (badge) {
-      case "legend":
-        return <Crown className="h-4 w-4 text-amber-400" />;
-      case "rising":
-        return <Zap className="h-4 w-4 text-blue-400" />;
-      default:
-        return null;
-    }
-  };
-
-  const getRankStyle = (rank: number) => {
-    if (rank === 1) return "bg-primary";
-    if (rank === 2) return "bg-secondary/70";
-    if (rank === 3) return "bg-blue/70";
-    return "bg-night-700";
-  };
+        if (error) {
+          setEntries([]);
+        } else if (data) {
+          setEntries(data as LeaderboardEntry[]);
+        }
+      });
+  }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="container flex-1 py-12">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <div className="p-2 bg-primary border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                <Award className="h-8 w-8 text-black" />
-              </div>
-              <h1 className="text-3xl font-black">Leaderboard</h1>
-            </div>
-            
-            <Tabs defaultValue={period} onValueChange={setPeriod} className="w-auto">
-              <TabsList className="bg-secondary border-2 border-black p-1">
-                <TabsTrigger value="today" className="data-[state=active]:bg-primary data-[state=active]:text-black">
-                  Today
-                </TabsTrigger>
-                <TabsTrigger value="week" className="data-[state=active]:bg-primary data-[state=active]:text-black">
-                  This Week
-                </TabsTrigger>
-                <TabsTrigger value="alltime" className="data-[state=active]:bg-primary data-[state=active]:text-black">
-                  All Time
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-          
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <Loader size="large" variant="colorful" className="text-primary" />
-              <p className="mt-4 text-muted-foreground">Loading leaderboard...</p>
-            </div>
-          ) : (
-            <div className="border-2 border-black bg-night-800">
-              <div className="grid grid-cols-12 py-4 px-6 border-b-2 border-black text-sm font-bold text-white">
-                <div className="col-span-1">Rank</div>
-                <div className="col-span-7">User</div>
-                <div className="col-span-2 text-right">Score</div>
-                <div className="col-span-2 text-right">Wins</div>
-              </div>
-              
-              {users.map((user) => (
-                <div 
-                  key={user.id}
-                  className="grid grid-cols-12 py-3 px-6 items-center border-b-2 border-black hover:bg-night-700/50 transition-colors"
-                >
-                  <div className="col-span-1">
-                    <div className={`flex items-center justify-center w-8 h-8 font-bold border-2 border-black ${getRankStyle(user.rank)}`}>
-                      {user.rank}
-                    </div>
+    <div className="neo-container py-8">
+      <h1 className="text-3xl font-black mb-6 text-night-900">🔥 Leaderboard</h1>
+      {loading ? (
+        <div className="flex justify-center items-center min-h-[200px]">
+          <Loader size="large" variant="colorful" />
+        </div>
+      ) : (
+        <div className="neo-grid">
+          {entries.map(entry => (
+            <Card key={entry.id} className="bg-white border-2 border-black text-night-900 shadow-neo">
+              <CardContent className="p-4 flex items-center gap-4">
+                <img
+                  src={entry.avatar_url || "/placeholder.svg"}
+                  className="w-12 h-12 rounded-full border-2 border-yellow object-cover"
+                  alt={entry.username}
+                />
+                <div>
+                  <div className="font-bold text-lg">{entry.username}</div>
+                  <div className="text-xs text-night-300">
+                    Wins: <span className="font-semibold">{entry.wins_count}</span> · 
+                    Battles: <span className="font-semibold">{entry.battles_count}</span> · 
+                    Win Rate: <span className="font-semibold">{Number(entry.win_rate * 100).toFixed(1)}%</span>
                   </div>
-                  
-                  <div className="col-span-7 flex items-center gap-3">
-                    <Avatar className="h-10 w-10 border-2 border-black bg-secondary">
-                      <AvatarImage src={user.avatar_url} alt={user.username} />
-                      <AvatarFallback className="bg-secondary text-black">
-                        {user.username.substring(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-white">{user.username}</span>
-                        {user.badge && getBadgeIcon(user.badge)}
-                      </div>
-                      <div className="text-xs text-white/70">
-                        {user.wins} battles won
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="col-span-2 font-mono font-bold text-right text-white">
-                    {user.score.toLocaleString()}
-                  </div>
-                  
-                  <div className="col-span-2 font-mono text-right text-white">
-                    {user.wins}
+                  <div className="text-xs text-night-400">
+                    Avg Score: <span className="font-semibold">{Number(entry.average_score).toFixed(2)}</span>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-          
-          <div className="mt-8 text-center text-sm text-white/70">
-            <p>Leaderboards reset weekly. Earn points by winning battles and getting high ratings.</p>
-          </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-      </main>
+      )}
     </div>
   );
 };
