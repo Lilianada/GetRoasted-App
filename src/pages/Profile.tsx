@@ -148,79 +148,122 @@ const Profile = () => {
   }, [user, profile]);
 
 
+  // Optimistic profile editing (keep for instant UI feedback)
+  const [optimisticProfile, setOptimisticProfile] = useState<any>(null);
+  const [optimisticError, setOptimisticError] = useState<string | null>(null);
+
+// Centralized profile update handler (optimistic UI)
+const handleProfileUpdate = async (updates: any) => {
+    setOptimisticError(null);
+    const prevProfile = { ...profile };
+    setOptimisticProfile({ ...profile, ...updates });
+    setProfile((p: any) => ({ ...p, ...updates }));
+    try {
+      const { error } = await supabase.from('profiles').update(updates).eq('id', user.id);
+      if (error) throw error;
+      setOptimisticProfile(null);
+      toast.success('Profile updated successfully');
+    } catch (err: any) {
+      setOptimisticProfile(null);
+      setProfile(prevProfile);
+      setOptimisticError(err?.message || 'Failed to update profile');
+      toast.error('Failed to update profile: ' + (err?.message || 'Unknown error'));
+    }
+    setIsSaving(false);
+  };
+
+  // Avatar upload callback (update avatar in parent state)
+  const handleAvatarUpdated = (avatar_url: string) => {
+    setProfile((prev: any) => ({ ...prev, avatar_url }));
+  };
+
+  // Validation helpers
+  const validateProfile = (fields: any) => {
+    if (!fields.username || fields.username.length < 3) return 'Username must be at least 3 characters.';
+    if (!fields.email || !/^[^@]+@[^@]+\.[^@]+$/.test(fields.email)) return 'Please enter a valid email.';
+    if (fields.bio && fields.bio.length > 160) return 'Bio must be less than 160 characters.';
+    return null;
+  };
+
+  const currentProfile = optimisticProfile || profile;
+
   return (
     <div className="neo-container py-8 animate-fade-in">
       <h1 className="text-3xl font-black mb-8 text-white">Your Profile</h1>
-
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          {/* Profile Card */}
           <ProfileCard
             loading={loading}
-            avatarUrl={profile?.avatar_url}
-            username={profile?.username || user?.email?.split("@")[0] || "User"}
-            bio={profile?.bio}
-            email={user?.email}
+            avatarUrl={currentProfile?.avatar_url}
+            username={currentProfile?.username || user?.email?.split("@")?.[0] || "User"}
+            bio={currentProfile?.bio}
+            email={currentProfile?.email || user?.email}
             stats={{
               battles: playerStats.battles,
               wins: playerStats.wins,
               winRate: playerStats.winRate,
               longestStreak: playerStats.longestStreak,
             }}
+            onAvatarUpdated={handleAvatarUpdated}
           />
-          {/* Edit Profile Button */}
-          <div className="flex items-center gap-2 w-full justify-center">
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => setIsEditing(!isEditing)}
-              className="border-2 border-black"
-            >
-              <User className="mr-2 h-4 w-4" />
-              Edit Profile
-            </Button>
-            </div>
-
-          {/* Leaderboard Position Card */}
           <LeaderboardPosition
             loading={statsLoading}
             position={leaderboardStats.position}
             totalPlayers={leaderboardStats.totalPlayers}
             topPercentage={leaderboardStats.topPercentage}
           />
-
-          </div>
-
-          <div className="lg:col-span-2 space-y-6">
-            <Tabs defaultValue="stats" className="w-full">
-              <TabsList className="w-full bg-night-800 border-2 border-black mb-6">
-                <TabsTrigger value="activity" className="flex-1 data-[state=active]:bg-primary data-[state=active]:text-black">
-                  Activity
-                </TabsTrigger>
-                <TabsTrigger value="achievements" className="flex-1 data-[state=active]:bg-primary data-[state=active]:text-black">
-                  Achievements
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="activity" className="space-y-6 mt-0 animate-fade-in">
-                <RecentActivity
-                  loading={statsLoading}
-                  activities={recentActivities || []}
-                />
-              </TabsContent>
-
-              <TabsContent value="achievements" className="mt-0 animate-fade-in">
-                <Achievements
-                  loading={statsLoading}
-                  achievements={achievements || []}
-                />
-              </TabsContent>
-            </Tabs>
-          </div>
         </div>
-
+        <div className="lg:col-span-2 space-y-6">
+          <Tabs defaultValue="profile" className="w-full">
+            <TabsList className="w-full bg-night-800 border-2 border-black mb-6">
+              <TabsTrigger value="profile" className="flex-1 data-[state=active]:bg-primary data-[state=active]:text-black text-night-500">
+                Profile
+              </TabsTrigger>
+              <TabsTrigger value="activity" className="flex-1 data-[state=active]:bg-primary data-[state=active]:text-black text-night-500">
+                Activity
+              </TabsTrigger>
+              <TabsTrigger value="achievements" className="flex-1 data-[state=active]:bg-primary data-[state=active]:text-black text-night-500">
+                Achievements
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="profile" className="space-y-6 mt-0 animate-fade-in">
+              <ProfileEditor
+                avatarUrl={currentProfile?.avatar_url}
+                username={currentProfile?.username || user?.email?.split("@")?.[0] || "User"}
+                bio={currentProfile?.bio}
+                email={currentProfile?.email || user?.email}
+                loading={loading}
+                isSaving={isSaving}
+                error={optimisticError}
+                onProfileUpdated={async (updates) => {
+                  const validationError = validateProfile(updates);
+                  if (validationError) {
+                    setOptimisticError(validationError);
+                    toast.error(validationError);
+                    return;
+                  }
+                  setIsSaving(true);
+                  await handleProfileUpdate(updates);
+                }}
+              />
+            </TabsContent>
+            <TabsContent value="activity" className="space-y-6 mt-0 animate-fade-in">
+              <RecentActivity
+                loading={statsLoading}
+                activities={recentActivities || []}
+              />
+            </TabsContent>
+            <TabsContent value="achievements" className="mt-0 animate-fade-in">
+              <Achievements
+                loading={statsLoading}
+                achievements={achievements || []}
+              />
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
-      );
+    </div>
+  );
 };
 
-      export default Profile;
+export default Profile;

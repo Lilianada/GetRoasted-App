@@ -14,7 +14,7 @@ interface LeaderboardPositionProps {
 const LeaderboardPosition = ({ loading, position, totalPlayers, topPercentage }: LeaderboardPositionProps) => {
   if (loading) {
     return (
-      <Card className="p-6 bg-blue border-2 border-black text-black shadow-neo relative overflow-hidden">
+      <Card className="px-4 sm:px-8 py-6 bg-blue border-2 border-black text-black shadow-neo relative overflow-hidden">
         <div className="flex justify-center p-4">
           <Loader size="small" variant="colorful" />
         </div>

@@ -18,6 +18,7 @@ interface ProfileCardProps {
     winRate?: number;
     longestStreak?: number;
   };
+  onAvatarUpdated?: (avatar_url: string) => void;
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({
@@ -26,7 +27,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   username,
   bio,
   email,
-  stats = { battles: 0, wins: 0 }
+  stats = { battles: 0, wins: 0 },
+  onAvatarUpdated
 }) => {
   const { user } = useAuthContext();
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -92,7 +94,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         console.error('Profile update error:', profileUpdateError);
         return;
       }
-
+      if (onAvatarUpdated) onAvatarUpdated(data.publicUrl);
       toast.success('Avatar uploaded successfully!');
     } catch (error) {
       toast.error('An unexpected error occurred');
@@ -107,7 +109,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 
 
   return (
-    <div className="bg-secondary border-2 border-black shadow-neo rounded-xl px-8 py-6 flex flex-col items-center relative overflow-hidden transition-all duration-300 hover:translate-y-[-4px]">
+    <div className="bg-secondary border-2 border-black shadow-neo rounded-xl px-4 sm:px-8 py-6 flex flex-col items-center relative overflow-hidden transition-all duration-300 hover:translate-y-[-4px]">
       {loading ? (
         <Loader size="large" variant="colorful" className="my-8" />
       ) : (
@@ -122,6 +124,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           <Avatar
             className="h-24 w-24 border-2 border-black cursor-pointer rounded-full border-black border-4  object-cover transition-transform duration-300 hover:scale-110"
             onClick={() => fileInputRef.current?.click()}
+            aria-label="Upload profile avatar"
+            role="button"
+            tabIndex={0}
+            onKeyPress={e => { if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click(); }}
           >
             {uploading ? (
               <div className="h-full w-full flex items-center justify-center bg-night-800">
@@ -130,7 +136,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             ) : (
               <>
                 <AvatarImage
-                  src={avatarPreview || undefined}
+                  src={uploading && avatarPreview ? avatarPreview : avatarUrl || undefined}
                   alt="Profile avatar"
                 />
                 <AvatarFallback className="bg-primary text-black font-bold">
@@ -139,7 +145,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               </>
             )}
           </Avatar>
-          <div className="text-2xl font-black text-black mb-2">{username}</div>
+          <div className="text-2xl font-black text-black mb-2 capitalize">{username}</div>
           <div className="text-base text-night-900 font-medium text-center mb-2 max-w-[90%]">{email}</div>
           {bio && (
             <div className="text-base text-night-900 font-medium text-center mb-2 max-w-[90%]">{bio}</div>
@@ -149,7 +155,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           )}
 
           <div className="mt-4 w-full pt-4 border-t border-night-700">
-            <div className="flex justify-center gap-6">
+            <div className="flex justify-center gap-3 sm:gap-6">
               <div className="text-center">
                 <div className="text-xl font-bold text-black">{stats.battles || 0}</div>
                 <div className="text-xs text-night-400">Battles</div>
