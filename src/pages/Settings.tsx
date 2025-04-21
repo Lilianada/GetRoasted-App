@@ -39,13 +39,11 @@ import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/context/AuthContext";
 
+import { NotificationSettings, AccountSettings, AppearanceSettings } from "@/components/SettingsSections";
+
 const Settings = () => {
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [inAppNotifications, setInAppNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(true);
-  const [soundEffects, setSoundEffects] = useState(true);
-  const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  // State is now managed in respective section components
+
   
   const [profileData, setProfileData] = useState({
     displayName: "",
@@ -126,6 +124,9 @@ const Settings = () => {
     }
     
     try {
+      const response = await fetch('/api/delete-account', { method: 'POST', credentials: 'include' });
+      if (!response.ok) throw new Error('Failed to delete account securely');
+      // Log out user, redirect, etc.
       // In a real implementation, you would call a secure server function to delete the account
       if (user) {
         await signOut();

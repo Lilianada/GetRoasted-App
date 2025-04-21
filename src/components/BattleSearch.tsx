@@ -86,7 +86,7 @@ const BattleSearch = ({ onSearch }: BattleSearchProps) => {
   
   return (
     <div className="relative">
-      <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+      <Search className="absolute left-3 top-2.5 h-4 w-4 text-flame-500" />
       <Input
         placeholder="Search battles..."
         value={searchTerm}

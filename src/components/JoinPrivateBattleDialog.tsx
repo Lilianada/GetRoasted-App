@@ -67,7 +67,7 @@ const JoinPrivateBattleDialog = ({ children }: JoinPrivateBattleDialogProps) => 
   ) : (
     <DialogTrigger asChild>
       <Button variant="outline" className="gap-2 border-night-700">
-        <LinkIcon className="h-4 w-4" />
+        <LinkIcon className="h-4 w-4 text-flame-500" />
         Join Private
       </Button>
     </DialogTrigger>

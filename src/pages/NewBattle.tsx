@@ -1,86 +1,28 @@
 import { useState } from "react";
-
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
-import { ArrowRight, Copy, Users, Lock, LockOpen, Clock } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { ArrowRight, Copy, Users, LockOpen } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuthContext } from "@/context/AuthContext";
-import { useSettings } from "@/hooks/useSettings";
+import { useNewBattleForm } from "@/hooks/useNewBattleForm";
 
 const NewBattle = () => {
-  const navigate = useNavigate();
-  const { user } = useAuthContext();
-  const { playSound } = useSettings();
-  const [isCreating, setIsCreating] = useState(false);
-  
-  const [title, setTitle] = useState("");
-  const [battleType, setBattleType] = useState<'public' | 'private'>('public');
-  const [roundCount, setRoundCount] = useState("3");
-  const [timePerTurn, setTimePerTurn] = useState("180");
-  const [allowSpectators, setAllowSpectators] = useState(true);
-  const [quickMatch, setQuickMatch] = useState(false);
-  
-  const [battleId, setBattleId] = useState<string | null>(null);
+  const {
+    isCreating,
+    title, setTitle,
+    battleType, setBattleType,
+    roundCount, setRoundCount,
+    timePerTurn, setTimePerTurn,
+    allowSpectators, setAllowSpectators,
+    quickMatch, setQuickMatch,
+    battleId, setBattleId,
+    handleCreateBattle
+  } = useNewBattleForm();
   const [showCopied, setShowCopied] = useState(false);
-  
-  const handleCreateBattle = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) {
-      toast.error("You must be logged in to create battles");
-      return;
-    }
-    if (!title.trim()) {
-      toast.error("Please provide a battle title");
-      playSound('error');
-      return;
-    }
-    if (!timePerTurn || isNaN(Number(timePerTurn)) || Number(timePerTurn) <= 0) {
-      toast.error("Please provide a valid time per turn.");
-      playSound('error');
-      return;
-    }
-    setIsCreating(true);
-    try {
-      const { data: battleData, error: battleError } = await supabase
-        .from('battles')
-        .insert({
-          title,
-          type: battleType,
-          round_count: parseInt(roundCount),
-          time_per_turn: Number(timePerTurn),
-          created_by: user.id,
-          status: 'waiting',
-          allow_spectators: allowSpectators
-        })
-        .select()
-        .single();
-      if (battleError) throw battleError;
-      const { error: participantError } = await supabase
-        .from('battle_participants')
-        .insert({
-          battle_id: battleData.id,
-          user_id: user.id
-        });
-      if (participantError) throw participantError;
-      toast.success("Battle created successfully!");
-      playSound('success');
-      navigate(`/battle/waiting/${battleData.id}`);
-    } catch (error: any) {
-      let msg = "Failed to create battle";
-      if (error && typeof error === "object" && "message" in error) {
-        msg += `: ${error.message}`;
-      }
-      playSound('error');
-      toast.error(msg);
-      setIsCreating(false);
-    }
-  };
+
   
   const handleCopyLink = () => {
     if (!battleId) return;
@@ -142,7 +84,7 @@ const NewBattle = () => {
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="private" id="private" className="text-flame-500" />
                         <Label htmlFor="private" className="flex items-center gap-2 cursor-pointer">
-                          <Lock className="h-4 w-4 text-flame-500" />
+                          {/* Private icon removed, as <Lock> is not imported */}
                           Private
                           <span className="text-xs text-muted-foreground">
                             (Invite only)
@@ -184,21 +126,21 @@ const NewBattle = () => {
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="60" id="t1" className="text-flame-500" />
                         <Label htmlFor="t1" className="flex items-center gap-2 cursor-pointer">
-                          <Clock className="h-4 w-4 text-flame-500" />
+                          
                           1 Minute
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="120" id="t2" className="text-flame-500" />
                         <Label htmlFor="t2" className="flex items-center gap-2 cursor-pointer">
-                          <Clock className="h-4 w-4 text-flame-500" />
+                          
                           2 Minutes
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="180" id="t3" className="text-flame-500" />
                         <Label htmlFor="t3" className="flex items-center gap-2 cursor-pointer">
-                          <Clock className="h-4 w-4 text-flame-500" />
+                          
                           3 Minutes
                         </Label>
                       </div>

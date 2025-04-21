@@ -23,11 +23,21 @@ const fetchLeaderboard = async () => {
   return data as LeaderboardEntry[];
 };
 
+import { useMemo, useState } from "react";
+
+const PAGE_SIZE = 20;
+
 const Leaderboard = () => {
   const { data: entries, isLoading, isError, error } = useQuery({
     queryKey: ["leaderboard"],
     queryFn: fetchLeaderboard,
   });
+
+  const [page, setPage] = useState(0);
+  const paginatedEntries = useMemo(() => {
+    if (!entries) return [];
+    return entries.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  }, [entries, page]);
 
   return (
     <div className="neo-container py-8">
@@ -69,7 +79,7 @@ const Leaderboard = () => {
                   <div className="text-xs text-night-300">
                     Wins: <span className="font-semibold">{entry.wins_count}</span> · 
                     Battles: <span className="font-semibold">{entry.battles_count}</span> · 
-                    Win Rate: <span className="font-semibold">{Number(entry.win_rate * 100).toFixed(1)}%</span>
+                    Win Rate: <span className="font-semibold">{entry.win_rate != null ? Number(entry.win_rate * 100).toFixed(1) + '%' : 'N/A'}</span>
                   </div>
                   <div className="text-xs text-night-400">
                     Avg Score: <span className="font-semibold">{Number(entry.average_score).toFixed(2)}</span>

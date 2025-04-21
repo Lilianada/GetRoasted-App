@@ -4,8 +4,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LoginForm from "@/components/auth/LoginForm";
 import SignupForm from "@/components/auth/SignupForm";
 
+import { useForm } from "react-hook-form";
+
 const Signup = () => {
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
+
+  const handleSignup = async (data: any) => {
+    // handle signup logic here
+  }
+
   return (
+
     <div className="flex flex-col items-center justify-center bg-night p-4">
       <div className="w-full max-w-md">
         

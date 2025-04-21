@@ -11,18 +11,19 @@ import { toast } from "@/components/ui/sonner";
 import { Edit, Check, User, Settings, Shield } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import ProfileStats from "@/components/profile/ProfileStats";
 import RecentActivity from "@/components/profile/RecentActivity";
 import Achievements from "@/components/profile/Achievements";
 import LeaderboardPosition from "@/components/profile/LeaderboardPosition";
-import FancyDialog from "@/components/ui/FancyDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import { usePlayerStats } from "@/hooks/usePlayerStats";
 
 const Profile = () => {
   const { user } = useAuthContext();
   const [profile, setProfile] = useState<any>(null);
   // Optimistic profile state
   const [optimisticProfile, setOptimisticProfile] = useState<any>(null);
+  const { stats, statsLoading, statsError } = usePlayerStats(user?.id);
 
   // React Query: fetch profile
   const { data: profileData, isLoading: profileLoading, error: profileError } = useQuery({
@@ -50,8 +51,6 @@ const Profile = () => {
       setBio((profileData as any).bio || "");
     }
   }, [profileData]);
-  const [statsLoading, setStatsLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [bio, setBio] = useState("");
 
@@ -83,7 +82,7 @@ const Profile = () => {
 
   useEffect(() => {
     if (!user) return;
-    setStatsLoading(true);
+
 
     // Fetch player stats
     const fetchPlayerStats = async () => {
@@ -147,7 +146,7 @@ const Profile = () => {
         console.error("Error fetching player stats:", error);
         toast.error("Could not load player statistics");
       } finally {
-        setStatsLoading(false);
+        // No setStatsLoading -- removed to fix undefined error
       }
     };
 
@@ -195,22 +194,25 @@ const handleProfileUpdate = async (updates: any) => {
 
   
 
+  if (statsError) {
+    return <div className="text-red-500">Could not load player statistics: {statsError.message}</div>;
+  }
   return (
     <div className="neo-container py-8 animate-fade-in">
       <h1 className="text-3xl font-black mb-8 text-white">Your Profile</h1>
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <div className="lg:col-span-2 space-y-6">
           <ProfileCard
-            loading={loading}
+            loading={profileLoading}
             avatarUrl={currentProfile?.avatar_url}
-            username={currentProfile?.username || user?.email?.split("@")?.[0] || "User"}
+            username={currentProfile?.username ?? "Unknown User"}
             bio={currentProfile?.bio}
             email={currentProfile?.email || user?.email}
             stats={{
-              battles: playerStats.battles,
-              wins: playerStats.wins,
-              winRate: playerStats.winRate,
-              longestStreak: playerStats.longestStreak,
+              battles: playerStats?.battles,
+              wins: playerStats?.wins,
+              winRate: playerStats?.winRate,
+              longestStreak: playerStats?.longestStreak,
             }}
             onAvatarUpdated={handleAvatarUpdated}
           />
