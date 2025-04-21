@@ -44,7 +44,14 @@ import { NotificationSettings, AccountSettings, AppearanceSettings } from "@/com
 const Settings = () => {
   // State is now managed in respective section components
 
-  
+  // Add missing notificationsEnabled state
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [inAppNotifications, setInAppNotifications] = useState(true);
+
+  const [soundEffects, setSoundEffects] = useState(true);
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
+
   const [profileData, setProfileData] = useState({
     displayName: "",
     email: "",
@@ -224,20 +231,6 @@ const Settings = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-base">Dark Mode</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Toggle between dark and light theme
-                    </p>
-                  </div>
-                  <Switch 
-                    checked={darkMode} 
-                    onCheckedChange={setDarkMode} 
-                    className="data-[state=checked]:bg-primary"
-                  />
-                </div>
-                
                 <Separator className="bg-night-700" />
                 
                 <div className="flex items-center justify-between">
