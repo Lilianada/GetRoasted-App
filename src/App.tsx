@@ -35,9 +35,9 @@ const queryClient = new QueryClient();
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuthContext();
 
-  if (loading) {
-    return <div className="flex h-screen items-center justify-center bg-night">Loading...</div>;
-  }
+  // if (loading) {
+  //   return <div className="flex h-screen items-center justify-center bg-night">Loading...</div>;
+  // }
 
   if (!user) {
     return <Navigate to="/signup" replace />;

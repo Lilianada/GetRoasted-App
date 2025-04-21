@@ -48,7 +48,7 @@ const Home = () => {
                 <Flame className="h-20 w-20 text-flame-600" />
               </div>
               
-              <h1 className="text-4xl font-bold tracking-tight lg:text-5xl max-w-3xl">
+              <h1 className="text-4xl font-bold tracking-tight lg:text-5xl max-w-2xl">
                 Epic <span className="gradient-text">Roast Battles</span> in Real-Time
               </h1>
               
