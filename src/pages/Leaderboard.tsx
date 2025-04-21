@@ -1,15 +1,15 @@
 
 import { useEffect, useState } from "react";
-
-
+import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Award, Crown, Flame, Zap } from "lucide-react";
+import { Award, Crown, Zap } from "lucide-react";
+import { Loader } from "@/components/ui/loader";
 
 interface LeaderboardUser {
   id: string;
   username: string;
-  avatar: string;
+  avatar_url?: string;
   score: number;
   wins: number;
   badge?: string;
@@ -22,22 +22,57 @@ const Leaderboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setUsers([
-        { id: "1", username: "FlameThrow3r", avatar: "", score: 1285, wins: 47, rank: 1, badge: "legend" },
-        { id: "2", username: "RoastMaster99", avatar: "", score: 1142, wins: 38, rank: 2 },
-        { id: "3", username: "WittyComeback", avatar: "", score: 1098, wins: 41, rank: 3 },
-        { id: "4", username: "BurnNotice", avatar: "", score: 945, wins: 32, rank: 4 },
-        { id: "5", username: "SavageModeOn", avatar: "", score: 892, wins: 29, rank: 5, badge: "rising" },
-        { id: "6", username: "QuipMaster", avatar: "", score: 867, wins: 27, rank: 6 },
-        { id: "7", username: "ComebackKid", avatar: "", score: 823, wins: 25, rank: 7 },
-        { id: "8", username: "VerbalAssassin", avatar: "", score: 791, wins: 23, rank: 8 },
-        { id: "9", username: "FlameSpit", avatar: "", score: 775, wins: 24, rank: 9 },
-        { id: "10", username: "RoastBeef", avatar: "", score: 742, wins: 20, rank: 10 },
-      ]);
-      setLoading(false);
-    }, 500);
+    // Fetch leaderboard data from Supabase
+    const fetchLeaderboardData = async () => {
+      setLoading(true);
+      
+      try {
+        // Query the leaderboard table
+        const { data, error } = await supabase
+          .from('leaderboard')
+          .select('id, username, avatar_url, average_score, wins_count, win_rate')
+          .order('wins_count', { ascending: false })
+          .limit(10);
+
+        if (error) {
+          throw error;
+        }
+
+        // Transform data to match our interface
+        const transformedData: LeaderboardUser[] = data.map((user, index) => ({
+          id: user.id,
+          username: user.username,
+          avatar_url: user.avatar_url || '',
+          score: Math.round(user.average_score * 100) || 0, // Convert to points
+          wins: user.wins_count || 0,
+          rank: index + 1,
+          // Assign badges based on rank or other criteria
+          badge: index === 0 ? 'legend' : (user.win_rate > 75 ? 'rising' : undefined)
+        }));
+
+        setUsers(transformedData);
+      } catch (error) {
+        console.error("Error fetching leaderboard data:", error);
+        
+        // Fallback to sample data if fetching fails
+        setUsers([
+          { id: "1", username: "FlameThrow3r", avatar_url: "", score: 1285, wins: 47, rank: 1, badge: "legend" },
+          { id: "2", username: "RoastMaster99", avatar_url: "", score: 1142, wins: 38, rank: 2 },
+          { id: "3", username: "WittyComeback", avatar_url: "", score: 1098, wins: 41, rank: 3 },
+          { id: "4", username: "BurnNotice", avatar_url: "", score: 945, wins: 32, rank: 4 },
+          { id: "5", username: "SavageModeOn", avatar_url: "", score: 892, wins: 29, rank: 5, badge: "rising" },
+          { id: "6", username: "QuipMaster", avatar_url: "", score: 867, wins: 27, rank: 6 },
+          { id: "7", username: "ComebackKid", avatar_url: "", score: 823, wins: 25, rank: 7 },
+          { id: "8", username: "VerbalAssassin", avatar_url: "", score: 791, wins: 23, rank: 8 },
+          { id: "9", username: "FlameSpit", avatar_url: "", score: 775, wins: 24, rank: 9 },
+          { id: "10", username: "RoastBeef", avatar_url: "", score: 742, wins: 20, rank: 10 },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaderboardData();
   }, [period]);
 
   const getBadgeIcon = (badge?: string) => {
@@ -53,14 +88,15 @@ const Leaderboard = () => {
 
   const getRankStyle = (rank: number) => {
     if (rank === 1) return "bg-primary";
+    if (rank === 2) return "bg-secondary/70";
+    if (rank === 3) return "bg-blue/70";
+    return "bg-night-700";
   };
 
   return (
     <div className="min-h-screen flex flex-col">
-      
       <main className="container flex-1 py-12">
-        
-      <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
               <div className="p-2 bg-primary border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
@@ -85,10 +121,9 @@ const Leaderboard = () => {
           </div>
           
           {loading ? (
-            <div className="flex justify-center py-12">
-              <div className="relative h-12 w-12">
-                <Flame className="h-12 w-12 text-[#F8C537] animate-flame-pulse" />
-              </div>
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader size="large" variant="colorful" className="text-primary" />
+              <p className="mt-4 text-muted-foreground">Loading leaderboard...</p>
             </div>
           ) : (
             <div className="border-2 border-black bg-night-800">
@@ -111,9 +146,12 @@ const Leaderboard = () => {
                   </div>
                   
                   <div className="col-span-7 flex items-center gap-3">
-                    <div className="h-10 w-10 border-2 border-black bg-secondary flex items-center justify-center font-bold">
-                      {user.username.substring(0, 2).toUpperCase()}
-                    </div>
+                    <Avatar className="h-10 w-10 border-2 border-black bg-secondary">
+                      <AvatarImage src={user.avatar_url} alt={user.username} />
+                      <AvatarFallback className="bg-secondary text-black">
+                        {user.username.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
                     
                     <div className="flex flex-col">
                       <div className="flex items-center gap-1.5">

@@ -5,6 +5,7 @@ import { useAuthContext } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Loader } from '@/components/ui/loader';
 
 interface ProfileEditorProps {
   // Add proper props interface
@@ -13,6 +14,7 @@ interface ProfileEditorProps {
 const ProfileEditor = () => {
   const { user } = useAuthContext();
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,6 +36,8 @@ const ProfileEditor = () => {
     }
 
     try {
+      setUploading(true);
+      
       // Create a preview of the image
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -83,6 +87,8 @@ const ProfileEditor = () => {
     } catch (error) {
       toast.error('An unexpected error occurred');
       console.error('Unexpected error:', error);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -104,20 +110,36 @@ const ProfileEditor = () => {
         className="h-24 w-24 border-2 border-black cursor-pointer hover:opacity-80 transition-opacity"
         onClick={() => fileInputRef.current?.click()}
       >
-        <AvatarImage 
-          src={avatarPreview || undefined} 
-          alt="Profile avatar" 
-        />
-        <AvatarFallback className="bg-primary text-black font-bold">
-          {initials}
-        </AvatarFallback>
+        {uploading ? (
+          <div className="h-full w-full flex items-center justify-center bg-night-800">
+            <Loader size="small" variant="colorful" />
+          </div>
+        ) : (
+          <>
+            <AvatarImage 
+              src={avatarPreview || undefined} 
+              alt="Profile avatar" 
+            />
+            <AvatarFallback className="bg-primary text-black font-bold">
+              {initials}
+            </AvatarFallback>
+          </>
+        )}
       </Avatar>
       
       <Button 
         variant="outline" 
         onClick={() => fileInputRef.current?.click()}
+        disabled={uploading}
       >
-        Change Avatar
+        {uploading ? (
+          <>
+            <Loader size="small" className="mr-2" />
+            Uploading...
+          </>
+        ) : (
+          'Change Avatar'
+        )}
       </Button>
     </div>
   );
