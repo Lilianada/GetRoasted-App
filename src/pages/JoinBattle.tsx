@@ -10,6 +10,7 @@ import { toast } from "@/components/ui/sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/context/AuthContext";
+import Loader from "@/components/ui/loader";
 
 const JoinBattle = () => {
   const { battleId } = useParams<{ battleId: string }>();
@@ -35,10 +36,10 @@ const JoinBattle = () => {
         
         // If battle is not in waiting status, redirect appropriately
         if (battle.status === 'active') {
-          navigate(`/battle/${battleId}`);
+          navigate(`/battles/${battleId}`);
           return;
         } else if (battle.status === 'completed') {
-          navigate(`/battle/results/${battleId}`);
+          navigate(`/battles/results/${battleId}`);
           return;
         }
         
@@ -67,7 +68,7 @@ const JoinBattle = () => {
             .maybeSingle();
             
           if (existingParticipant) {
-            navigate(`/battle/waiting/${battleId}`);
+            navigate(`/battles/waiting/${battleId}`);
             return;
           }
         }
@@ -103,7 +104,7 @@ const JoinBattle = () => {
       if (error) throw error;
       
       toast.success("Joined as spectator");
-      navigate(`/battle/${battleId}`);
+      navigate(`/battles/${battleId}`);
     } catch (error) {
       console.error('Error joining as spectator:', error);
       toast.error("Failed to join as spectator");
@@ -151,10 +152,10 @@ const JoinBattle = () => {
           .eq('id', battleId);
           
         toast.success("Battle joined! Get ready to roast!");
-        navigate(`/battle/live/${battleId}`);
+        navigate(`/battles/live/${battleId}`);
       } else {
         toast.success("Battle joined! Waiting for an opponent.");
-        navigate(`/battle/waiting/${battleId}`);
+        navigate(`/battles/waiting/${battleId}`);
       }
     } catch (error) {
       console.error('Error joining battle:', error);
@@ -176,7 +177,7 @@ const JoinBattle = () => {
             <CardContent className="text-center">
               <p className="mb-6">You need to sign in or create an account to join this battle.</p>
               <div className="flex gap-4 justify-center">
-                <Button onClick={() => navigate('/signup', { state: { returnTo: `/battle/join/${battleId}` } })}>
+                <Button onClick={() => navigate('/signup', { state: { returnTo: `/battles/join/${battleId}` } })}>
                   Sign In / Sign Up
                 </Button>
               </div>
@@ -192,7 +193,7 @@ const JoinBattle = () => {
       <div className="min-h-screen bg-night flex flex-col">
         
         <div className="container flex-1 flex items-center justify-center">
-          <div className="text-center">Loading battle information...</div>
+          <Loader size="large" variant="colorful" />
         </div>
       </div>
     );

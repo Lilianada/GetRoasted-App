@@ -60,7 +60,7 @@ const Home = () => {
               <div className="flex flex-wrap justify-center gap-4">
                 {user ? (
                   <Button asChild size="lg" className="gap-2 bg-yellow hover:opacity-90">
-                    <Link to="/battle/new">
+                    <Link to="/battles/new">
                       Start a Battle
                       <ArrowRight className="h-4 w-4" />
                     </Link>
@@ -153,7 +153,7 @@ const Home = () => {
                 <div className="col-span-3 text-center py-8">
                   <p className="text-muted-foreground">No active battles at the moment. Be the first to start one!</p>
                   <Button asChild className="mt-4 bg-yellow hover:opacity-90">
-                    <Link to={user ? "/battle/new" : "/signup"}>Start a Battle</Link>
+                    <Link to={user ? "/battles/new" : "/signup"}>Start a Battle</Link>
                   </Button>
                 </div>
               )}
@@ -173,7 +173,7 @@ const Home = () => {
               <div className="flex flex-wrap justify-center gap-4">
                 {user ? (
                   <Button asChild size="lg" className="gap-2 bg-yellow hover:opacity-90">
-                    <Link to="/battle/new">
+                    <Link to="/battles/new">
                       <Sparkles className="h-4 w-4" />
                       Start Battle
                     </Link>

@@ -23,7 +23,7 @@ const InviteFromContacts = ({ battleId, trigger }: InviteFromContactsProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [inviteMessage, setInviteMessage] = useState(
-    `Join me for an epic roast battle on GetRoasted! Click the link to join: ${window.location.origin}/battle/${battleId}`
+    `Join me for an epic roast battle on GetRoasted! Click the link to join: ${window.location.origin}/battles/${battleId}`
   );
   
   // Mock contacts - would come from API/database in a real app

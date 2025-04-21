@@ -11,6 +11,7 @@ import { Copy, ArrowLeft, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
+import Loader from "@/components/ui/loader";
 
 const BattleWaitingRoom = () => {
   const { battleId } = useParams<{ battleId: string }>();
@@ -21,7 +22,7 @@ const BattleWaitingRoom = () => {
   const [loading, setLoading] = useState(true);
   const [showCopied, setShowCopied] = useState(false);
   
-  const battleUrl = `${window.location.origin}/battle/join/${battleId}`;
+  const battleUrl = `${window.location.origin}/battles/join/${battleId}`;
   
   useEffect(() => {
     if (!battleId || !user) return;
@@ -93,7 +94,7 @@ const BattleWaitingRoom = () => {
             
           // Redirect to the battle page
           toast.success("Battle is starting!");
-          navigate(`/battle/live/${battleId}`);
+          navigate(`/battles/live/${battleId}`);
         }
       } catch (error) {
         console.error('Error fetching participants:', error);
@@ -176,7 +177,7 @@ const BattleWaitingRoom = () => {
       <div className="min-h-screen bg-night flex flex-col">
         
         <main className="container flex-1 py-8 flex items-center justify-center">
-          <div className="text-center">Loading battle information...</div>
+          <Loader size="large" variant="colorful" />
         </main>
       </div>
     );
@@ -200,19 +201,7 @@ const BattleWaitingRoom = () => {
   
   return (
     <div className="min-h-screen bg-night flex flex-col">
-      <div className="container py-8">
-        <div className="flex items-center mb-6">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="gap-2"
-            onClick={() => navigate('/battles')}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Battles
-          </Button>
-        </div>
-        
+      <div className="container py-8">      
         <Card className=" max-w-3xl mx-auto">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">{battleData.title}</CardTitle>
@@ -290,7 +279,7 @@ const BattleWaitingRoom = () => {
           <CardFooter className="flex justify-center border-t border-night-800 pt-6">
             <div className="text-center text-sm text-muted-foreground">
               <p>Battle will automatically start when an opponent joins.</p>
-              <p className="mt-2">Round count: {battleData.round_count} • Type: {battleData.type}</p>
+              <p className="mt-2"><span className="font-semibold">Round count:</span> {battleData.round_count} • <span className="font-semibold">Type:</span> {battleData.type}</p>
             </div>
           </CardFooter>
         </Card>

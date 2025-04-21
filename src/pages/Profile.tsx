@@ -136,7 +136,7 @@ const Profile = () => {
           topPercentage: undefined // Calculate based on position and total players
         });
 
-        // For recent activities, you'd fetch actual battle/achievement data
+        // For recent activities, you'd fetch actual battles/achievement data
         setRecentActivities([]);
 
         // For achievements, you would define criteria and fetch progress

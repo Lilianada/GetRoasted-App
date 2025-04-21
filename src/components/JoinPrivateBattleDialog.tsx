@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link as LinkIcon } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
+import Loader from "./ui/loader";
 
 interface JoinPrivateBattleDialogProps {
   children?: React.ReactNode;
@@ -51,7 +52,7 @@ const JoinPrivateBattleDialog = ({ children }: JoinPrivateBattleDialogProps) => 
       }
       
       // Navigate to join page
-      navigate(`/battle/join/${battleId}`);
+      navigate(`/battles/join/${battleId}`);
     } catch (error) {
       console.error('Error joining private battle:', error);
       toast.error("Failed to join battle");
@@ -76,10 +77,10 @@ const JoinPrivateBattleDialog = ({ children }: JoinPrivateBattleDialogProps) => 
   return (
     <Dialog>
       {triggerElement}
-      <DialogContent className="sm:max-w-md bg-coral text-white border border-night-700">
+      <DialogContent className="sm:max-w-md bg-blue text-white border border-night-700">
         <DialogHeader>
-          <DialogTitle className="text-white">Join Private Battle</DialogTitle>
-          <DialogDescription className="text-night-200">
+          <DialogTitle className="text-night-800">Join Private Battle</DialogTitle>
+          <DialogDescription className="text-night-600">
             Enter an invite link or battle ID to join a private battle.
           </DialogDescription>
         </DialogHeader>
@@ -92,7 +93,7 @@ const JoinPrivateBattleDialog = ({ children }: JoinPrivateBattleDialogProps) => 
             className="border-night-700 focus-visible:ring-flame-500 bg-night-800 text-white placeholder:text-night-400"
           />
           
-          <p className="text-xs text-night-300 mt-2">
+          <p className="text-xs text-night-600 mt-2">
             Paste a battle link that was shared with you or enter the battle ID directly.
           </p>
         </div>
@@ -104,7 +105,7 @@ const JoinPrivateBattleDialog = ({ children }: JoinPrivateBattleDialogProps) => 
             disabled={isJoining}
             onClick={handleJoin}
           >
-            {isJoining ? 'Joining...' : 'Join Battle'}
+            {isJoining ? <Loader variant="colorful" />  : 'Join Battle'}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -51,7 +51,7 @@ const BattleCard = ({
     <Card className={`
       relative transform transition-all duration-200 
       hover:-translate-y-1 hover:translate-x-1
-      bg-blue border-2 border-black rounded-xl overflow-hidden
+      bg-secondary border-2 border-black rounded-xl overflow-hidden
       shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]
       hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]
     `}>
@@ -83,7 +83,7 @@ const BattleCard = ({
       <CardContent className="p-0">
         <div className="flex items-center justify-center gap-4 py-4">
           {participants.map((participant, index) => (
-            <React.Fragment key={participant.id}>
+            <div key={participant.id}>
               <div className="flex flex-col items-center text-center gap-1.5">
                 <Avatar className="h-14 w-14 border-2 border-flame-500 rounded-full">
                   <AvatarImage src={participant.avatar} alt={participant.name} />
@@ -95,7 +95,7 @@ const BattleCard = ({
               {index < participants.length - 1 && (
                 <span className="text-flame-500 font-bold">VS</span>
               )}
-            </React.Fragment>
+            </div>
           ))}
 
           {participants.length === 1 && (
@@ -122,9 +122,19 @@ const BattleCard = ({
           asChild
           className="bg-primary text-black border-2 border-black hover:bg-primary/90 shadow-neo hover:shadow-neo-hover"
         >
-          <Link to={`/battle/${id}`}>
-            {status === 'waiting' ? 'Join Battle' : status === 'active' ? 'Watch' : 'View Results'}
-          </Link>
+          {status === 'waiting' ? (
+            <Link to={`/battles/waiting/${id}`}>
+              Join Battle
+            </Link>
+          ) : status === 'active' ? (
+            <Link to={`/battles/${id}`}>
+              Watch
+            </Link>
+          ) : (
+            <Link to={`/battles/${id}`}>
+              View Results
+            </Link>
+          )}
         </Button>
       </CardFooter>
     </Card>

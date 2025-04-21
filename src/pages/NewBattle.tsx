@@ -10,7 +10,7 @@ const NewBattle = () => {
   const handleCopyLink = () => {
     if (!battleId) return;
     
-    const inviteLink = `${window.location.origin}/battle/join/${battleId}`;
+    const inviteLink = `${window.location.origin}/battles/join/${battleId}`;
     navigator.clipboard.writeText(inviteLink);
     
     setShowCopied(true);

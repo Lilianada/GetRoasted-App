@@ -72,7 +72,7 @@ const Index = () => {
                     </Button>
                   </Link>
                 ) : (
-                  <Link to="/battle/new">
+                  <Link to="/battles/new">
                     <Button className="neo-button text-lg px-10 py-6">
                       Start A Battle
                     </Button>
@@ -172,7 +172,7 @@ const Index = () => {
                 <p className="text-lg text-black/80 font-medium mb-6">
                   Join thousands of roasters and put your comedy skills to the test.
                 </p>
-                <Link to={session ? "/battle/new" : "/signup"}>
+                <Link to={session ? "/battles/new" : "/signup"}>
                   <Button className="neo-button bg-black text-white px-10 py-5 text-lg">
                     {session ? "Start A Battle" : "Create Free Account"}
                   </Button>

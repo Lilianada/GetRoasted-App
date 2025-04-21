@@ -3,6 +3,7 @@ import { Flame } from "lucide-react";
 
 
 import { Card } from "@/components/ui/card";
+import AuthFooter from "@/components/AuthFooter";
 
 const Rules = () => {
   return (
@@ -81,11 +82,7 @@ const Rules = () => {
         </div>
       </main>
       
-      <footer className="border-t border-night-800 py-6 mt-12">
-        <div className="container text-center text-sm text-muted-foreground">
-          <p>© 2025 GetRoasted. All rights reserved. Keep it fiery, keep it fair.</p>
-        </div>
-      </footer>
+      <AuthFooter />
     </div>
   );
 };

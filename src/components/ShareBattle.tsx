@@ -17,7 +17,7 @@ const ShareBattle = ({ battleId, trigger }: ShareBattleProps) => {
   const [activeTab, setActiveTab] = useState<string>("link");
   
   // Generate the shareable link
-  const battleUrl = `${window.location.origin}/battle/${battleId}`;
+  const battleUrl = `${window.location.origin}/battles/${battleId}`;
   
   // Function to copy link to clipboard
   const copyLink = async () => {

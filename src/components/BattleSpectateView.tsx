@@ -5,10 +5,14 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Flame, MessageCircle, Users, ThumbsUp } from "lucide-react";
-import VotingSystem from "@/components/VotingSystem";
+import Loader from "@/components/ui/loader";
 import { useAuthContext } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
+import BattleInfoCard from "./BattleSpectateView/BattleInfoCard";
+import ParticipantsList from "./BattleSpectateView/ParticipantsList";
+import RoastFeed from "./BattleSpectateView/RoastFeed";
+import SpectatorBadge from "./BattleSpectateView/SpectatorBadge";
 
 interface BattleSpectateViewProps {
   battleId: string;
@@ -44,7 +48,7 @@ const BattleSpectateView = ({ battleId }: { battleId: string }) => {
   const [isSpectating, setIsSpectating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [currentRound, setCurrentRound] = useState(1);
-  
+
   useEffect(() => {
     const fetchBattleData = async () => {
       try {
@@ -73,7 +77,7 @@ const BattleSpectateView = ({ battleId }: { battleId: string }) => {
         
         const { count, error: spectatorsError } = await supabase
           .from('battle_spectators')
-          .select('*', { count: 'exact', head: true })
+          .select('*', { count: 'exact', head: true})
           .eq('battle_id', battleId);
           
         if (spectatorsError) throw spectatorsError;
@@ -95,8 +99,8 @@ const BattleSpectateView = ({ battleId }: { battleId: string }) => {
           .from('roasts')
           .select('*, profile: profiles(username, avatar_url)')
           .eq('battle_id', battleId)
-          .order('round_number', { ascending: true })
-          .order('created_at', { ascending: true });
+          .order('round_number', { ascending: true})
+          .order('created_at', { ascending: true});
           
         if (roastsError) throw roastsError;
         setRoasts(roastsData);
@@ -152,7 +156,7 @@ const BattleSpectateView = ({ battleId }: { battleId: string }) => {
         async () => {
           const { count, error } = await supabase
             .from('battle_spectators')
-            .select('*', { count: 'exact', head: true })
+            .select('*', { count: 'exact', head: true})
             .eq('battle_id', battleId);
             
           if (error) {
@@ -239,7 +243,7 @@ const BattleSpectateView = ({ battleId }: { battleId: string }) => {
   };
   
   if (loading) {
-    return <div className="flex justify-center p-8">Loading battle...</div>;
+    return <Loader size="large" variant="colorful" />;
   }
   
   if (!battle) {

@@ -2,24 +2,24 @@
 
 Last updated: April 15, 2025
 
-## 1. Introduction
+### 1. Introduction
 
 GetRoasted ("we," "us," or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website, mobile application, and related services (collectively, the "Services").
 
 By accessing or using our Services, you consent to the collection, use, and storage of your information as described in this Privacy Policy. Please read this Privacy Policy carefully. If you disagree with our practices, please do not use our Services.
 
-## 2. Information We Collect
+### 2. Information We Collect
 
 We collect information that you provide directly to us, information we collect automatically, and information from third parties.
 
-### Information You Provide
+#### Information You Provide
 
 -   **Account Information:** When you register for an account, we collect your name, email address, username, and password.
 -   **Profile Information:** You may choose to provide additional information in your profile, such as a profile picture, bio, or social media handles.
 -   **User Content:** We collect the content you create, share, or upload, including text, images, or audio for roast battles.
 -   **Communications:** If you contact us directly, we may collect information you provide in your communications.
 
-### Information We Collect Automatically
+#### Information We Collect Automatically
 
 -   **Device Information:** We collect device information, including IP address, device type, operating system, and browser type.
 -   **Usage Information:** We collect information about your use of our Services, including the pages you visit, the time and duration of your visits, and the content you interact with.

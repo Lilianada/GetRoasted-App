@@ -7,7 +7,7 @@ export function useBattle(battleId?: string) {
     queryKey: ['battle', battleId],
     enabled: !!battleId,
     queryFn: async () => {
-      if (!battleId) return null;
+      if (!battleId) return null; // Only return a value, do not return from the hook
       const { data, error } = await supabase
         .from('battles')
         .select('*')
@@ -24,6 +24,7 @@ export function useBattle(battleId?: string) {
         spectatorCount: 0, // fetched separately
       } as Battle;
     },
+
   });
 }
 
@@ -44,6 +45,7 @@ export function useBattleParticipants(battleId?: string) {
         avatar_url: p.profiles?.avatar_url || undefined,
       }));
     },
+
   });
 }
 
@@ -61,6 +63,7 @@ export function useSpectatorCount(battleId?: string) {
       if (error) throw new Error(error.message);
       return data?.count || 0;
     },
+
     refetchInterval: 5000, // poll for real-time updates
   });
 }
@@ -78,6 +81,7 @@ export function useBattleVotes(battleId?: string) {
       if (error) throw new Error(error.message);
       return data as Vote[];
     },
+
   });
 }
 

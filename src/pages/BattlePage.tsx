@@ -22,7 +22,7 @@ const BattlePage = () => {
   const [voteSubmitted, setVoteSubmitted] = useState(false);
   const [votedFor, setVotedFor] = useState<string | null>(null);
 
-  // --- React Query hooks ---
+  // --- React Query hooks (always called unconditionally at the top) ---
   const {
     data: battle,
     isLoading: battleLoading,
@@ -47,11 +47,14 @@ const BattlePage = () => {
     isError: votesError,
     error: votesErrObj,
   } = useBattleVotes(battleId);
+  // --- Voting mutation hook (must be here, not inside any conditional) ---
+  const voteMutation = useVoteMutation();
 
   // --- Participation logic ---
   const isParticipant = !!participants?.find(p => p.id === user?.id);
 
   // --- Centralized error handling ---
+  // Move all returns after hooks
   if (!battleId) {
     return <div>Invalid battle ID</div>;
   }
@@ -86,12 +89,8 @@ const BattlePage = () => {
   }
 
   // --- Voting logic ---
-  // --- Voting logic ---
   // Move vote upsert logic to a custom hook
   // Use mutation from React Query for voting
-  import { useVoteMutation } from '@/hooks/useBattleData'; // (move to top of file)
-  const voteMutation = useVoteMutation();
-
   const handleVote = async (userId: string) => {
     if (!user || !battleId) return;
     voteMutation.mutate(
@@ -112,7 +111,6 @@ const BattlePage = () => {
 
   // --- Battle duration ---
   const battleDuration = battle?.roundCount ? battle.roundCount * 60 : 120;
-
   return (
     <div className="min-h-screen bg-night flex flex-col">
       <div className="container py-6">

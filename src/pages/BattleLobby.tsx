@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 
 import BattleCard from "@/components/BattleCard";
 import { Button } from "@/components/ui/button";
+import Loader from "@/components/ui/loader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Link as LinkIcon } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -139,7 +140,8 @@ const BattleLobby = () => {
             
             <TabsContent value="all" className="space-y-6">
               {loading ? (
-                <div className="text-center py-12">Loading battles...</div>
+                  <Loader size="large" variant="colorful" />
+                 
               ) : battles.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {battles.map((battle) => (
@@ -161,7 +163,7 @@ const BattleLobby = () => {
             
             <TabsContent value="active" className="space-y-6">
               {loading ? (
-                <div className="text-center py-12">Loading battles...</div>
+                <div className="flex justify-center items-center py-12"><Loader size="large" variant="colorful" /></div>
               ) : battles.filter(battle => battle.status === 'active').length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {battles.filter(battle => battle.status === 'active').map((battle) => (
@@ -177,7 +179,7 @@ const BattleLobby = () => {
             
             <TabsContent value="waiting" className="space-y-6">
               {loading ? (
-                <div className="text-center py-12">Loading battles...</div>
+                <div className="flex justify-center items-center py-12"><Loader size="large" variant="colorful" /></div>
               ) : battles.filter(battle => battle.status === 'waiting').length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {battles.filter(battle => battle.status === 'waiting').map((battle) => (
@@ -193,7 +195,9 @@ const BattleLobby = () => {
             
             <TabsContent value="completed" className="space-y-6">
               {loading ? (
-                <div className="text-center py-12">Loading battles...</div>
+                <div className="flex justify-center items-center py-12">
+                  <Loader size="large" variant="colorful" />
+                  </div>
               ) : battles.filter(battle => battle.status === 'completed').length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {battles.filter(battle => battle.status === 'completed').map((battle) => (

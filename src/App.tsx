@@ -27,6 +27,7 @@ import NotFound from "./pages/NotFound";
 import Rules from "./pages/Rules";
 import Leaderboard from "./pages/Leaderboard";
 import Billing from "./pages/Billing";
+import Loader from "@/components/ui/loader";
 import SocketStatus from "./components/SocketStatus";
 
 const queryClient = new QueryClient();
@@ -36,7 +37,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuthContext();
 
   if (loading) {
-    return <div className="flex h-screen items-center justify-center bg-night text-white text-xl font-bold">Loading...</div>;
+    return <div className="flex h-screen items-center justify-center"><Loader size="large" variant="colorful" /></div>;
   }
 
   if (!user) {
@@ -75,27 +76,27 @@ const App = () => (
                     <NewBattle />
                   </ProtectedRoute>
                 } />
-                <Route path="/battle/live/:battleId" element={
+                <Route path="/battles/live/:battleId" element={
                   <ProtectedRoute>
                     <Battle />
                   </ProtectedRoute>
                 } />
-                <Route path="/battle/:battleId" element={
+                <Route path="/battles/:battleId" element={
                   <ProtectedRoute>
                     <BattlePage />
                   </ProtectedRoute>
                 } />
-                <Route path="/battle/join/:battleId" element={
+                <Route path="/battles/join/:battleId" element={
                   <ProtectedRoute>
                     <JoinBattle />
                   </ProtectedRoute>
                 } />
-                <Route path="/battle/waiting/:battleId" element={
+                <Route path="/battles/waiting/:battleId" element={
                   <ProtectedRoute>
                     <BattleWaitingRoom />
                   </ProtectedRoute>
                 } />
-                <Route path="/battle/results/:battleId" element={
+                <Route path="/battles/results/:battleId" element={
                   <ProtectedRoute>
                     <BattleResults />
                   </ProtectedRoute>

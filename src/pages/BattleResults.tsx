@@ -145,7 +145,7 @@ const BattleResults = () => {
           
           <div className="mt-8 flex justify-center">
             <Button asChild className="gap-2 bg-yellow hover:opacity-90">
-              <Link to={`/battle/${MOCK_RESULTS.battleId}`}>
+              <Link to={`/battles/${MOCK_RESULTS.battleId}`}>
                 <MessageSquare className="h-4 w-4" />
                 View Full Battle
               </Link>
@@ -309,7 +309,7 @@ const BattleResults = () => {
         
         <div className="text-center">
           <Button asChild className="gap-2 bg-yellow hover:opacity-90">
-            <Link to="/battle/new">
+            <Link to="/battles/new">
               Start a New Battle
             </Link>
           </Button>

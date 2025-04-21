@@ -12,6 +12,8 @@ import {
   SheetHeader,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
 import { useSettings } from "@/hooks/useSettings";
@@ -103,6 +105,9 @@ const NavBar = () => {
           </SheetTrigger>
           <SheetContent className="w-[300px] bg-night-800 border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] menu-content">
             <SheetHeader className="border-b-2 border-black pb-4">
+              <VisuallyHidden>
+                <DialogTitle>Navigation Menu</DialogTitle>
+              </VisuallyHidden>
               <div className="flex items-center gap-2">
                 <div className="bg-flame-500 p-1 border-2 border-black">
                   <Flame className="h-6 w-6 text-black" />

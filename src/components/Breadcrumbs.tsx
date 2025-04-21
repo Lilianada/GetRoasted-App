@@ -30,8 +30,16 @@ export default function Breadcrumbs() {
 
   // Build breadcrumb items (relative to /battles)
   const breadcrumbItems = processedSegments.map((segment, index) => {
-    const path = ["/battles", ...segments.slice(0, index + 1)].join("/");
-    const label = segment.replace(/-/g, " ").replace(/\b\w/g, char => char.toUpperCase());
+    let label = segment.replace(/-/g, " ").replace(/\b\w/g, char => char.toUpperCase());
+    let path;
+    // For join, waiting, results, always link to /battles
+    if (["join", "waiting", "results"].includes(segment.toLowerCase()) && index === 0) {
+      path = "/battles";
+    } else if (index < processedSegments.length - 1) {
+      path = ["/battles", ...segments.slice(0, index + 1)].join("/");
+    } else {
+      path = null; // last segment (id) is not clickable
+    }
     return {
       label,
       path,
@@ -45,24 +53,24 @@ export default function Breadcrumbs() {
         <li className="flex items-center">
           <Link
             to="/battles"
-            className="flex items-center rounded px-2 py-1 hover:bg-accent hover:text-foreground transition-colors"
+            className="flex items-center px-2 py-1 hover:text-foreground transition-colors"
           >
             <Home className="h-4 w-4" />
             <span className="sr-only">Home</span>
           </Link>
         </li>
         {breadcrumbItems.map((item, index) => (
-          <li key={item.path} className="flex items-center">
+          <li key={item.label + index} className="flex items-center">
             <ChevronRight className="h-4 w-4" />
             <div
               className={cn(
                 "px-2 py-1 rounded",
                 item.isLast
                   ? "font-medium text-accent"
-                  : "hover:bg-accent hover:text-foreground transition-colors"
+                  : "hover:text-primary transition-colors"
               )}
             >
-              {item.isLast ? (
+              {item.isLast || !item.path ? (
                 <span>{item.label}</span>
               ) : (
                 <Link to={item.path}>{item.label}</Link>

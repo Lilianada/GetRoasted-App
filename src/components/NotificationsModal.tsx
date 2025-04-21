@@ -48,7 +48,7 @@ const NotificationsModal = ({ children }: NotificationsModalProps) => {
       read: false,
       created_at: new Date().toISOString(),
       type: 'battle_invite',
-      action_url: "/battle/join/123"
+      action_url: "/battles/join/123"
     },
     {
       id: "2",
@@ -58,7 +58,7 @@ const NotificationsModal = ({ children }: NotificationsModalProps) => {
       read: true,
       created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
       type: 'battle_start',
-      action_url: "/battle/live/456"
+      action_url: "/battles/live/456"
     }
   ];
   

@@ -55,7 +55,7 @@ export function useNewBattleForm() {
         });
       if (participantError) throw participantError;
       toast.success("Battle created successfully!");
-      navigate(`/battle/waiting/${battleData.id}`);
+      navigate(`/battles/waiting/${battleData.id}`);
     } catch (error: any) {
       toast.error(error.message || "Failed to create battle");
     } finally {
