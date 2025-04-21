@@ -9,6 +9,44 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      battle_messages: {
+        Row: {
+          avatar_url: string | null
+          battle_id: string
+          created_at: string
+          id: string
+          message: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          battle_id: string
+          created_at?: string
+          id?: string
+          message: string
+          user_id: string
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          battle_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          user_id?: string
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "battle_messages_battle_id_fkey"
+            columns: ["battle_id"]
+            isOneToOne: false
+            referencedRelation: "battles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       battle_participants: {
         Row: {
           battle_id: string
@@ -81,6 +119,55 @@ export type Database = {
           },
         ]
       }
+      battle_votes: {
+        Row: {
+          battle_id: string
+          created_at: string
+          id: string
+          score: number
+          voted_for_user_id: string
+          voter_id: string
+        }
+        Insert: {
+          battle_id: string
+          created_at?: string
+          id?: string
+          score: number
+          voted_for_user_id: string
+          voter_id: string
+        }
+        Update: {
+          battle_id?: string
+          created_at?: string
+          id?: string
+          score?: number
+          voted_for_user_id?: string
+          voter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "votes_battle_id_fkey"
+            columns: ["battle_id"]
+            isOneToOne: false
+            referencedRelation: "battles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "votes_voted_for_id_fkey"
+            columns: ["voted_for_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "votes_voter_id_fkey"
+            columns: ["voter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       battles: {
         Row: {
           allow_spectators: boolean
@@ -89,6 +176,7 @@ export type Database = {
           id: string
           round_count: number
           status: string
+          time_per_turn: number
           title: string
           type: string
           updated_at: string
@@ -100,6 +188,7 @@ export type Database = {
           id?: string
           round_count?: number
           status: string
+          time_per_turn?: number
           title: string
           type: string
           updated_at?: string
@@ -111,6 +200,7 @@ export type Database = {
           id?: string
           round_count?: number
           status?: string
+          time_per_turn?: number
           title?: string
           type?: string
           updated_at?: string
@@ -244,55 +334,6 @@ export type Database = {
           {
             foreignKeyName: "roasts_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      votes: {
-        Row: {
-          battle_id: string
-          created_at: string
-          id: string
-          score: number
-          voted_for_id: string
-          voter_id: string
-        }
-        Insert: {
-          battle_id: string
-          created_at?: string
-          id?: string
-          score: number
-          voted_for_id: string
-          voter_id: string
-        }
-        Update: {
-          battle_id?: string
-          created_at?: string
-          id?: string
-          score?: number
-          voted_for_id?: string
-          voter_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "votes_battle_id_fkey"
-            columns: ["battle_id"]
-            isOneToOne: false
-            referencedRelation: "battles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "votes_voted_for_id_fkey"
-            columns: ["voted_for_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "votes_voter_id_fkey"
-            columns: ["voter_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]

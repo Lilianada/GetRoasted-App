@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { ArrowRight, Copy, Users, LockOpen } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { useNewBattleForm } from "@/hooks/useNewBattleForm";
+import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits";
 
 const NewBattle = () => {
   const {
@@ -21,6 +22,7 @@ const NewBattle = () => {
     battleId, setBattleId,
     handleCreateBattle
   } = useNewBattleForm();
+  const { checkCanCreateBattle } = useSubscriptionLimits();
   const [showCopied, setShowCopied] = useState(false);
 
   
@@ -38,6 +40,36 @@ const NewBattle = () => {
     }, 2000);
   };
   
+  const handleCreateBattle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!checkCanCreateBattle()) {
+      return;
+    }
+
+    if (!title) {
+      toast.error("Battle title is required!");
+      return;
+    }
+
+    if (!battleType) {
+      toast.error("Battle type is required!");
+      return;
+    }
+
+    if (!roundCount) {
+      toast.error("Number of rounds is required!");
+      return;
+    }
+
+    if (!timePerTurn) {
+      toast.error("Time per turn is required!");
+      return;
+    }
+
+    handleCreateBattle();
+  };
+
   return (
     <div className="min-h-screen bg-night flex flex-col">
       <main className="container flex-1 py-8">
