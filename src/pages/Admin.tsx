@@ -231,7 +231,7 @@ const Admin = () => {
                               <td className="px-4 py-3 text-muted-foreground">{user.email}</td>
                               <td className="px-4 py-3 text-center">
                                 <Badge
-                                  variant={user.status === "active" ? "default" : user.status === "inactive" ? "secondary" : "destructive"}
+                                  variant={user.status === "active" ? "default" : user.status === "inactive" ? "outline" : "destructive"}
                                   className="capitalize"
                                 >
                                   {user.status}
@@ -324,7 +324,7 @@ const Admin = () => {
                         <CardHeader className="px-4 py-3 flex flex-row items-start justify-between gap-4">
                           <div>
                             <CardTitle className="text-base flex items-center gap-2">
-                              <Badge variant={report.severity === "high" ? "destructive" : "secondary"} className="capitalize">
+                              <Badge variant={report.severity === "high" ? "destructive" : "outline"} className="capitalize">
                                 {report.severity}
                               </Badge>
                               <span>{report.type}</span>

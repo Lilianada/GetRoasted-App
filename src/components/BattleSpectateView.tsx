@@ -247,7 +247,7 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Status</p>
-                <Badge variant={battle.status === 'active' ? "default" : "secondary"}>
+                <Badge variant={battle.status === 'active' ? "default" : "outline"}>
                   {battle.status === 'waiting' ? 'Waiting' : 
                    battle.status === 'active' ? 'Live' : 'Completed'}
                 </Badge>
@@ -259,7 +259,7 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
                     <Badge 
                       key={i} 
                       variant={i + 1 === currentRound ? "default" : 
-                               i + 1 < currentRound ? "outline" : "secondary"}
+                               i + 1 < currentRound ? "outline" : "outline"}
                     >
                       {i + 1}
                     </Badge>
