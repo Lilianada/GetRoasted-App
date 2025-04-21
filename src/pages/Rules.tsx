@@ -20,7 +20,7 @@ const Rules = () => {
           </div>
           
           <div className="space-y-6">
-            <Card className="bg-yellow border-2 border-black">
+            <Card className="p-3 border-2 border-black">
               <h2 className="text-xl font-bold mb-3">1. The Basics</h2>
               <p className="text-muted-foreground">
                 GetRoasted is a platform for witty, creative verbal duels. Our battles are meant to be entertaining and 
@@ -28,7 +28,7 @@ const Rules = () => {
               </p>
             </Card>
             
-            <Card className="bg-yellow border-2 border-black">
+            <Card className="p-3 border-2 border-black">
               <h2 className="text-xl font-bold mb-3">2. Battle Structure</h2>
               <ul className="text-muted-foreground space-y-2 list-disc pl-5">
                 <li>Each battle consists of 3 rounds maximum</li>
@@ -39,7 +39,7 @@ const Rules = () => {
               </ul>
             </Card>
             
-            <Card className="bg-yellow border-2 border-black">
+            <Card className="p-3 border-2 border-black">
               <h2 className="text-xl font-bold mb-3">3. Judging System</h2>
               <p className="text-muted-foreground mb-3">
                 Battles are scored across three dimensions:
@@ -57,7 +57,7 @@ const Rules = () => {
               </div>
             </Card>
             
-            <Card className="bg-yellow border-2 border-black">
+            <Card className="p-3 border-2 border-black">
               <h2 className="text-xl font-bold mb-3">4. Community Guidelines</h2>
               <ul className="text-muted-foreground space-y-2 list-disc pl-5">
                 <li><span className="font-medium">No hate speech</span> - No racism, sexism, homophobia, or other forms of discrimination</li>
@@ -68,7 +68,7 @@ const Rules = () => {
               </ul>
             </Card>
             
-            <Card className="bg-yellow border-2 border-black">
+            <Card className="p-3 border-2 border-black">
               <h2 className="text-xl font-bold mb-3">5. Rewards & Recognition</h2>
               <ul className="text-muted-foreground space-y-2 list-disc pl-5">
                 <li>"Top Roaster" badges for exceptional performances</li>

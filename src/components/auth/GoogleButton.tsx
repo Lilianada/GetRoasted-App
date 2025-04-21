@@ -10,7 +10,7 @@ const GoogleButton = ({ onClick, label }: GoogleButtonProps) => {
   return (
     <Button 
       type="button"
-      className="w-full bg-night-700 hover:bg-night-600 flex items-center gap-2"
+      className="w-full bg-background hover:bg-night-600 flex items-center gap-2"
       onClick={onClick}
     >
       <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">

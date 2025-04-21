@@ -6,21 +6,21 @@ import SignupForm from "@/components/auth/SignupForm";
 
 const Signup = () => {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-night p-4">
+    <div className="flex flex-col items-center justify-center bg-night p-4">
       <div className="w-full max-w-md">
         
         <Tabs defaultValue="signup" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6 bg-night-800 border border-night-700">
-            <TabsTrigger value="login" className="data-[state=active]:bg-flame-600">
+            <TabsTrigger value="login" className="data-[state=active]:bg-yellow">
               Login
             </TabsTrigger>
-            <TabsTrigger value="signup" className="data-[state=active]:bg-flame-600">
+            <TabsTrigger value="signup" className="data-[state=active]:bg-yellow">
               Sign Up
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="login">
-            <Card className="bg-yellow border-2 border-black border-night-700">
+            <Card className="bg-secondary border-2 border-black border-night-700">
               <CardHeader className="space-y-1">
                 <CardTitle className="text-2xl">Welcome back</CardTitle>
                 <CardDescription>
@@ -32,7 +32,7 @@ const Signup = () => {
           </TabsContent>
           
           <TabsContent value="signup">
-            <Card className="bg-yellow border-2 border-black border-night-700">
+            <Card className="bg-secondary border-2 border-black border-night-700">
               <CardHeader className="space-y-1">
                 <CardTitle className="text-2xl">Create an account</CardTitle>
                 <CardDescription>

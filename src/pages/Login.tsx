@@ -59,7 +59,7 @@ const Login = () => {
                 <span className="w-full border-t border-night-700" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-night px-2 text-muted-foreground">Or continue with</span>
+                <span className="bg-night px-2 text-muted">Or continue with</span>
               </div>
             </div>
             

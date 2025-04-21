@@ -56,8 +56,7 @@ const Leaderboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-yellow flex flex-col">
-      
+    <div className="min-h-screen flex flex-col">
       
       <main className="container flex-1 py-12">
         

@@ -48,11 +48,11 @@ const Home = () => {
                 <Flame className="h-20 w-20 text-flame-600" />
               </div>
               
-              <h1 className="text-5xl font-bold tracking-tight lg:text-6xl max-w-3xl">
+              <h1 className="text-4xl font-bold tracking-tight lg:text-5xl max-w-3xl">
                 Epic <span className="gradient-text">Roast Battles</span> in Real-Time
               </h1>
               
-              <p className="text-xl text-muted-foreground max-w-2xl">
+              <p className="text-lg text-muted-foreground max-w-2xl">
                 GetRoasted is the premier platform for gamified verbal duels 
                 where you can showcase your wit and compete for social clout.
               </p>
