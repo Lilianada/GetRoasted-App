@@ -95,7 +95,7 @@ const Home = () => {
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 place-items-center">
               <div className=" flex flex-col items-center text-center p-6">
                 <div className="h-12 w-12 bg-yellow rounded-full flex items-center justify-center mb-4">
                   <Users className="h-6 w-6 text-white" />

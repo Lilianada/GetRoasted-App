@@ -44,11 +44,8 @@ const PricingSection = () => {
   const freePlanFeatures = [
     { name: "Join public battles", included: true },
     { name: "Create up to 3 battles per day", included: true },
-    { name: "Spectate unlimited battles", included: true },
-    { name: "Basic profile customization", included: true },
-    { name: "Community leaderboard access", included: true },
+    { name: "Spectate up to 3 battles per day", included: true },
     { name: "Limited roast analytics", included: false },
-    { name: "Exclusive flame effects", included: false },
     { name: "AI-suggested comebacks", included: false }
   ];
   
@@ -56,10 +53,7 @@ const PricingSection = () => {
     { name: "Join unlimited battles", included: true },
     { name: "Create unlimited battles", included: true },
     { name: "Spectate unlimited battles", included: true },
-    { name: "Advanced profile customization", included: true },
-    { name: "Premium leaderboard stats", included: true },
     { name: "Comprehensive roast analytics", included: true },
-    { name: "All flame effects and animations", included: true },
     { name: "AI-suggested comebacks", included: true }
   ];
 
