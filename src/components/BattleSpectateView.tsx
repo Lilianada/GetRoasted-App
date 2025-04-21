@@ -35,7 +35,7 @@ interface Roast {
   };
 }
 
-const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
+const BattleSpectateView = ({ battleId }: { battleId: string }) => {
   const { user } = useAuthContext();
   const [battle, setBattle] = useState<any>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -205,7 +205,34 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
       toast.error("Failed to update spectator status");
     }
   };
-  
+
+  const handleVote = async (userId: string) => {
+    if (!user) {
+      toast.error("You must be logged in to vote");
+      return;
+    }
+    
+    try {
+      const { error } = await supabase
+        .from('battle_votes')
+        .upsert({
+          battle_id: battleId,
+          voter_id: user.id,
+          voted_for_user_id: userId,
+          score: 10 // Default high score for now
+        });
+        
+      if (error) {
+        toast.error("Failed to submit vote");
+      } else {
+        toast.success(`Vote submitted successfully`);
+      }
+    } catch (error) {
+      console.error('Error submitting vote:', error);
+      toast.error("Failed to submit vote");
+    }
+  };
+
   const getParticipantById = (userId: string) => {
     const participant = participants.find(p => p.user_id === userId);
     return participant ? participant.profile : { username: 'Unknown', avatar_url: null };
@@ -326,22 +353,7 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
                     key={p.user_id} 
                     variant="outline" 
                     className="flex items-center gap-3"
-                    onClick={() => {
-                      if (user) {
-                        supabase.from('votes').upsert({
-                          battle_id: battleId,
-                          voter_id: user.id,
-                          voted_for_id: p.user_id,
-                          score: 10 // Default high score for now
-                        }).then(({error}) => {
-                          if (error) {
-                            toast.error("Failed to submit vote");
-                          } else {
-                            toast.success(`Voted for ${p.profile.username}`);
-                          }
-                        });
-                      }
-                    }}
+                    onClick={() => handleVote(p.user_id)}
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={p.profile.avatar_url || undefined} />

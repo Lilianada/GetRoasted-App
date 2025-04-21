@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Battle, Participant, Vote } from '@/types/battle';
 
@@ -72,7 +72,7 @@ export function useBattleVotes(battleId?: string) {
     queryFn: async () => {
       if (!battleId) return [];
       const { data, error } = await supabase
-        .from('votes')
+        .from('battle_votes')
         .select('*')
         .eq('battle_id', battleId);
       if (error) throw new Error(error.message);
@@ -81,24 +81,22 @@ export function useBattleVotes(battleId?: string) {
   });
 }
 
-import { useMutation } from '@tanstack/react-query';
-
-interface VoteInput {
-  battleId: string;
-  voterId: string;
-  votedForId: string;
-  score: number;
-}
-
 export function useVoteMutation() {
-  return useMutation<unknown, Error, VoteInput>({
-    mutationFn: async ({ battleId, voterId, votedForId, score }) => {
-      const { error } = await supabase.from('votes').upsert({
-        battle_id: battleId,
-        voter_id: voterId,
-        voted_for_id: votedForId,
-        score,
-      });
+  return useMutation({
+    mutationFn: async ({ battleId, voterId, votedForId, score }: {
+      battleId: string;
+      voterId: string;
+      votedForId: string;
+      score: number;
+    }) => {
+      const { error } = await supabase
+        .from('battle_votes')
+        .upsert({
+          battle_id: battleId,
+          voter_id: voterId,
+          voted_for_user_id: votedForId,
+          score,
+        });
       if (error) throw new Error(error.message);
       return true;
     },

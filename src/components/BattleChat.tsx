@@ -2,17 +2,6 @@ import React, { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
-function getSafeUser(user: any) {
-  return {
-    id: user?.id || '',
-    username: user?.username || user?.user_metadata?.username || user?.email || 'User',
-    avatar_url: user?.avatar_url || user?.user_metadata?.avatar_url || undefined,
-  };
-}
-
-/**
- * Real-time chat for a battle. Only participants can send messages.
- */
 export function BattleChat({ battleId, user, canSend }: {
   battleId: string;
   user: { id?: string, username?: string, avatar_url?: string, user_metadata?: any, email?: string };
@@ -22,12 +11,13 @@ export function BattleChat({ battleId, user, canSend }: {
   const [input, setInput] = React.useState("");
   const chatRef = useRef<HTMLDivElement>(null);
 
-  // Fetch and subscribe to messages
   useEffect(() => {
     if (!battleId) return;
+
     let isMounted = true;
+    // Initial fetch
     supabase
-      .from('messages') // Use correct table name as per schema (change to 'messages' if that's the correct one)
+      .from('battle_messages')
       .select('*')
       .eq('battle_id', battleId)
       .order('created_at', { ascending: true })
@@ -38,37 +28,48 @@ export function BattleChat({ battleId, user, canSend }: {
         }
         if (isMounted) setMessages(data || []);
       });
-    // Real-time subscription (supabase.channel)
-    const channel = supabase.channel(`battle_messages_${battleId}`);
-    channel.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'battle_messages', filter: `battle_id=eq.${battleId}` },
-      payload => setMessages(msgs => [...msgs, payload.new])
-    );
-    channel.subscribe();
+
+    // Real-time subscription
+    const channel = supabase
+      .channel(`battle_messages_${battleId}`)
+      .on(
+        'postgres_changes',
+        { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'battle_messages', 
+          filter: `battle_id=eq.${battleId}` 
+        },
+        payload => setMessages(msgs => [...msgs, payload.new])
+      )
+      .subscribe();
+
     return () => {
       isMounted = false;
-      supabase.removeChannel(channel);
+      channel.unsubscribe();
     };
   }, [battleId]);
 
   useEffect(() => {
-    // Scroll to bottom on new message
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }
   }, [messages]);
 
-  const safeUser = getSafeUser(user);
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || !safeUser.id) return;
-    const { error } = await supabase.from('messages') // Use correct table name as per schema
+    if (!input.trim() || !user?.id) return;
+
+    const { error } = await supabase
+      .from('battle_messages')
       .insert({
         battle_id: battleId,
-        user_id: safeUser.id,
-        username: safeUser.username,
-        avatar_url: safeUser.avatar_url,
-        content: input.trim(),
+        user_id: user.id,
+        username: user.username || user.user_metadata?.username || user.email || 'User',
+        avatar_url: user.avatar_url || user.user_metadata?.avatar_url,
+        message: input.trim(),
       });
+
     if (error) {
       console.error('Error sending message:', error);
       return;
@@ -84,7 +85,7 @@ export function BattleChat({ battleId, user, canSend }: {
             <img src={msg.avatar_url || "/placeholder.svg"} alt={msg.username} className="w-7 h-7 rounded-full border" />
             <div>
               <span className="font-bold text-xs text-night-100">{msg.username}</span>
-              <div className="text-night-100 text-sm bg-night-700 rounded px-2 py-1 inline-block">{msg.content}</div>
+              <div className="text-night-100 text-sm bg-night-700 rounded px-2 py-1 inline-block">{msg.message}</div>
             </div>
           </div>
         ))}

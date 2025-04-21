@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Switch } from "@/components/ui/switch";
 import { ArrowRight, LockOpen } from "lucide-react";
+import { BattleRoundsSelection } from "./BattleRoundsSelection";
+import { BattleTimeSelection } from "./BattleTimeSelection";
+import { BattleSettings } from "./BattleSettings";
 import { useNewBattleForm } from "@/hooks/useNewBattleForm";
 
 export const BattleCreationForm = () => {
