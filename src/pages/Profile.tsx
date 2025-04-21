@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -123,7 +122,6 @@ const Profile = () => {
           bio: profile.bio || ''
         });
 
-        // Fetch stats - in a real app, this would come from the database
         setStats({
           wins: 47,
           losses: 12,
@@ -176,7 +174,6 @@ const Profile = () => {
     setIsLoading(true);
 
     try {
-      // Update profile in database
       const { error } = await supabase
         .from('profiles')
         .update({
@@ -187,7 +184,6 @@ const Profile = () => {
 
       if (error) throw error;
 
-      // Update local state with the new data
       setProfileData(prev => prev ? {
         ...prev,
         username: formData.username,
@@ -228,44 +224,43 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-night flex flex-col">
-      <main className="container flex-1 py-8">
+    <div className="min-h-screen bg-gradient-to-b from-night-900 via-night-800 to-night-900 flex flex-col">
+      <main className="container flex-1 py-10">
         <div className="max-w-4xl mx-auto">
-          <Card className="border-night-700 overflow-visible mb-6">
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row gap-6">
+          <Card className="bg-night-800/60 shadow-neo-lg border-night-700 rounded-2xl transition-all duration-300 hover:shadow-neo p-0 mb-10 overflow-visible backdrop-blur-md">
+            <CardContent className="p-8 md:p-10">
+              <div className="flex flex-col md:flex-row gap-10">
                 <div className="flex flex-col items-center">
                   <div className="relative">
-                    <Avatar className="h-24 w-24 border-2 border-flame-500">
+                    <Avatar className="h-28 w-28 border-4 border-flame-500 bg-night-900 shadow-neo">
                       <AvatarImage src={profileData.avatar_url} alt={profileData.username} />
-                      <AvatarFallback className="bg-night-700 text-flame-500 text-xl">
+                      <AvatarFallback className="bg-night-700 text-flame-500 text-2xl">
                         {profileData.username.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <Button
                       size="icon"
                       variant="outline"
-                      className="absolute -right-2 -bottom-2 h-7 w-7 rounded-full bg-primary border-night-700"
+                      className="absolute -right-2 -bottom-2 h-8 w-8 rounded-full bg-primary border-night-700 shadow-neo hover:bg-flame-500"
                       onClick={() => setIsEditing(!isEditing)}
+                      aria-label="Edit profile"
                     >
-                      <Edit className="h-3.5 w-3.5" />
+                      <Edit className="h-4 w-4" />
                     </Button>
                   </div>
-                  
-                  <div className="mt-4 text-center">
-                    <h1 className="text-xl font-bold">{profileData.username}</h1>
-                    <Badge variant="default" className="mt-1">
+                  <div className="mt-5 text-center">
+                    <h1 className="text-2xl font-extrabold text-white">{profileData.username}</h1>
+                    <Badge variant="default" className="mt-1 text-night-900 bg-primary shadow-neo">
                       Top Roaster
                     </Badge>
                   </div>
                 </div>
-                
                 <div className="flex-1">
                   {isEditing ? (
-                    <Card className="border-night-700 w-full">
+                    <Card className="border-night-700 bg-night-900/95 rounded-xl shadow-neo p-0">
                       <CardHeader>
-                        <CardTitle className="text-xl">Edit Profile</CardTitle>
-                        <CardDescription>
+                        <CardTitle className="text-xl text-white">Edit Profile</CardTitle>
+                        <CardDescription className="text-night-400">
                           Update your profile information
                         </CardDescription>
                       </CardHeader>
@@ -276,7 +271,7 @@ const Profile = () => {
                             id="username"
                             value={formData.username}
                             onChange={handleInputChange}
-                            className="border-night-700 focus-visible:ring-primary"
+                            className="bg-night-800 text-white border-night-700 focus-visible:ring-primary"
                           />
                           <p className="text-xs text-muted-foreground">
                             This is how you'll appear in battles and on the leaderboard.
@@ -288,7 +283,7 @@ const Profile = () => {
                             id="bio"
                             value={formData.bio || ''}
                             onChange={handleInputChange}
-                            className="border-night-700 focus-visible:ring-primary min-h-[100px]"
+                            className="bg-night-800 text-white border-night-700 focus-visible:ring-primary min-h-[100px]"
                           />
                           <p className="text-xs text-muted-foreground">
                             Tell others about your roasting style in 160 characters or less.
@@ -297,7 +292,7 @@ const Profile = () => {
                       </CardContent>
                       <CardFooter className="border-t border-night-700 pt-6 flex gap-2">
                         <Button
-                          className="bg-primary text-black hover:opacity-90"
+                          className="bg-primary text-black hover:opacity-90 shadow-neo"
                           onClick={handleSaveSettings}
                           disabled={isLoading}
                         >
@@ -308,7 +303,6 @@ const Profile = () => {
                           variant="outline"
                           onClick={() => {
                             setIsEditing(false);
-                            // Reset form data to current profile data
                             setFormData({
                               username: profileData.username || '',
                               bio: profileData.bio || ''
@@ -321,39 +315,37 @@ const Profile = () => {
                       </CardFooter>
                     </Card>
                   ) : (
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex flex-col md:flex-row gap-3 text-sm text-muted-foreground">
-                          {profileData.email && (
-                            <div className="flex items-center gap-1">
-                              <Mail className="h-4 w-4" />
-                              <span>{profileData.email}</span>
-                            </div>
-                          )}
+                    <div className="space-y-5">
+                      <div className="flex flex-col md:flex-row gap-3 text-sm text-night-300">
+                        {profileData.email && (
                           <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            <span>Joined {formatDate(profileData.created_at)}</span>
+                            <Mail className="h-4 w-4" />
+                            <span>{profileData.email}</span>
                           </div>
+                        )}
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          <span>Joined {formatDate(profileData.created_at)}</span>
                         </div>
                       </div>
 
                       <div>
-                        <Label>Bio</Label>
-                        <p className="mt-1 text-muted-foreground">{profileData.bio || "No bio provided yet. Click the edit button to add one!"}</p>
+                        <Label className="text-night-200">Bio</Label>
+                        <p className="mt-1 text-night-200">{profileData.bio || "No bio provided yet. Click the edit button to add one!"}</p>
                       </div>
 
                       <div className="mt-4 grid grid-cols-3 gap-3 text-center">
-                        <div className="flex flex-col items-center rounded-md bg-night-800 border border-night-700 px-2 py-2">
-                          <span className="text-2xl font-bold text-flame-500">{stats?.wins}</span>
-                          <span className="text-xs text-muted-foreground">Wins</span>
+                        <div className="flex flex-col items-center rounded-lg bg-night-900 border border-night-700 px-3 py-3 shadow-neo">
+                          <span className="text-3xl font-extrabold text-flame-400">{stats?.wins}</span>
+                          <span className="text-xs text-night-400">Wins</span>
                         </div>
-                        <div className="flex flex-col items-center rounded-md bg-night-800 border border-night-700 px-2 py-2">
-                          <span className="text-2xl font-bold text-ember-500">{stats?.losses}</span>
-                          <span className="text-xs text-muted-foreground">Losses</span>
+                        <div className="flex flex-col items-center rounded-lg bg-night-900 border border-night-700 px-3 py-3 shadow-neo">
+                          <span className="text-3xl font-extrabold text-ember-400">{stats?.losses}</span>
+                          <span className="text-xs text-night-400">Losses</span>
                         </div>
-                        <div className="flex flex-col items-center rounded-md bg-night-800 border border-night-700 px-2 py-2">
-                          <span className="text-2xl font-bold text-secondary">{stats?.winRate}%</span>
-                          <span className="text-xs text-muted-foreground">Win Rate</span>
+                        <div className="flex flex-col items-center rounded-lg bg-night-900 border border-night-700 px-3 py-3 shadow-neo">
+                          <span className="text-3xl font-extrabold text-yellow">{stats?.winRate}%</span>
+                          <span className="text-xs text-night-400">Win Rate</span>
                         </div>
                       </div>
                     </div>
@@ -363,26 +355,26 @@ const Profile = () => {
             </CardContent>
           </Card>
           
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
-            <TabsList className="bg-night-800 border border-night-700 w-full md:w-auto">
-              <TabsTrigger value="details" className="data-[state=active]:bg-flame-600">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+            <TabsList className="bg-night-800 border border-night-700 rounded-lg shadow-neo w-full md:w-auto">
+              <TabsTrigger value="details" className="data-[state=active]:bg-flame-600 data-[state=active]:text-white font-medium transition">
                 User Details
               </TabsTrigger>
-              <TabsTrigger value="stats" className="data-[state=active]:bg-flame-600">
+              <TabsTrigger value="stats" className="data-[state=active]:bg-flame-600 data-[state=active]:text-white font-medium transition">
                 Battle Stats
               </TabsTrigger>
-              <TabsTrigger value="history" className="data-[state=active]:bg-flame-600">
+              <TabsTrigger value="history" className="data-[state=active]:bg-flame-600 data-[state=active]:text-white font-medium transition">
                 Battle History
               </TabsTrigger>
-              <TabsTrigger value="badges" className="data-[state=active]:bg-flame-600">
+              <TabsTrigger value="badges" className="data-[state=active]:bg-flame-600 data-[state=active]:text-white font-medium transition">
                 Badges
               </TabsTrigger>
             </TabsList>
             
             <TabsContent value="details" className="mt-6">
-              <Card className="border-night-700">
+              <Card className="bg-night-900/90 rounded-xl border-night-700 shadow-neo">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-white">
                     <User className="h-5 w-5" />
                     User Details
                   </CardTitle>
@@ -390,28 +382,28 @@ const Profile = () => {
                 <CardContent>
                   {stats && (
                     <div className="pt-4">
-                      <h3 className="text-sm font-medium text-muted-foreground mb-3">Roasting Style</h3>
+                      <h3 className="text-sm font-medium text-night-400 mb-3">Roasting Style</h3>
                       <div className="space-y-5">
                         <div>
                           <div className="flex items-center justify-between mb-1">
-                            <label className="text-sm">Savagery</label>
+                            <label className="text-sm text-night-300">Savagery</label>
                             <span className="text-xs font-mono">{stats.savageryRating}%</span>
                           </div>
-                          <Progress value={stats.savageryRating} className="h-2" />
+                          <Progress value={stats.savageryRating} className="h-2 bg-night-700" />
                         </div>
                         <div>
                           <div className="flex items-center justify-between mb-1">
-                            <label className="text-sm">Creativity</label>
+                            <label className="text-sm text-night-300">Creativity</label>
                             <span className="text-xs font-mono">{stats.creativityRating}%</span>
                           </div>
-                          <Progress value={stats.creativityRating} className="h-2" />
+                          <Progress value={stats.creativityRating} className="h-2 bg-night-700" />
                         </div>
                         <div>
                           <div className="flex items-center justify-between mb-1">
-                            <label className="text-sm">Humor</label>
+                            <label className="text-sm text-night-300">Humor</label>
                             <span className="text-xs font-mono">{stats.humorRating}%</span>
                           </div>
-                          <Progress value={stats.humorRating} className="h-2" />
+                          <Progress value={stats.humorRating} className="h-2 bg-night-700" />
                         </div>
                       </div>
                     </div>
@@ -421,9 +413,9 @@ const Profile = () => {
             </TabsContent>
             
             <TabsContent value="stats" className="mt-6">
-              <Card className="border-night-700">
+              <Card className="bg-night-900/90 rounded-xl border-night-700 shadow-neo">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-white">
                     <BarChart className="h-5 w-5" />
                     Battle Statistics
                   </CardTitle>
@@ -431,54 +423,54 @@ const Profile = () => {
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
-                      <div className="bg-night-800 rounded-lg p-4 border border-night-700">
-                        <h3 className="text-sm font-medium text-muted-foreground mb-2">Battle Summary</h3>
+                      <div className="bg-night-800 rounded-lg p-4 border border-night-700 shadow-neo">
+                        <h3 className="text-sm font-medium text-night-400 mb-2">Battle Summary</h3>
                         <ul className="space-y-2">
                           <li className="flex items-center justify-between">
-                            <span className="text-sm">Total Battles</span>
+                            <span className="text-sm text-night-300">Total Battles</span>
                             <span className="font-mono">{stats?.totalBattles}</span>
                           </li>
                           <li className="flex items-center justify-between">
-                            <span className="text-sm">Win Rate</span>
+                            <span className="text-sm text-night-300">Win Rate</span>
                             <span className="font-mono">{stats?.winRate}%</span>
                           </li>
                           <li className="flex items-center justify-between">
-                            <span className="text-sm">Average Score</span>
+                            <span className="text-sm text-night-300">Average Score</span>
                             <span className="font-mono">{stats?.avgScore} / 10</span>
                           </li>
                           <li className="flex items-center justify-between">
-                            <span className="text-sm">Highest Score</span>
+                            <span className="text-sm text-night-300">Highest Score</span>
                             <span className="font-mono">{stats?.highestScore} / 10</span>
                           </li>
                         </ul>
                       </div>
-                      <div className="bg-night-800 rounded-lg p-4 border border-night-700">
-                        <h3 className="text-sm font-medium text-muted-foreground mb-2">Ranking</h3>
+                      <div className="bg-night-800 rounded-lg p-4 border border-night-700 shadow-neo">
+                        <h3 className="text-sm font-medium text-night-400 mb-2">Ranking</h3>
                         <div className="flex items-center gap-2">
                           <div className="bg-flame-600/20 text-flame-500 p-2 rounded-full">
                             <Trophy className="h-6 w-6" />
                           </div>
                           <div>
-                            <div className="text-lg font-bold">Top 5%</div>
-                            <div className="text-xs text-muted-foreground">Global Ranking</div>
+                            <div className="text-lg font-bold text-white">Top 5%</div>
+                            <div className="text-xs text-night-400">Global Ranking</div>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div className="bg-night-800 rounded-lg p-4 border border-night-700">
-                      <h3 className="text-sm font-medium text-muted-foreground mb-4">Score Distribution</h3>
+                    <div className="bg-night-800 rounded-lg p-4 border border-night-700 shadow-neo flex flex-col justify-end">
+                      <h3 className="text-sm font-medium text-night-400 mb-4">Score Distribution</h3>
                       <div className="h-64 flex items-end justify-around gap-2">
                         {[45, 68, 90, 75, 60, 30, 20, 10, 5, 2].map((value, i) => (
-                          <div key={i} className="flex-1">
+                          <div key={i} className="flex-1 flex flex-col justify-end">
                             <div
-                              className="bg-gradient-to-t from-flame-700 to-flame-500 rounded-t"
+                              className="bg-gradient-to-t from-flame-700/90 to-flame-500 rounded-t shadow-md"
                               style={{ height: `${value * 0.6}%` }}
                             ></div>
-                            <div className="text-xs text-center mt-1">{i + 1}</div>
+                            <div className="text-xs text-center mt-1 text-night-400">{i + 1}</div>
                           </div>
                         ))}
                       </div>
-                      <div className="text-xs text-center mt-2 text-muted-foreground">Score Rating (1-10)</div>
+                      <div className="text-xs text-center mt-2 text-night-400">Score Rating (1-10)</div>
                     </div>
                   </div>
                 </CardContent>
@@ -486,9 +478,9 @@ const Profile = () => {
             </TabsContent>
             
             <TabsContent value="history" className="mt-6">
-              <Card className="border-night-700">
+              <Card className="bg-night-900/90 rounded-xl border-night-700 shadow-neo">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-white">
                     <Clock className="h-5 w-5" />
                     Recent Battles
                   </CardTitle>
@@ -498,7 +490,7 @@ const Profile = () => {
                     {recentBattles.map((battle) => (
                       <div
                         key={battle.id}
-                        className="group flex items-center justify-between p-3 rounded-lg bg-night-800 border border-night-700 hover:bg-night-700 transition-colors"
+                        className={`group flex items-center justify-between p-3 rounded-xl bg-night-800 border border-night-700 hover:bg-night-700/90 transition-colors shadow-neo-lg`}
                       >
                         <div className="flex items-center gap-3">
                           <div className={`h-10 w-10 rounded-full flex items-center justify-center ${battle.result === "win" ? "bg-flame-600/20 text-flame-500" : "bg-ember-600/20 text-ember-500"}`}>
@@ -509,19 +501,19 @@ const Profile = () => {
                             )}
                           </div>
                           <div>
-                            <div className="font-medium">
-                              vs. <span className={battle.result === "win" ? "text-flame-500" : ""}>{battle.opponent}</span>
+                            <div className={`font-medium ${battle.result === "win" ? "text-flame-500" : "text-ember-500"}`}>
+                              vs. {battle.opponent}
                             </div>
-                            <div className="text-xs text-muted-foreground">{battle.date}</div>
+                            <div className="text-xs text-night-400">{battle.date}</div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="font-mono font-medium">{battle.score}</div>
-                          <div className="text-xs text-muted-foreground capitalize">{battle.result}</div>
+                          <div className="font-mono font-medium text-white">{battle.score}</div>
+                          <div className="text-xs text-night-400 capitalize">{battle.result}</div>
                         </div>
                       </div>
                     ))}
-                    <Button variant="outline" className="w-full mt-4 border-night-700">
+                    <Button variant="outline" className="w-full mt-4 border-night-700 shadow-neo hover:bg-primary hover:text-night-900">
                       View All Battles
                     </Button>
                   </div>
@@ -530,35 +522,35 @@ const Profile = () => {
             </TabsContent>
             
             <TabsContent value="badges" className="mt-6">
-              <Card className="border-night-700">
+              <Card className="bg-night-900/90 rounded-xl border-night-700 shadow-neo">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-white">
                     <Award className="h-5 w-5" />
                     Earned Badges
                   </CardTitle>
-                  <CardDescription>Badges earned through exceptional roasting</CardDescription>
+                  <CardDescription className="text-night-400">Badges earned through exceptional roasting</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {badges.map((badge) => (
-                      <div key={badge.id} className="bg-night-800 rounded-lg p-4 border border-night-700 flex flex-col items-center text-center">
+                      <div key={badge.id} className="bg-night-800 rounded-xl p-4 border border-night-700 flex flex-col items-center text-center shadow-neo">
                         <div className="h-12 w-12 rounded-full bg-night-700 flex items-center justify-center mb-3">
                           {getBadgeIcon(badge.icon)}
                         </div>
-                        <h3 className="font-medium mb-1">{badge.name}</h3>
-                        <p className="text-xs text-muted-foreground">{badge.description}</p>
+                        <h3 className="font-medium text-white mb-1">{badge.name}</h3>
+                        <p className="text-xs text-night-400">{badge.description}</p>
                       </div>
                     ))}
                   </div>
                   <div className="mt-6 border-t border-night-700 pt-4">
-                    <h3 className="text-sm font-medium mb-3">Locked Badges</h3>
+                    <h3 className="text-sm font-medium mb-3 text-night-400">Locked Badges</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                      <div className="bg-night-800 rounded-lg p-4 border border-night-700 flex flex-col items-center text-center opacity-60">
+                      <div className="bg-night-800 rounded-xl p-4 border border-night-700 flex flex-col items-center text-center opacity-60 shadow-neo">
                         <div className="h-12 w-12 rounded-full bg-night-700 flex items-center justify-center mb-3">
                           <Shield className="h-4 w-4 text-gray-400" />
                         </div>
-                        <h3 className="font-medium mb-1">Unbreakable</h3>
-                        <p className="text-xs text-muted-foreground">Win 20 battles without losing</p>
+                        <h3 className="font-medium mb-1 text-white/60">Unbreakable</h3>
+                        <p className="text-xs text-night-400">Win 20 battles without losing</p>
                       </div>
                     </div>
                   </div>
