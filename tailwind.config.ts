@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -23,39 +22,53 @@ export default {
         geist: ['"Geist Mono"', 'monospace'],
       },
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        black: '#000',
+        white: '#fff',
+        yellow: {
+          DEFAULT: '#F8C537',
+        },
+        purple: {
+          DEFAULT: '#C5B4F0',
+        },
+        blue: {
+          DEFAULT: '#A6C7F7',
+        },
+        pink: {
+          DEFAULT: '#FFB3B3',
+        },
+        orange: {
+          DEFAULT: '#FF6B35',
+        },
+        coral: {
+          DEFAULT: '#FF3366',
+        },
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: '#F8C537',
+          foreground: '#000',
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
-        },
-        destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))'
-        },
-        muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))'
+          DEFAULT: '#C5B4F0',
+          foreground: '#000',
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: '#A6C7F7',
+          foreground: '#000',
         },
-        popover: {
-          DEFAULT: 'hsl(var(--popover))',
-          foreground: 'hsl(var(--popover-foreground))'
+        destructive: {
+          DEFAULT: '#FF3366',
+          foreground: '#fff',
+        },
+        warning: {
+          DEFAULT: '#FF6B35',
+          foreground: '#000',
         },
         card: {
-          DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))'
+          DEFAULT: '#fff',
+          foreground: '#000',
         },
+        border: '#000',
+        background: '#fff',
+        foreground: '#000',
         night: {
           DEFAULT: '#181B23',  // Updated darker navy blue
           50: '#f8f9fa',
@@ -184,9 +197,7 @@ export default {
         'neo': '4px 4px 0px 0px rgba(0,0,0,1)',
         'neo-hover': '6px 6px 0px 0px rgba(0,0,0,1)',
         'neo-lg': '8px 8px 0px 0px rgba(0,0,0,1)',
-        'neo-xl': '12px 12px 0px 0px rgba(0,0,0,1)',
       }
     }
   },
-  plugins: [require("tailwindcss-animate")],
-} satisfies Config;
+};

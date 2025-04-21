@@ -52,7 +52,7 @@ const BattlePage = () => {
   
   return (
     <div className="min-h-screen bg-night flex flex-col">
-      <NavBar />
+      
       
       <div className="container py-6">
         <div className="flex items-center justify-between mb-6">
@@ -68,7 +68,7 @@ const BattlePage = () => {
           
           {isParticipant && (
             <Button 
-              className="gap-2 bg-gradient-flame hover:opacity-90"
+              className="gap-2 bg-yellow hover:opacity-90"
               onClick={handleJoinBattle}
             >
               <Flame className="h-4 w-4" />

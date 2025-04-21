@@ -105,7 +105,7 @@ const SignupForm = () => {
       <CardFooter className="flex flex-col items-center">
         <Button 
           type="submit" 
-          className="w-full bg-gradient-flame hover:opacity-90"
+          className="w-full bg-yellow hover:opacity-90"
         >
           Create Account
         </Button>

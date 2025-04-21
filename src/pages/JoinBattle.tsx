@@ -6,7 +6,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Flame, ArrowLeft, Eye } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
-import NavBar from "@/components/NavBar";
+
+
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/context/AuthContext";
 
@@ -166,9 +167,9 @@ const JoinBattle = () => {
   if (!authLoading && !user) {
     return (
       <div className="min-h-screen bg-night flex flex-col">
-        <NavBar />
+        
         <div className="container flex-1 flex items-center justify-center">
-          <Card className="flame-card w-full max-w-md">
+          <Card className="bg-yellow border-2 border-black w-full max-w-md">
             <CardHeader className="text-center">
               <CardTitle className="text-2xl">Join Battle</CardTitle>
             </CardHeader>
@@ -189,7 +190,7 @@ const JoinBattle = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-night flex flex-col">
-        <NavBar />
+        
         <div className="container flex-1 flex items-center justify-center">
           <div className="text-center">Loading battle information...</div>
         </div>
@@ -200,7 +201,7 @@ const JoinBattle = () => {
   if (!battleData) {
     return (
       <div className="min-h-screen bg-night flex flex-col">
-        <NavBar />
+        
         <div className="container py-8">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">Battle Not Found</h2>
@@ -216,7 +217,7 @@ const JoinBattle = () => {
   
   return (
     <div className="min-h-screen bg-night flex flex-col">
-      <NavBar />
+      
       
       <div className="container py-8">
         <div className="flex items-center mb-6">
@@ -231,7 +232,7 @@ const JoinBattle = () => {
           </Button>
         </div>
         
-        <Card className="flame-card max-w-lg mx-auto">
+        <Card className="bg-yellow border-2 border-black max-w-lg mx-auto">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">{battleData.title}</CardTitle>
           </CardHeader>
@@ -264,7 +265,7 @@ const JoinBattle = () => {
           
           <CardFooter className="flex flex-col space-y-3">
             <Button 
-              className="w-full gap-2 bg-gradient-flame hover:opacity-90" 
+              className="w-full gap-2 bg-yellow hover:opacity-90" 
               onClick={handleJoinBattle}
               disabled={isJoining}
             >

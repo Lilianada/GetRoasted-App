@@ -1,6 +1,7 @@
 
 import { useState } from "react";
-import NavBar from "@/components/NavBar";
+
+
 import {
   Card,
   CardContent,
@@ -129,13 +130,14 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-night flex flex-col">
-      <NavBar />
       
-      <main className="container flex-1 py-6">
+      
+      
+      <main className="container flex-1 py-8">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Admin Sidebar */}
           <aside className="lg:w-64">
-            <Card className="flame-card border-night-700 bg-night-800">
+            <Card className=" border-night-700 bg-night-800">
               <CardHeader className="px-4 py-4">
                 <div className="flex items-center gap-2 text-amber-400">
                   <Shield className="h-5 w-5" />
@@ -176,7 +178,7 @@ const Admin = () => {
           {/* Main Content */}
           <div className="flex-1">
             <TabsContent value="users" className={activeTab === "users" ? "block" : "hidden"}>
-              <Card className="flame-card border-night-700">
+              <Card className=" border-night-700">
                 <CardHeader>
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <CardTitle className="flex items-center gap-2">
@@ -305,7 +307,7 @@ const Admin = () => {
             </TabsContent>
             
             <TabsContent value="reports" className={activeTab === "reports" ? "block" : "hidden"}>
-              <Card className="flame-card border-night-700">
+              <Card className=" border-night-700">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Flag className="h-5 w-5" />
@@ -391,7 +393,7 @@ const Admin = () => {
             </TabsContent>
             
             <TabsContent value="analytics" className={activeTab === "analytics" ? "block" : "hidden"}>
-              <Card className="flame-card border-night-700">
+              <Card className=" border-night-700">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <BarChart3 className="h-5 w-5" />

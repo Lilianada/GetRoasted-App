@@ -38,7 +38,7 @@ const VotingSystem = ({ options, onVote }: VotingSystemProps) => {
   };
 
   return (
-    <Card className="bg-[#C5B4F0] border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:translate-x-1 transition-all">
+    <Card className="bg-secondary border-2 border-black shadow-neo hover:shadow-neo-hover hover:-translate-y-1 hover:translate-x-1 transition-all">
       <CardHeader className="border-b-2 border-black">
         <CardTitle className="flex items-center gap-2 text-black">
           <Trophy className="h-5 w-5 text-[#F8C537]" />

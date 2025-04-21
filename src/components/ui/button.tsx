@@ -6,14 +6,14 @@ import { cn } from "@/lib/utils"
 import { useButtonAnimation } from "@/lib/animations"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-bold transition-all relative border-2 border-black shadow-neo",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-bold transition-all relative border-2 border-black shadow-neo font-geist rounded-none",
   {
     variants: {
       variant: {
-        default: "bg-[#F8C537] text-black hover:shadow-neo-hover hover:-translate-y-1 hover:translate-x-1 active:translate-y-0 active:translate-x-0 active:shadow-neo",
-        destructive: "bg-red-500 text-white hover:shadow-neo-hover hover:-translate-y-1 hover:translate-x-1 active:translate-y-0 active:translate-x-0 active:shadow-neo",
-        outline: "bg-white text-black hover:shadow-neo-hover hover:-translate-y-1 hover:translate-x-1 active:translate-y-0 active:translate-x-0 active:shadow-neo",
-        secondary: "bg-[#C5B4F0] text-black hover:shadow-neo-hover hover:-translate-y-1 hover:translate-x-1 active:translate-y-0 active:translate-x-0 active:shadow-neo",
+        default: "bg-yellow text-black border-2 border-black hover:shadow-neo-hover hover:-translate-y-1 hover:translate-x-1 active:translate-y-0 active:translate-x-0 active:shadow-neo",
+        destructive: "bg-coral text-white hover:shadow-neo-hover hover:-translate-y-1 hover:translate-x-1 active:translate-y-0 active:translate-x-0 active:shadow-neo",
+        outline: "bg-white text-black border-2 border-black hover:shadow-neo-hover hover:-translate-y-1 hover:translate-x-1 active:translate-y-0 active:translate-x-0 active:shadow-neo",
+        secondary: "bg-purple text-black border-2 border-black hover:shadow-neo-hover hover:-translate-y-1 hover:translate-x-1 active:translate-y-0 active:translate-x-0 active:shadow-neo",
         ghost: "border-transparent shadow-none hover:bg-accent hover:text-accent-foreground",
         link: "border-transparent shadow-none text-primary underline-offset-4 hover:underline",
       },

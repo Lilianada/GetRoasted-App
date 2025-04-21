@@ -76,10 +76,10 @@ const JoinPrivateBattleDialog = ({ children }: JoinPrivateBattleDialogProps) => 
   return (
     <Dialog>
       {triggerElement}
-      <DialogContent className="flame-card sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-coral text-white border border-night-700">
         <DialogHeader>
-          <DialogTitle>Join Private Battle</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-white">Join Private Battle</DialogTitle>
+          <DialogDescription className="text-night-200">
             Enter an invite link or battle ID to join a private battle.
           </DialogDescription>
         </DialogHeader>
@@ -89,10 +89,10 @@ const JoinPrivateBattleDialog = ({ children }: JoinPrivateBattleDialogProps) => 
             placeholder="Battle link or ID"
             value={battleLink}
             onChange={(e) => setBattleLink(e.target.value)}
-            className="border-night-700 focus-visible:ring-flame-500"
+            className="border-night-700 focus-visible:ring-flame-500 bg-night-800 text-white placeholder:text-night-400"
           />
           
-          <p className="text-xs text-muted-foreground mt-2">
+          <p className="text-xs text-night-300 mt-2">
             Paste a battle link that was shared with you or enter the battle ID directly.
           </p>
         </div>
@@ -100,7 +100,7 @@ const JoinPrivateBattleDialog = ({ children }: JoinPrivateBattleDialogProps) => 
         <DialogFooter>
           <Button 
             type="submit" 
-            className="bg-gradient-flame hover:opacity-90"
+            className="bg-yellow hover:opacity-90 text-black"
             disabled={isJoining}
             onClick={handleJoin}
           >

@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Flame, Trophy, MessageSquare, Users, Sparkles } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,22 +15,22 @@ const Index = () => {
       id: "battles",
       title: "Epic Roast Battles",
       description: "Challenge friends or strangers to hilarious verbal duels",
-      icon: <Flame className="h-8 w-8 text-[#F97316]" />,
-      color: "bg-[#FFB4A8]"
+      icon: <Flame className="h-8 w-8 text-accent" />,
+      color: "bg-accent"
     },
     {
       id: "leaderboards",
       title: "Global Leaderboards",
       description: "Climb the ranks and become the ultimate roast champion",
-      icon: <Trophy className="h-8 w-8 text-yellow-500" />,
-      color: "bg-[#F8C537]"
+      icon: <Trophy className="h-8 w-8 text-primary" />,
+      color: "bg-primary"
     },
     {
       id: "community",
       title: "Growing Community",
       description: "Join thousands of roasters from around the world",
-      icon: <Users className="h-8 w-8 text-[#A6C7F7]" />,
-      color: "bg-[#A6C7F7]"
+      icon: <Users className="h-8 w-8 text-blue" />,
+      color: "bg-blue"
     },
     {
       id: "rewards",
@@ -79,7 +80,7 @@ const Index = () => {
                 )}
                 
                 <Link to="/rules">
-                  <Button variant="outline" className="text-lg border-2 border-white hover:border-flame-500 hover:text-flame-500 py-6">
+                  <Button variant="outline" className="text-lg border-2 border-white hover:bg-yellow-500 hover:text-flame-500 py-6">
                     How It Works
                   </Button>
                 </Link>
@@ -120,6 +121,7 @@ const Index = () => {
       </section>
       
       {/* Features Section */}
+      <Breadcrumbs />
       <section className="neo-section py-16 relative">
         <div className="neo-container">
           <div className="text-center mb-12">

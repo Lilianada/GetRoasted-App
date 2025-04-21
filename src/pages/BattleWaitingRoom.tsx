@@ -1,7 +1,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import NavBar from "@/components/NavBar";
+
+
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -173,10 +174,10 @@ const BattleWaitingRoom = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-night flex flex-col">
-        <NavBar />
-        <div className="container flex-1 flex items-center justify-center">
+        
+        <main className="container flex-1 py-8 flex items-center justify-center">
           <div className="text-center">Loading battle information...</div>
-        </div>
+        </main>
       </div>
     );
   }
@@ -184,7 +185,6 @@ const BattleWaitingRoom = () => {
   if (!battleData) {
     return (
       <div className="min-h-screen bg-night flex flex-col">
-        <NavBar />
         <div className="container py-8">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">Battle Not Found</h2>
@@ -200,8 +200,6 @@ const BattleWaitingRoom = () => {
   
   return (
     <div className="min-h-screen bg-night flex flex-col">
-      <NavBar />
-      
       <div className="container py-8">
         <div className="flex items-center mb-6">
           <Button 
@@ -215,7 +213,7 @@ const BattleWaitingRoom = () => {
           </Button>
         </div>
         
-        <Card className="flame-card max-w-3xl mx-auto">
+        <Card className=" max-w-3xl mx-auto">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">{battleData.title}</CardTitle>
             <CardDescription>

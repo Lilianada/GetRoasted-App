@@ -219,7 +219,7 @@ const NotificationsModal = ({ children }: NotificationsModalProps) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {triggerElement}
-      <DialogContent className="flame-card sm:max-w-md max-h-[80vh] flex flex-col">
+      <DialogContent className=" sm:max-w-md max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>Notifications</span>

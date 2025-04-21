@@ -17,7 +17,7 @@ const SettingsToggle = ({ variant = 'horizontal', className = '' }: SettingsTogg
         variant={darkMode ? "default" : "outline"} 
         size="icon" 
         onClick={toggleDarkMode}
-        className={`border-2 border-black transition-all ${darkMode ? 'bg-[#F8C537] text-black' : 'bg-night-800 text-white'}`}
+        className={`border-2 border-black transition-all ${darkMode ? 'bg-primary text-black' : 'bg-background text-white'}`}
       >
         {darkMode ? <Moon className="h-[1.2rem] w-[1.2rem]" /> : <Sun className="h-[1.2rem] w-[1.2rem]" />}
       </Button>

@@ -1,6 +1,7 @@
 
 import { Link } from "react-router-dom";
-import NavBar from "@/components/NavBar";
+
+
 import { Button } from "@/components/ui/button";
 import { Flame, ShieldCheck, ChevronUp } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -23,7 +24,7 @@ const Privacy = () => {
   
   return (
     <div className="min-h-screen bg-night flex flex-col">
-      <NavBar />
+      
       
       <main className="container flex-1 py-12">
         <div className="max-w-3xl mx-auto">

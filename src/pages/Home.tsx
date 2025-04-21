@@ -35,7 +35,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-night flex flex-col">
-      <NavBar />
+      
       
       <main className="flex-1">
         {/* Hero Section */}
@@ -59,14 +59,14 @@ const Home = () => {
               
               <div className="flex flex-wrap justify-center gap-4">
                 {user ? (
-                  <Button asChild size="lg" className="gap-2 bg-gradient-flame hover:opacity-90">
+                  <Button asChild size="lg" className="gap-2 bg-yellow hover:opacity-90">
                     <Link to="/battle/new">
                       Start a Battle
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                   </Button>
                 ) : (
-                  <Button asChild size="lg" className="gap-2 bg-gradient-flame hover:opacity-90">
+                  <Button asChild size="lg" className="gap-2 bg-yellow hover:opacity-90">
                     <Link to="/signup">
                       Get Started
                       <ArrowRight className="h-4 w-4" />
@@ -96,8 +96,8 @@ const Home = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div className="flame-card flex flex-col items-center text-center p-6">
-                <div className="h-12 w-12 bg-gradient-flame rounded-full flex items-center justify-center mb-4">
+              <div className=" flex flex-col items-center text-center p-6">
+                <div className="h-12 w-12 bg-yellow rounded-full flex items-center justify-center mb-4">
                   <Users className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-xl font-bold mb-2">Join a Battle</h3>
@@ -106,8 +106,8 @@ const Home = () => {
                 </p>
               </div>
               
-              <div className="flame-card flex flex-col items-center text-center p-6">
-                <div className="h-12 w-12 bg-gradient-flame rounded-full flex items-center justify-center mb-4">
+              <div className=" flex flex-col items-center text-center p-6">
+                <div className="h-12 w-12 bg-yellow rounded-full flex items-center justify-center mb-4">
                   <Timer className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-xl font-bold mb-2">Time-bound Rounds</h3>
@@ -116,8 +116,8 @@ const Home = () => {
                 </p>
               </div>
               
-              <div className="flame-card flex flex-col items-center text-center p-6">
-                <div className="h-12 w-12 bg-gradient-flame rounded-full flex items-center justify-center mb-4">
+              <div className=" flex flex-col items-center text-center p-6">
+                <div className="h-12 w-12 bg-yellow rounded-full flex items-center justify-center mb-4">
                   <Crown className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-xl font-bold mb-2">Get Voted</h3>
@@ -152,7 +152,7 @@ const Home = () => {
               ) : (
                 <div className="col-span-3 text-center py-8">
                   <p className="text-muted-foreground">No active battles at the moment. Be the first to start one!</p>
-                  <Button asChild className="mt-4 bg-gradient-flame hover:opacity-90">
+                  <Button asChild className="mt-4 bg-yellow hover:opacity-90">
                     <Link to={user ? "/battle/new" : "/signup"}>Start a Battle</Link>
                   </Button>
                 </div>
@@ -164,7 +164,7 @@ const Home = () => {
         {/* CTA Section */}
         <section className="py-16 bg-gradient-to-b from-night-900 to-night-800">
           <div className="container">
-            <div className="flame-card p-8 lg:p-12 text-center">
+            <div className=" p-8 lg:p-12 text-center">
               <h2 className="text-3xl font-bold mb-4">Ready to Get Roasted?</h2>
               <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
                 Sign up now to join the ultimate verbal battleground. Show off your wit, 
@@ -172,14 +172,14 @@ const Home = () => {
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 {user ? (
-                  <Button asChild size="lg" className="gap-2 bg-gradient-flame hover:opacity-90">
+                  <Button asChild size="lg" className="gap-2 bg-yellow hover:opacity-90">
                     <Link to="/battle/new">
                       <Sparkles className="h-4 w-4" />
                       Start Battle
                     </Link>
                   </Button>
                 ) : (
-                  <Button asChild size="lg" className="gap-2 bg-gradient-flame hover:opacity-90">
+                  <Button asChild size="lg" className="gap-2 bg-yellow hover:opacity-90">
                     <Link to="/signup">
                       <User className="h-4 w-4" />
                       Sign Up Free

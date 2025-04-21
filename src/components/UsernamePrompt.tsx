@@ -94,7 +94,7 @@ const UsernamePrompt = ({ isOpen, onClose, onSubmit }: UsernamePromptProps) => {
           <DialogFooter>
             <Button 
               type="submit" 
-              className="bg-gradient-flame hover:opacity-90 w-full"
+              className="bg-yellow hover:opacity-90 w-full"
               disabled={isLoading}
             >
               {isLoading ? (

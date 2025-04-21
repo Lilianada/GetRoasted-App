@@ -32,19 +32,16 @@
 }
 
 /* Button overrides */
-button[class*="bg-gradient-flame"] {
+button[class*="bg-yellow"], button, .neo-button {
   background: #F8C537 !important;
   color: black !important;
   border: 2px solid black !important;
   box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1) !important;
   transition: all 0.2s !important;
   border-radius: 0 !important;
+  font-family: 'Geist Mono', monospace !important;
 }
 
-button[class*="bg-gradient-flame"]:hover {
-  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1) !important;
-  transform: translate(-1px, -1px) !important;
-}
 
 /* Sheet animation overrides */
 [data-state="open"] > .neo-button {

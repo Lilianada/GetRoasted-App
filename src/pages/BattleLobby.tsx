@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
-import NavBar from "@/components/NavBar";
+
+
 import BattleCard from "@/components/BattleCard";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -101,7 +102,8 @@ const BattleLobby = () => {
   
   return (
     <div className="min-h-screen bg-night flex flex-col">
-      <NavBar />
+      
+      
       
       <main className="flex-1 container py-8">
         <div className="mb-8">
@@ -116,8 +118,8 @@ const BattleLobby = () => {
               <BattleSearch onSearch={handleSearch} />
             </div>
             <div className="flex gap-4">
-              <Button asChild className="gap-2 bg-[#F8C537] text-black border-2 border-black hover:bg-[#F8C537]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:translate-x-1 transition-all">
-                <Link to="/battle/new">
+              <Button asChild className="gap-2 bg-primary text-black border-2 border-black hover:bg-primary/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:translate-x-1 transition-all">
+                <Link to="/battles/new">
                   <Plus className="h-4 w-4" />
                   Create Battle
                 </Link>
@@ -128,11 +130,11 @@ const BattleLobby = () => {
           
           {/* Battle Types Tabs */}
           <Tabs defaultValue="all" className="space-y-6">
-            <TabsList className="grid grid-cols-4 max-w-md bg-[#A6C7F7] border-2 border-black">
-              <TabsTrigger value="all" className="data-[state=active]:bg-[#F8C537] data-[state=active]:text-black font-bold">All</TabsTrigger>
-              <TabsTrigger value="active" className="data-[state=active]:bg-[#F8C537] data-[state=active]:text-black font-bold">Active</TabsTrigger>
-              <TabsTrigger value="waiting" className="data-[state=active]:bg-[#F8C537] data-[state=active]:text-black font-bold">Waiting</TabsTrigger>
-              <TabsTrigger value="completed" className="data-[state=active]:bg-[#F8C537] data-[state=active]:text-black font-bold">Completed</TabsTrigger>
+            <TabsList className="grid grid-cols-4 max-w-md bg-blue border-2 border-black">
+              <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-black font-bold">All</TabsTrigger>
+              <TabsTrigger value="active" className="data-[state=active]:bg-primary data-[state=active]:text-black font-bold">Active</TabsTrigger>
+              <TabsTrigger value="waiting" className="data-[state=active]:bg-primary data-[state=active]:text-black font-bold">Waiting</TabsTrigger>
+              <TabsTrigger value="completed" className="data-[state=active]:bg-primary data-[state=active]:text-black font-bold">Completed</TabsTrigger>
             </TabsList>
             
             <TabsContent value="all" className="space-y-6">
@@ -145,10 +147,10 @@ const BattleLobby = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12 bg-[#C5B4F0] border-2 border-black rounded-xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                <div className="text-center py-12 bg-secondary border-2 border-black rounded-xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
                   <p className="text-black font-bold mb-4">No battles found</p>
-                  <Button asChild className="gap-2 bg-[#F8C537] text-black border-2 border-black hover:bg-[#F8C537]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:translate-x-1 transition-all">
-                    <Link to="/battle/new">
+                  <Button asChild className="gap-2 bg-primary text-black border-2 border-black hover:bg-primary/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:translate-x-1 transition-all">
+                    <Link to="/battles/new">
                       <Plus className="h-4 w-4" />
                       Create a Battle
                     </Link>
@@ -167,7 +169,7 @@ const BattleLobby = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12 bg-[#C5B4F0] border-2 border-black rounded-xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                <div className="text-center py-12 bg-secondary border-2 border-black rounded-xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
                   <p className="text-black font-bold">No active battles</p>
                 </div>
               )}
@@ -183,7 +185,7 @@ const BattleLobby = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12 bg-[#C5B4F0] border-2 border-black rounded-xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                <div className="text-center py-12 bg-secondary border-2 border-black rounded-xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
                   <p className="text-black font-bold">No battles waiting for players</p>
                 </div>
               )}
@@ -199,7 +201,7 @@ const BattleLobby = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12 bg-[#C5B4F0] border-2 border-black rounded-xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                <div className="text-center py-12 bg-secondary border-2 border-black rounded-xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
                   <p className="text-black font-bold">No completed battles</p>
                 </div>
               )}

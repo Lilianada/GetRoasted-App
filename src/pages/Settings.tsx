@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import NavBar from "@/components/NavBar";
+
+
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -144,79 +145,23 @@ const Settings = () => {
 
   return (
     <div className="min-h-screen bg-night flex flex-col">
-      <NavBar />
+      
 
-      <main className="container flex-1 py-8">
+      
+      <main className="container flex-1 py-12">
         <div className="max-w-3xl mx-auto">
           <div className="mb-6 flex items-center gap-3">
-            <SettingsIcon className="h-6 w-6 text-flame-500" />
+            <SettingsIcon className="h-6 w-6 text-primary" />
             <h1 className="text-2xl font-bold">Settings</h1>
           </div>
 
           <div className="grid gap-6">
-            <Card className="flame-card border-night-700">
+           
+
+            <Card className=" border-night-700">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Account Settings
-                </CardTitle>
-                <CardDescription>
-                  Manage your profile information
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="displayName">Display Name</Label>
-                  <Input
-                    id="displayName"
-                    value={profileData.displayName}
-                    onChange={handleInputChange}
-                    className="border-night-700 focus-visible:ring-flame-500"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    This is how you'll appear in battles and on the leaderboard.
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    value={profileData.email}
-                    type="email"
-                    disabled
-                    className="border-night-700 focus-visible:ring-flame-500"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="bio">Bio</Label>
-                  <Textarea
-                    id="bio"
-                    value={profileData.bio}
-                    onChange={handleInputChange}
-                    className="border-night-700 focus-visible:ring-flame-500 min-h-[100px]"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Tell others about your roasting style in 160 characters or less.
-                  </p>
-                </div>
-              </CardContent>
-              <CardFooter className="border-t border-night-700 pt-6">
-                <Button 
-                  className="bg-gradient-flame hover:opacity-90"
-                  onClick={handleSaveSettings}
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Saving..." : "Save Changes"}
-                </Button>
-              </CardFooter>
-            </Card>
-
-            <Card className="flame-card border-night-700">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bell className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  {/* <Bell className="h-5 w-5" /> */}
                   Notification Settings
                 </CardTitle>
                 <CardDescription>
@@ -234,7 +179,7 @@ const Settings = () => {
                   <Switch 
                     checked={notificationsEnabled} 
                     onCheckedChange={setNotificationsEnabled} 
-                    className="data-[state=checked]:bg-flame-500"
+                    className="data-[state=checked]:bg-primary"
                   />
                 </div>
 
@@ -243,14 +188,14 @@ const Settings = () => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      {/* <Mail className="h-4 w-4 text-muted-foreground" /> */}
                       <Label className="text-base">Email Notifications</Label>
                     </div>
                     <Switch 
                       checked={emailNotifications} 
                       onCheckedChange={setEmailNotifications}
                       disabled={!notificationsEnabled}
-                      className="data-[state=checked]:bg-flame-500"
+                      className="data-[state=checked]:bg-primary"
                     />
                   </div>
                   
@@ -263,17 +208,17 @@ const Settings = () => {
                       checked={inAppNotifications} 
                       onCheckedChange={setInAppNotifications}
                       disabled={!notificationsEnabled}
-                      className="data-[state=checked]:bg-flame-500"
+                      className="data-[state=checked]:bg-primary"
                     />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="flame-card border-night-700">
+            <Card className=" border-night-700">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Moon className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  {/* <Moon className="h-5 w-5" /> */}
                   Display Preferences
                 </CardTitle>
               </CardHeader>
@@ -288,7 +233,7 @@ const Settings = () => {
                   <Switch 
                     checked={darkMode} 
                     onCheckedChange={setDarkMode} 
-                    className="data-[state=checked]:bg-flame-500"
+                    className="data-[state=checked]:bg-primary"
                   />
                 </div>
                 
@@ -304,13 +249,13 @@ const Settings = () => {
                   <Switch 
                     checked={soundEffects} 
                     onCheckedChange={setSoundEffects} 
-                    className="data-[state=checked]:bg-flame-500"
+                    className="data-[state=checked]:bg-primary"
                   />
                 </div>
               </CardContent>
               <CardFooter className="border-t border-night-700 pt-6">
                 <Button 
-                  className="bg-gradient-flame hover:opacity-90"
+                  className="bg-yellow hover:opacity-90"
                   onClick={handleSaveSettings}
                 >
                   Save Preferences
@@ -324,10 +269,11 @@ const Settings = () => {
                   <AlertTriangle className="h-5 w-5" />
                   Danger Zone
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-card">
                   Irreversible actions that affect your account
                 </CardDescription>
               </CardHeader>
+                {/* DIALOG CONFIRMATION */}
               <CardContent>
                 <Dialog>
                   <DialogTrigger asChild>

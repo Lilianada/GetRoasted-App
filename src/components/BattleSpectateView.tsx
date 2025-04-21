@@ -228,7 +228,7 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Sidebar */}
         <div className="lg:col-span-1 space-y-6">
-          <Card className="flame-card p-4">
+          <Card className=" p-4">
             <h3 className="text-lg font-bold mb-4">Battle Info</h3>
             <div className="space-y-3">
               <div>
@@ -269,7 +269,7 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
             </div>
           </Card>
           
-          <Card className="flame-card p-4">
+          <Card className=" p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold">Participants</h3>
               <Badge variant="outline" className="flex items-center gap-1">
@@ -298,7 +298,7 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
             </div>
           </Card>
           
-          <Card className="flame-card p-4">
+          <Card className=" p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold">Spectators</h3>
               <Badge variant="outline" className="flex items-center gap-1">
@@ -309,7 +309,7 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
             <div className="space-y-2">
               {user ? (
                 <Button
-                  className={isSpectating ? "w-full bg-night-700" : "w-full bg-gradient-flame"}
+                  className={isSpectating ? "w-full bg-night-700" : "w-full bg-yellow"}
                   onClick={handleSpectate}
                 >
                   {isSpectating ? "Stop Spectating" : "Spectate Battle"}
@@ -323,7 +323,7 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
           </Card>
           
           {isSpectating && participants.length === 2 && battle.status === 'active' && (
-            <Card className="flame-card p-4">
+            <Card className=" p-4">
               <h3 className="text-lg font-bold mb-4">Vote for Winner</h3>
               <div className="flex flex-col space-y-4">
                 {participants.map((p) => (
@@ -362,7 +362,7 @@ const BattleSpectateView = ({ battleId }: BattleSpectateViewProps) => {
         
         {/* Main Content - Roast Feed */}
         <div className="lg:col-span-2">
-          <Card className="flame-card p-4 min-h-[500px]">
+          <Card className=" p-4 min-h-[500px]">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
               <MessageCircle className="h-5 w-5 text-flame-500" />
               Live Roast Feed

@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
-import NavBar from "@/components/NavBar";
+
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Award, Crown, Flame, Zap } from "lucide-react";
@@ -51,35 +52,33 @@ const Leaderboard = () => {
   };
 
   const getRankStyle = (rank: number) => {
-    if (rank === 1) return "bg-[#F8C537]";
-    if (rank === 2) return "bg-[#C5B4F0]";
-    if (rank === 3) return "bg-[#A6C7F7]";
-    return "bg-[#FFB4A8]";
+    if (rank === 1) return "bg-primary";
   };
 
   return (
-    <div className="min-h-screen bg-night flex flex-col">
-      <NavBar />
+    <div className="min-h-screen bg-yellow flex flex-col">
+      
       
       <main className="container flex-1 py-12">
-        <div className="max-w-4xl mx-auto">
+        
+      <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
-              <div className="p-2 bg-[#F8C537] border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="p-2 bg-primary border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                 <Award className="h-8 w-8 text-black" />
               </div>
               <h1 className="text-3xl font-black">Leaderboard</h1>
             </div>
             
             <Tabs defaultValue={period} onValueChange={setPeriod} className="w-auto">
-              <TabsList className="bg-[#C5B4F0] border-2 border-black p-1">
-                <TabsTrigger value="today" className="data-[state=active]:bg-[#F8C537] data-[state=active]:text-black">
+              <TabsList className="bg-secondary border-2 border-black p-1">
+                <TabsTrigger value="today" className="data-[state=active]:bg-primary data-[state=active]:text-black">
                   Today
                 </TabsTrigger>
-                <TabsTrigger value="week" className="data-[state=active]:bg-[#F8C537] data-[state=active]:text-black">
+                <TabsTrigger value="week" className="data-[state=active]:bg-primary data-[state=active]:text-black">
                   This Week
                 </TabsTrigger>
-                <TabsTrigger value="alltime" className="data-[state=active]:bg-[#F8C537] data-[state=active]:text-black">
+                <TabsTrigger value="alltime" className="data-[state=active]:bg-primary data-[state=active]:text-black">
                   All Time
                 </TabsTrigger>
               </TabsList>
@@ -113,7 +112,7 @@ const Leaderboard = () => {
                   </div>
                   
                   <div className="col-span-7 flex items-center gap-3">
-                    <div className="h-10 w-10 border-2 border-black bg-[#C5B4F0] flex items-center justify-center font-bold">
+                    <div className="h-10 w-10 border-2 border-black bg-secondary flex items-center justify-center font-bold">
                       {user.username.substring(0, 2).toUpperCase()}
                     </div>
                     

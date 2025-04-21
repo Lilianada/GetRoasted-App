@@ -1,16 +1,11 @@
 
 import { useEffect, useRef } from 'react';
-import * as animeLib from 'animejs';
+
 import { cn } from '@/lib/utils';
 
-// Handle anime.js import properly - create a function that safely returns the anime instance
-const getAnime = () => {
-  // @ts-ignore - Ignore TypeScript error as anime.js has a different export structure than its types suggest
-  return animeLib.default || animeLib;
-};
 
-// Get the anime instance
-const anime = getAnime();
+
+
 
 interface LoaderProps {
   size?: 'small' | 'medium' | 'large';
@@ -27,20 +22,35 @@ export function Loader({
 
   useEffect(() => {
     if (!loaderRef.current) return;
-    
-    const animation = anime({
-      targets: loaderRef.current.querySelectorAll('.loader-dot'),
-      scale: [0, 1],
-      opacity: [0.5, 1],
-      delay: anime.stagger(150),
-      duration: 500,
-      loop: true,
-      direction: 'alternate',
-      easing: 'easeInOutQuad'
-    });
+    const dots = loaderRef.current.querySelectorAll('.loader-dot');
+    let frame = 0;
+    let running = true;
+    const totalDots = dots.length;
+    const duration = 1000; // ms for a full loop
+    const dotDelay = 150;
 
+    function animate() {
+      if (!running) return;
+      const now = Date.now();
+      dots.forEach((dot, i) => {
+        // Calculate phase for each dot
+        const phase = ((now / duration) + i * (dotDelay / duration)) % 1;
+        // Animate scale and opacity in a wave
+        const scale = 0.7 + 0.3 * Math.sin(phase * 2 * Math.PI);
+        const opacity = 0.5 + 0.5 * Math.sin(phase * 2 * Math.PI);
+        (dot as HTMLElement).style.transform = `scale(${scale})`;
+        (dot as HTMLElement).style.opacity = `${opacity}`;
+      });
+      frame = requestAnimationFrame(animate);
+    }
+    animate();
     return () => {
-      animation.pause();
+      running = false;
+      if (frame) cancelAnimationFrame(frame);
+      dots.forEach(dot => {
+        (dot as HTMLElement).style.transform = '';
+        (dot as HTMLElement).style.opacity = '';
+      });
     };
   }, []);
 
@@ -57,7 +67,7 @@ export function Loader({
   };
   
   const dotColors = variant === 'colorful' 
-    ? ['bg-[#F8C537]', 'bg-[#C5B4F0]', 'bg-[#A6C7F7]'] 
+    ? ['bg-primary', 'bg-secondary', 'bg-blue'] 
     : ['bg-current', 'bg-current', 'bg-current'];
 
   return (

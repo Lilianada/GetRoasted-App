@@ -168,7 +168,7 @@ const InviteFromContacts = ({ battleId, trigger }: InviteFromContactsProps) => {
             Cancel
           </Button>
           <Button 
-            className="gap-2 bg-gradient-flame hover:opacity-90"
+            className="gap-2 bg-yellow hover:opacity-90"
             onClick={handleInvite}
             disabled={selectedContacts.length === 0}
           >

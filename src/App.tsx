@@ -1,9 +1,10 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import NavBar from "@/components/NavBar";
 import { SubscriptionProvider } from "./hooks/useSubscription";
 import { AuthProvider } from "./context/AuthContext";
 import { useAuthContext } from "./context/AuthContext";
@@ -54,6 +55,8 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
+              <NavBar />
+              <Breadcrumbs />
               <Routes>
                 {/* Public routes */}
                 <Route path="/" element={<Home />} />
@@ -67,7 +70,7 @@ const App = () => (
                     <BattleLobby />
                   </ProtectedRoute>
                 } />
-                <Route path="/battle/new" element={
+                <Route path="/battles/new" element={
                   <ProtectedRoute>
                     <NewBattle />
                   </ProtectedRoute>

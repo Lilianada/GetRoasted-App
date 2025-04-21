@@ -22,7 +22,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import NavBar from "@/components/NavBar";
+
+
 
 // Mock data for the battle
 const battleData = {
@@ -151,13 +152,14 @@ const Battle = () => {
 
   return (
     <div className="min-h-screen bg-night flex flex-col">
-      <NavBar />
       
-      <main className="container flex-1 py-4">
+      
+      
+      <main className="container flex-1 py-8">
         <div className="flex flex-col lg:flex-row gap-4">
           {/* Battle Arena */}
           <div className="flex-1">
-            <Card className="p-4 flame-card border-night-700">
+            <Card className="p-4 bg-yellow border-2 border-black border-night-700">
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -214,9 +216,9 @@ const Battle = () => {
               <div className="flex justify-between items-center mb-4">
                 {battleData.players.map((player, index) => (
                   <div key={player.id} className={`flex ${index === 0 ? "flex-row" : "flex-row-reverse"} items-center gap-3`}>
-                    <Avatar className={`h-12 w-12 border-2 ${player.isCurrentTurn ? "border-flame-500 animate-pulse" : "border-night-700"}`}>
+                    <Avatar className={`h-12 w-12 border-2 ${player.isCurrentTurn ? "bg-yellow-500 animate-pulse" : "border-night-700"}`}>
                       <AvatarImage src={player.avatar} alt={player.username} />
-                      <AvatarFallback className="bg-night-700 text-flame-500">
+                      <AvatarFallback className="bg-night-700 text-yellow-500">
                         {player.username.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -240,7 +242,7 @@ const Battle = () => {
                           {isLeft ? (
                             <>
                               <Avatar className="h-6 w-6">
-                                <AvatarFallback className="bg-night-700 text-flame-500 text-xs">
+                                <AvatarFallback className="bg-night-700 text-yellow-500 text-xs">
                                   {player?.username.substring(0, 2).toUpperCase()}
                                 </AvatarFallback>
                               </Avatar>
@@ -254,7 +256,7 @@ const Battle = () => {
                                 {player?.username} • Round {roast.round}
                               </span>
                               <Avatar className="h-6 w-6">
-                                <AvatarFallback className="bg-night-700 text-flame-500 text-xs">
+                                <AvatarFallback className="bg-night-700 text-yellow-500 text-xs">
                                   {player?.username.substring(0, 2).toUpperCase()}
                                 </AvatarFallback>
                               </Avatar>
@@ -265,7 +267,7 @@ const Battle = () => {
                         <div className={`p-3 rounded-lg ${
                           isLeft ? 
                           "bg-night-800 border border-night-700 rounded-tl-none" : 
-                          "bg-flame-600/20 border border-flame-500/20 rounded-tr-none"
+                          "bg-yellow-500 border border-yellow-500 rounded-tr-none"
                         }`}>
                           <p>{roast.text}</p>
                         </div>
@@ -329,7 +331,7 @@ const Battle = () => {
           
           {/* Spectator Chat (visible on larger screens or when toggled on mobile) */}
           <div className={`w-full lg:w-80 ${showChat ? "block" : "hidden lg:block"}`}>
-            <Card className="flame-card border-night-700 h-full">
+            <Card className="bg-yellow border-2 border-black border-night-700 h-full">
               <div className="flex items-center justify-between p-3 border-b border-night-700">
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-flame-500" />

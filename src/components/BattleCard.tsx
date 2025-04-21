@@ -33,9 +33,9 @@ const BattleCard = ({
 }: BattleCardProps) => {
   const getStatusColor = () => {
     switch (status) {
-      case 'waiting': return 'bg-[#F8C537] text-black border-2 border-black';
-      case 'active': return 'bg-[#C5B4F0] text-black border-2 border-black';
-      case 'completed': return 'bg-[#FFB4A8] text-black border-2 border-black';
+      case 'waiting': return 'bg-primary text-black border-2 border-black';
+      case 'active': return 'bg-secondary text-black border-2 border-black';
+      case 'completed': return 'bg-accent text-black border-2 border-black';
       default: return '';
     }
   };
@@ -51,7 +51,7 @@ const BattleCard = ({
     <Card className={`
       relative transform transition-all duration-200 
       hover:-translate-y-1 hover:translate-x-1
-      bg-[#A6C7F7] border-2 border-black rounded-xl overflow-hidden
+      bg-blue border-2 border-black rounded-xl overflow-hidden
       shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]
       hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]
     `}>
@@ -120,7 +120,7 @@ const BattleCard = ({
         </div>
         <Button 
           asChild
-          className="bg-[#F8C537] text-black border-2 border-black hover:bg-[#F8C537]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+          className="bg-primary text-black border-2 border-black hover:bg-primary/90 shadow-neo hover:shadow-neo-hover"
         >
           <Link to={`/battle/${id}`}>
             {status === 'waiting' ? 'Join Battle' : status === 'active' ? 'Watch' : 'View Results'}

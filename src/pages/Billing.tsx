@@ -1,5 +1,6 @@
 import { useState } from "react";
-import NavBar from "@/components/NavBar";
+
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -64,9 +65,10 @@ const Billing = () => {
 
   return (
     <div className="min-h-screen bg-night flex flex-col">
-      <NavBar />
       
-      <main className="container py-8 flex-1">
+      
+      
+      <main className="container flex-1 py-8">
         <div className="mb-8">
           <h1 className="text-2xl font-bold">Billing & Subscription</h1>
           <p className="text-muted-foreground">Manage your subscription and payment details</p>
@@ -88,7 +90,7 @@ const Billing = () => {
               </TabsList>
               
               <TabsContent value="plan">
-                <Card className="flame-card">
+                <Card className="">
                   <CardHeader>
                     <CardTitle>Subscription Plan</CardTitle>
                     <CardDescription>
@@ -121,7 +123,7 @@ const Billing = () => {
                     <div className="flex flex-col sm:flex-row gap-4">
                       {mockSubscription.plan === "free" ? (
                         <Button 
-                          className="bg-gradient-flame hover:opacity-90"
+                          className="bg-yellow hover:opacity-90"
                           onClick={() => setShowUpgradeModal(true)}
                         >
                           Upgrade to Pro
@@ -149,7 +151,7 @@ const Billing = () => {
               </TabsContent>
               
               <TabsContent value="payment">
-                <Card className="flame-card">
+                <Card className="">
                   <CardHeader>
                     <CardTitle>Payment Methods</CardTitle>
                     <CardDescription>
@@ -183,7 +185,7 @@ const Billing = () => {
               </TabsContent>
               
               <TabsContent value="invoices">
-                <Card className="flame-card">
+                <Card className="">
                   <CardHeader>
                     <CardTitle>Billing History</CardTitle>
                     <CardDescription>
@@ -231,7 +233,7 @@ const Billing = () => {
           </div>
           
           <div>
-            <Card className="flame-card">
+            <Card className="">
               <CardHeader>
                 <CardTitle>Need Help?</CardTitle>
               </CardHeader>
@@ -303,7 +305,7 @@ const Billing = () => {
               Cancel
             </Button>
             {selectedPlan === "pro" && mockSubscription.plan !== "pro" && (
-              <Button className="bg-gradient-flame hover:opacity-90" onClick={handleUpgrade}>
+              <Button className="bg-yellow hover:opacity-90" onClick={handleUpgrade}>
                 Confirm Upgrade
               </Button>
             )}

@@ -1,6 +1,7 @@
 
 import { Link } from "react-router-dom";
-import NavBar from "@/components/NavBar";
+
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Flame, FileText, ChevronUp } from "lucide-react";
@@ -24,7 +25,7 @@ const Terms = () => {
   
   return (
     <div className="min-h-screen bg-night flex flex-col">
-      <NavBar />
+      
       
       <main className="container flex-1 py-12">
         <div className="max-w-3xl mx-auto">

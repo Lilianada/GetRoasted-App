@@ -108,7 +108,7 @@ const ProfileEditor = () => {
           src={avatarPreview || undefined} 
           alt="Profile avatar" 
         />
-        <AvatarFallback className="bg-[#F8C537] text-black font-bold">
+        <AvatarFallback className="bg-primary text-black font-bold">
           {initials}
         </AvatarFallback>
       </Avatar>

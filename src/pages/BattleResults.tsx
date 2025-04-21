@@ -1,5 +1,6 @@
 
-import NavBar from "@/components/NavBar";
+
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -64,11 +65,12 @@ const BattleResults = () => {
   
   return (
     <div className="min-h-screen bg-night flex flex-col">
-      <NavBar />
       
-      <main className="flex-1 container py-8">
+      
+      
+      <main className="container flex-1 py-8">
         {/* Hero results section */}
-        <Card className="flame-card p-6 md:p-8 mb-8">
+        <Card className="bg-yellow border-2 border-black p-6 md:p-8 mb-8">
           <div className="text-center mb-8">
             <Badge className="bg-flame-500 text-white mb-4">Battle Complete</Badge>
             <h1 className="text-2xl md:text-3xl font-bold mb-2">{title}</h1>
@@ -106,7 +108,7 @@ const BattleResults = () => {
                   <span className="font-mono font-bold">{winner.scores.total.toFixed(1)}</span>
                 </div>
                 <Progress value={100} className="h-2.5 bg-night-700">
-                  <div className="h-full bg-gradient-flame rounded-full" />
+                  <div className="h-full bg-yellow rounded-full" />
                 </Progress>
               </div>
             </div>
@@ -142,7 +144,7 @@ const BattleResults = () => {
           </div>
           
           <div className="mt-8 flex justify-center">
-            <Button asChild className="gap-2 bg-gradient-flame hover:opacity-90">
+            <Button asChild className="gap-2 bg-yellow hover:opacity-90">
               <Link to={`/battle/${MOCK_RESULTS.battleId}`}>
                 <MessageSquare className="h-4 w-4" />
                 View Full Battle
@@ -156,7 +158,7 @@ const BattleResults = () => {
           <div className="lg:col-span-2 space-y-6">
             <h2 className="text-2xl font-bold">Best Roasts</h2>
             
-            <Card className="flame-card p-6">
+            <Card className="bg-yellow border-2 border-black p-6">
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10 border-2 border-flame-500">
@@ -195,7 +197,7 @@ const BattleResults = () => {
               </div>
             </Card>
             
-            <Card className="flame-card p-6">
+            <Card className="bg-yellow border-2 border-black p-6">
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
@@ -233,7 +235,7 @@ const BattleResults = () => {
           <div className="space-y-6">
             <h2 className="text-2xl font-bold">Score Breakdown</h2>
             
-            <Card className="flame-card p-6">
+            <Card className="bg-yellow border-2 border-black p-6">
               <h3 className="font-semibold mb-4">Judging Categories</h3>
               
               <div className="space-y-6">
@@ -247,7 +249,7 @@ const BattleResults = () => {
                     </div>
                   </div>
                   <div className="h-2 bg-night-700 rounded-full flex overflow-hidden">
-                    <div className="bg-gradient-flame h-full" style={{ width: `${(winner.scores.creativity / 5) * 50}%` }} />
+                    <div className="bg-yellow h-full" style={{ width: `${(winner.scores.creativity / 5) * 50}%` }} />
                     <div className="bg-night-600 h-full" style={{ width: `${(loser.scores.creativity / 5) * 50}%` }} />
                   </div>
                 </div>
@@ -262,7 +264,7 @@ const BattleResults = () => {
                     </div>
                   </div>
                   <div className="h-2 bg-night-700 rounded-full flex overflow-hidden">
-                    <div className="bg-gradient-flame h-full" style={{ width: `${(winner.scores.humor / 5) * 50}%` }} />
+                    <div className="bg-yellow h-full" style={{ width: `${(winner.scores.humor / 5) * 50}%` }} />
                     <div className="bg-night-600 h-full" style={{ width: `${(loser.scores.humor / 5) * 50}%` }} />
                   </div>
                 </div>
@@ -277,7 +279,7 @@ const BattleResults = () => {
                     </div>
                   </div>
                   <div className="h-2 bg-night-700 rounded-full flex overflow-hidden">
-                    <div className="bg-gradient-flame h-full" style={{ width: `${(winner.scores.savagery / 5) * 50}%` }} />
+                    <div className="bg-yellow h-full" style={{ width: `${(winner.scores.savagery / 5) * 50}%` }} />
                     <div className="bg-night-600 h-full" style={{ width: `${(loser.scores.savagery / 5) * 50}%` }} />
                   </div>
                 </div>
@@ -306,7 +308,7 @@ const BattleResults = () => {
         </div>
         
         <div className="text-center">
-          <Button asChild className="gap-2 bg-gradient-flame hover:opacity-90">
+          <Button asChild className="gap-2 bg-yellow hover:opacity-90">
             <Link to="/battle/new">
               Start a New Battle
             </Link>

@@ -28,7 +28,7 @@ export const PricingCardWrapper: React.FC<PricingCardWrapperProps> = ({
   return (
     <div className="relative group neo-tilt">
       {isPopular && (
-        <div className="absolute -top-4 left-0 right-0 mx-auto w-fit px-6 py-1.5 bg-[#F8C537] text-black text-sm font-bold border-2 border-black z-10 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transform -rotate-[4deg] transition-transform group-hover:rotate-0">
+        <div className="absolute -top-4 left-0 right-0 mx-auto w-fit px-6 py-1.5 bg-primary text-black text-sm font-bold border-2 border-black z-10 shadow-neo transform -rotate-[4deg] transition-transform group-hover:rotate-0">
           Most Popular
         </div>
       )}
@@ -36,12 +36,12 @@ export const PricingCardWrapper: React.FC<PricingCardWrapperProps> = ({
         className={`
           relative transform transition-all duration-200 
           ${isPopular ? 'neo-tilt' : 'neo-tilt-reverse'}
-          ${isPopular ? 'bg-[#C5B4F0]' : 'bg-[#FFB4A8]'} 
+          ${isPopular ? 'bg-secondary' : 'bg-accent'} 
           border-2 border-black overflow-hidden
           shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]
           hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]
           hover:-translate-y-1 hover:translate-x-1
-          ${currentPlan ? 'ring-4 ring-[#F8C537]' : ''}
+          ${currentPlan ? 'ring-4 ring-primary' : ''}
         `}
       >
         <CardHeader className="border-b-2 border-black">
@@ -85,8 +85,8 @@ export const PricingCardWrapper: React.FC<PricingCardWrapperProps> = ({
               border-2 border-black
               transform hover:-translate-y-1 hover:translate-x-1
               ${isPopular 
-                ? 'bg-[#F8C537] text-black hover:bg-[#F8C537]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]' 
-                : 'bg-[#A6C7F7] text-black hover:bg-[#A6C7F7]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]'
+                ? 'bg-primary text-black hover:bg-primary/90 shadow-neo hover:shadow-neo-hover' 
+                : 'bg-blue text-black hover:bg-blue/90 shadow-neo hover:shadow-neo-hover'
               }
               ${currentPlan ? 'bg-green-500 text-white hover:bg-green-600' : ''}
             `}

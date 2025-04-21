@@ -74,8 +74,7 @@ const NavBar = () => {
   };
 
   const handleMenuPress = () => {
-    // Perform action when Menu button is pressed
-    console.log("Menu button pressed");
+    setIsOpen(!isOpen); // Toggle the isOpen state
   };
 
   return (
@@ -97,7 +96,7 @@ const NavBar = () => {
               variant="outline" 
               size="icon"
               className="neo-button p-2 menu-button"
-              onClick={handleMenuPress} // call handleMenuPress
+              onClick={handleMenuPress}
             >
               <Menu className="h-5 w-5" />
             </Button>
@@ -116,11 +115,6 @@ const NavBar = () => {
             </SheetHeader>
 
             <nav className="mt-6 flex flex-col gap-3">
-              <SheetClose asChild>
-                <Link to="/" className="neo-button w-full text-center p-2">
-                  Home
-                </Link>
-              </SheetClose>
 
               {isLoading ? (
                 <div className="flex justify-center py-4">
@@ -134,17 +128,7 @@ const NavBar = () => {
                     </Link>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Link to="/leaderboard" className="neo-button w-full text-center p-2">
-                      Leaderboard
-                    </Link>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <Link to="/rules" className="neo-button w-full text-center p-2">
-                      Rules
-                    </Link>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <Link to="/battle/new" className="neo-button w-full text-center p-2 bg-[#F8C537]">
+                    <Link to="/battle/new" className="neo-button w-full text-center p-2 bg-primary">
                       Start Battle
                     </Link>
                   </SheetClose>
@@ -154,13 +138,25 @@ const NavBar = () => {
                     </Link>
                   </SheetClose>
                   <SheetClose asChild>
+                    <Link to="/leaderboard" className="neo-button w-full text-center p-2">
+                      Leaderboard
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link to="/rules" className="neo-button w-full text-center p-2">
+                      Rules
+                    </Link>
+                  </SheetClose>
+                  
+                  
+                  <SheetClose asChild>
                     <Link to="/settings" className="neo-button w-full text-center p-2">
                       Settings
                     </Link>
                   </SheetClose>
                   <button 
                     onClick={handleSignOut}
-                    className="neo-button w-full p-2 bg-red-500 text-white hover:bg-red-600"
+                    className="neo-button w-full p-2 bg-red-500 text-white hover:bg-red-600 absolute bottom-1 left-0"
                     disabled={isLoading}
                   >
                     {isLoading ? <Loader size="small" /> : "Sign Out"}
@@ -168,7 +164,7 @@ const NavBar = () => {
                 </>
               ) : (
                 <SheetClose asChild>
-                  <Link to="/signup" className="neo-button w-full text-center p-2 bg-[#F8C537]">
+                  <Link to="/signup" className="neo-button w-full text-center p-2 bg-primary">
                     Get Started
                   </Link>
                 </SheetClose>

@@ -95,7 +95,7 @@ const LoginForm = () => {
       <CardFooter>
         <Button 
           type="submit" 
-          className="w-full bg-gradient-flame hover:opacity-90"
+          className="w-full bg-yellow hover:opacity-90"
         >
           Sign In
         </Button>

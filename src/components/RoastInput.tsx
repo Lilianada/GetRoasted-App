@@ -101,19 +101,19 @@ const RoastInput = ({
                   type="button"
                   size="icon"
                   variant="ghost"
-                  className={`border-2 border-black bg-[#C5B4F0] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:translate-x-0.5 ${!canUseVoiceRecording ? "opacity-50" : ""}`}
+                  className={`border-2 border-black bg-secondary text-black shadow-neo-sm hover:shadow-neo hover:-translate-y-0.5 hover:translate-x-0.5 ${!canUseVoiceRecording ? "opacity-50" : ""}`}
                   onClick={handleVoiceButtonClick}
                   disabled={isDisabled || timeRemaining === 0}
                 >
                   {!canUseVoiceRecording && (
-                    <span className="absolute -top-1 -right-1 text-[#F97316]">
+                    <span className="absolute -top-1 -right-1 text-accent">
                       <Lock className="h-3 w-3" />
                     </span>
                   )}
                   <Mic className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent className="bg-black text-white border-2 border-[#F8C537]">
+              <TooltipContent className="bg-black text-white border-2 border-accent">
                 <p>{canUseVoiceRecording ? "Voice input" : "Pro feature: Voice input"}</p>
               </TooltipContent>
             </Tooltip>
@@ -123,7 +123,7 @@ const RoastInput = ({
             type="submit"
             size="icon"
             disabled={isDisabled || text.trim().length === 0 || timeRemaining === 0}
-            className={`bg-[#F8C537] text-black border-2 border-black hover:bg-[#F8C537]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:translate-x-1 transition-all ${
+            className={`bg-primary text-black border-2 border-black hover:bg-primary/90 shadow-neo-sm hover:shadow-neo hover:-translate-y-0.5 hover:translate-x-0.5 transition-all ${
               text.trim().length === 0 ? "opacity-50" : ""
             }`}
           >
@@ -133,21 +133,21 @@ const RoastInput = ({
       </div>
       
       {isWarning && (
-        <div className="flex items-center gap-1 mt-1 text-[#F97316] text-xs font-bold">
+        <div className="flex items-center gap-1 mt-1 text-accent text-xs font-bold">
           <AlertCircle className="h-3 w-3" />
           <span>Approaching character limit</span>
         </div>
       )}
       
       {timeRemaining !== undefined && timeRemaining <= 30 && (
-        <div className="flex items-center gap-1 mt-1 text-[#F97316] text-xs font-bold">
+        <div className="flex items-center gap-1 mt-1 text-accent text-xs font-bold">
           <AlertCircle className="h-3 w-3" />
           <span>{timeRemaining === 0 ? "Time's up!" : `${timeRemaining}s remaining!`}</span>
         </div>
       )}
       
       {!isPro && (
-        <div className="flex items-center gap-1 mt-1 text-[#F8C537] text-xs font-bold">
+        <div className="flex items-center gap-1 mt-1 text-primary-foreground text-xs font-bold">
           <Crown className="h-3 w-3" />
           <span>
             Upgrade to Pro for {700 - effectiveMaxLength} more characters and voice recording
@@ -156,7 +156,7 @@ const RoastInput = ({
       )}
       
       <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
-        <DialogContent className="bg-[#C5B4F0] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+        <DialogContent className="bg-secondary border-4 border-black shadow-neo">
           <DialogHeader>
             <DialogTitle className="text-black text-2xl font-black">Unlock Pro Features</DialogTitle>
             <DialogDescription className="text-black/70 font-medium">
@@ -165,8 +165,8 @@ const RoastInput = ({
           </DialogHeader>
           
           <div className="space-y-4 py-4">
-            <div className="flex items-center gap-3 bg-[#A6C7F7] p-4 border-2 border-black">
-              <div className="bg-[#F8C537] p-2 border-2 border-black">
+            <div className="flex items-center gap-3 bg-blue p-4 border-2 border-black">
+              <div className="bg-primary p-2 border-2 border-black">
                 <Mic className="h-5 w-5 text-black" />
               </div>
               <div>
@@ -177,8 +177,8 @@ const RoastInput = ({
               </div>
             </div>
             
-            <div className="flex items-center gap-3 bg-[#A6C7F7] p-4 border-2 border-black">
-              <div className="bg-[#F8C537] p-2 border-2 border-black">
+            <div className="flex items-center gap-3 bg-blue p-4 border-2 border-black">
+              <div className="bg-primary p-2 border-2 border-black">
                 <AlertCircle className="h-5 w-5 text-black" />
               </div>
               <div>
@@ -189,8 +189,8 @@ const RoastInput = ({
               </div>
             </div>
             
-            <div className="flex items-center gap-3 bg-[#A6C7F7] p-4 border-2 border-black">
-              <div className="bg-[#F8C537] p-2 border-2 border-black">
+            <div className="flex items-center gap-3 bg-blue p-4 border-2 border-black">
+              <div className="bg-primary p-2 border-2 border-black">
                 <Lock className="h-5 w-5 text-black" />
               </div>
               <div>
@@ -204,11 +204,11 @@ const RoastInput = ({
           
           <DialogFooter className="gap-3">
             <Button variant="outline" onClick={() => setShowUpgradeModal(false)} 
-              className="bg-[#FFB4A8] text-black border-2 border-black hover:bg-[#FFB4A8]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:translate-x-0.5">
+              className="bg-accent text-black border-2 border-black hover:bg-accent/90 shadow-neo-sm hover:shadow-neo hover:-translate-y-0.5 hover:translate-x-0.5">
               Not Now
             </Button>
             <Button 
-              className="bg-[#F8C537] text-black border-2 border-black hover:bg-[#F8C537]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:translate-x-1 transition-all font-bold"
+              className="rounded-full px-4 py-2 bg-primary text-black border-2 border-black shadow-neo-sm hover:shadow-neo hover:-translate-y-0.5 hover:translate-x-0.5 transition-all font-bold"
               onClick={() => {
                 setShowUpgradeModal(false);
                 // Navigate to billing page in a real app

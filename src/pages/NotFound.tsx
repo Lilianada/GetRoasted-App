@@ -21,7 +21,7 @@ const NotFound = () => {
           Maybe it couldn't handle the heat of our savage roasts.
         </p>
         
-        <Button asChild className="gap-2 bg-gradient-flame hover:opacity-90">
+        <Button asChild className="gap-2 bg-yellow hover:opacity-90">
           <Link to="/">
             Back to Home
           </Link>

@@ -118,7 +118,7 @@ const ShareBattle = ({ battleId, trigger }: ShareBattleProps) => {
                 className="h-20 flex flex-col items-center justify-center gap-2"
                 onClick={() => shareOnSocial("twitter")}
               >
-                <Twitter className="h-6 w-6 text-[#1DA1F2]" />
+                <Twitter className="h-6 w-6 text-blue-500" />
                 <span>Twitter</span>
               </Button>
               
@@ -127,7 +127,7 @@ const ShareBattle = ({ battleId, trigger }: ShareBattleProps) => {
                 className="h-20 flex flex-col items-center justify-center gap-2"
                 onClick={() => shareOnSocial("facebook")}
               >
-                <Facebook className="h-6 w-6 text-[#1877F2]" />
+                <Facebook className="h-6 w-6 text-blue-700" />
                 <span>Facebook</span>
               </Button>
             </div>

@@ -22,7 +22,7 @@ const Login = () => {
           </Link>
         </div>
         
-        <Card className="flame-card border-night-700">
+        <Card className=" border-night-700">
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl">Sign in to GetRoasted</CardTitle>
             <CardDescription>
@@ -89,7 +89,7 @@ const Login = () => {
                   className="border-night-700 focus-visible:ring-flame-500"
                 />
               </div>
-              <Button className="w-full bg-gradient-flame hover:opacity-90" type="submit">
+              <Button className="w-full bg-yellow hover:opacity-90" type="submit">
                 Sign In
               </Button>
             </div>
