@@ -99,7 +99,7 @@ const NewBattle = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-            <Card className="bg-yellow border-2 border-black p-6">
+            <Card className="bg-secondary border-2 border-black p-6">
               <form className="space-y-6" onSubmit={handleCreateBattle}>
                 <div className="space-y-4">
                   <div className="space-y-2">
