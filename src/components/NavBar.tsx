@@ -27,6 +27,7 @@ const NavBar = () => {
   const { playSound } = useSettings();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -92,7 +93,18 @@ const NavBar = () => {
           </span>
         </Link>
 
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        {/* Always show the hamburger menu button */}
+        <Sheet open={isOpen || isClosing} onOpenChange={(open) => {
+          if (!open) {
+            setIsClosing(true);
+            setTimeout(() => {
+              setIsClosing(false);
+              setIsOpen(false);
+            }, 300); // match animation duration
+          } else {
+            setIsOpen(true);
+          }
+        }}>
           <SheetTrigger asChild>
             <Button 
               variant="outline" 
@@ -103,79 +115,81 @@ const NavBar = () => {
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent className="w-[300px] bg-night-800 border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] menu-content">
-            <SheetHeader className="border-b-2 border-black pb-4">
-              <VisuallyHidden>
-                <DialogTitle>Navigation Menu</DialogTitle>
-              </VisuallyHidden>
-              <div className="flex items-center gap-2">
-                <div className="bg-flame-500 p-1 border-2 border-black">
-                  <Flame className="h-6 w-6 text-black" />
+          {(isOpen || isClosing) && (
+            <SheetContent className={`w-[300px] bg-night-800 border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] menu-content${isClosing ? ' slide-out-right' : ''}`}>
+              <SheetHeader className="border-b-2 border-black pb-4">
+                <VisuallyHidden>
+                  <DialogTitle>Navigation Menu</DialogTitle>
+                </VisuallyHidden>
+                <div className="flex items-center gap-2">
+                  <div className="bg-flame-500 p-1 border-2 border-black">
+                    <Flame className="h-6 w-6 text-black" />
+                  </div>
+                  <span className="font-geist text-lg font-black tracking-tighter">
+                    <span className="text-flame-500">Get</span>
+                    <span className="text-ember-500">Roasted</span>
+                  </span>
                 </div>
-                <span className="font-geist text-lg font-black tracking-tighter">
-                  <span className="text-flame-500">Get</span>
-                  <span className="text-ember-500">Roasted</span>
-                </span>
-              </div>
-            </SheetHeader>
+              </SheetHeader>
 
-            <nav className="mt-6 flex flex-col gap-3">
+              <nav className="mt-6 flex flex-col gap-3">
 
-              {isLoading ? (
-                <div className="flex justify-center py-4">
-                  <Loader variant="colorful" />
-                </div>
-              ) : session ? (
-                <>
+                {isLoading ? (
+                  <div className="flex justify-center py-4">
+                    <Loader variant="colorful" />
+                  </div>
+                ) : session ? (
+                  <>
+                    <SheetClose asChild>
+                      <Link to="/battles" className="neo-button w-full text-center p-2">
+                        Battles
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link to="/battles/new" className="neo-button w-full text-center p-2 bg-primary">
+                        Start Battle
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link to="/profile" className="neo-button w-full text-center p-2">
+                        Profile
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link to="/leaderboard" className="neo-button w-full text-center p-2">
+                        Leaderboard
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link to="/rules" className="neo-button w-full text-center p-2">
+                        Rules
+                      </Link>
+                    </SheetClose>
+                    
+                    
+                    <SheetClose asChild>
+                      <Link to="/settings" className="neo-button w-full text-center p-2">
+                        Settings
+                      </Link>
+                    </SheetClose>
+                    <button 
+                      onClick={handleSignOut}
+                      className="neo-button w-full p-2 bg-red-500 text-white hover:bg-red-600 absolute bottom-1 left-0"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? <Loader size="small" /> : "Sign Out"}
+                    </button>
+                  </>
+                ) : (
                   <SheetClose asChild>
-                    <Link to="/battles" className="neo-button w-full text-center p-2">
-                      Battles
+                    <Link to="/signup" className="neo-button w-full text-center p-2 bg-primary">
+                      Get Started
                     </Link>
                   </SheetClose>
-                  <SheetClose asChild>
-                    <Link to="/battles/new" className="neo-button w-full text-center p-2 bg-primary">
-                      Start Battle
-                    </Link>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <Link to="/profile" className="neo-button w-full text-center p-2">
-                      Profile
-                    </Link>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <Link to="/leaderboard" className="neo-button w-full text-center p-2">
-                      Leaderboard
-                    </Link>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <Link to="/rules" className="neo-button w-full text-center p-2">
-                      Rules
-                    </Link>
-                  </SheetClose>
-                  
-                  
-                  <SheetClose asChild>
-                    <Link to="/settings" className="neo-button w-full text-center p-2">
-                      Settings
-                    </Link>
-                  </SheetClose>
-                  <button 
-                    onClick={handleSignOut}
-                    className="neo-button w-full p-2 bg-red-500 text-white hover:bg-red-600 absolute bottom-1 left-0"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? <Loader size="small" /> : "Sign Out"}
-                  </button>
-                </>
-              ) : (
-                <SheetClose asChild>
-                  <Link to="/signup" className="neo-button w-full text-center p-2 bg-primary">
-                    Get Started
-                  </Link>
-                </SheetClose>
-              )}
-            </nav>
-          </SheetContent>
+                )}
+              </nav>
+            </SheetContent>
+          )}
         </Sheet>
       </div>
     </header>

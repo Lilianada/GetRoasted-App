@@ -29,6 +29,7 @@ import Leaderboard from "./pages/Leaderboard";
 import Billing from "./pages/Billing";
 import Loader from "@/components/ui/loader";
 import SocketStatus from "./components/SocketStatus";
+import Footer from "./components/Footer";
 
 const queryClient = new QueryClient();
 
@@ -140,6 +141,7 @@ const App = () => (
                 {/* Catch-all route */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              <Footer />
             </AuthProvider>
           </BrowserRouter>
           <SocketStatus connected={true} />

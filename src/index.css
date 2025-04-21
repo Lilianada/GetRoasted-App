@@ -170,6 +170,10 @@
     animation: slideIn 0.3s ease forwards;
   }
 
+  .menu-content.slide-out-right {
+    animation: slideOutRight 0.3s ease forwards;
+  }
+
   @keyframes slideIn {
     from {
       transform: translateX(100%);
@@ -178,6 +182,17 @@
     to {
       transform: translateX(0);
       opacity: 1;
+    }
+  }
+
+  @keyframes slideOutRight {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
     }
   }
 }
