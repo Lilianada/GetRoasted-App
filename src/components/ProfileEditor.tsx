@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
@@ -119,6 +120,7 @@ const ProfileEditor = () => {
         variant="outline" 
         onClick={() => fileInputRef.current?.click()}
         disabled={uploading}
+        className="hover:bg-primary hover:text-black transition-colors"
       >
         {uploading ? (
           <>
