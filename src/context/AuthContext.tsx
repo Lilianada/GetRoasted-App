@@ -15,10 +15,31 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+import { useMemo, useEffect } from 'react';
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const auth = useAuth();
-  
-  return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
+
+  // Memoize the context value
+  const memoizedAuth = useMemo(() => auth, [auth.user, auth.loading, auth.session]);
+
+  // Store last path in localStorage on route change
+  useEffect(() => {
+    const updateLastPath = () => {
+      window.localStorage.setItem('lastPath', window.location.pathname);
+    };
+    window.addEventListener('popstate', updateLastPath);
+    window.addEventListener('pushstate', updateLastPath);
+    window.addEventListener('replacestate', updateLastPath);
+    updateLastPath();
+    return () => {
+      window.removeEventListener('popstate', updateLastPath);
+      window.removeEventListener('pushstate', updateLastPath);
+      window.removeEventListener('replacestate', updateLastPath);
+    };
+  }, []);
+
+  return <AuthContext.Provider value={memoizedAuth}>{children}</AuthContext.Provider>;
 }
 
 export function useAuthContext() {

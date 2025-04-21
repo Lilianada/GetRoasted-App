@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
 import { toast } from "@/components/ui/sonner";
@@ -15,44 +14,48 @@ export const useAuth = () => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log("Auth state changed:", event, session);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
-        
-        // Redirect authenticated users to battles if they're on the homepage or signup page
+  
+        // Only redirect if user just signed in and is on / or /signup
         if (event === 'SIGNED_IN') {
           const currentPath = window.location.pathname;
           if (currentPath === '/' || currentPath === '/signup') {
-            navigate('/battles');
+            navigate('/battles', { replace: true });
           }
         }
-
+  
         // Redirect unauthenticated users to home if they try to access protected routes
         if (event === 'SIGNED_OUT') {
           const currentPath = window.location.pathname;
-          if (currentPath !== '/' && currentPath !== '/signup' && currentPath !== '/terms' && currentPath !== '/privacy') {
+          if (
+            currentPath !== '/' &&
+            currentPath !== '/signup' &&
+            currentPath !== '/terms' &&
+            currentPath !== '/privacy'
+          ) {
             navigate('/');
           }
         }
       }
     );
-
+  
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-
-      // Redirect based on auth status when the page first loads
+  
+      // Only redirect if user is authenticated and on / or /signup
       if (session) {
         const currentPath = window.location.pathname;
         if (currentPath === '/' || currentPath === '/signup') {
-          navigate('/battles');
+          navigate('/battles', { replace: true });
         }
       }
     });
-
+  
     return () => {
       subscription.unsubscribe();
     };
@@ -128,16 +131,17 @@ export const useAuth = () => {
     }
   };
 
-  return { 
-    session, 
-    user, 
-    loading, 
+  // Memoize the returned object for context stability
+  return useMemo(() => ({
+    session,
+    user,
+    loading,
     signOut,
     signInWithEmail,
     signUpWithEmail,
     signInWithGoogle,
     deleteAccount
-  };
+  }), [session, user, loading]);
 };
 
 export default useAuth;

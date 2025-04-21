@@ -36,7 +36,7 @@ const Leaderboard = () => {
 
   return (
     <div className="neo-container py-8">
-      <h1 className="text-3xl font-black mb-6 text-night-900">🔥 Leaderboard</h1>
+      <h1 className="text-3xl  mb-6 ">🔥 Leaderboard</h1>
       {loading ? (
         <div className="flex justify-center items-center min-h-[200px]">
           <Loader size="large" variant="colorful" />

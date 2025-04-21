@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { useQuery } from '@tanstack/react-query';
 import { useAuthContext } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import ProfileCard from "@/components/ProfileCard";
@@ -20,7 +21,35 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const Profile = () => {
   const { user } = useAuthContext();
   const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  // Optimistic profile state
+  const [optimisticProfile, setOptimisticProfile] = useState<any>(null);
+
+  // React Query: fetch profile
+  const { data: profileData, isLoading: profileLoading, error: profileError } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Use profileData as the source of truth unless optimistic update is present
+  const currentProfile = optimisticProfile || profileData;
+  const loading = profileLoading;
+
+  // Set bio from profileData when fetched
+  useEffect(() => {
+    if (profileData && typeof profileData === 'object' && profileData !== null) {
+      setProfile(profileData);
+      setBio((profileData as any).bio || "");
+    }
+  }, [profileData]);
   const [statsLoading, setStatsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -50,29 +79,7 @@ const Profile = () => {
     topPercentage: undefined
   });
 
-  useEffect(() => {
-    if (!user) return;
-    setLoading(true);
 
-    const fetchProfile = async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      if (error) {
-        console.error("Error fetching profile:", error);
-        toast.error("Could not load profile");
-      } else {
-        setProfile(data);
-        setBio(data?.bio || "");
-      }
-      setLoading(false);
-    };
-
-    fetchProfile();
-  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -149,7 +156,8 @@ const Profile = () => {
 
 
   // Optimistic profile editing (keep for instant UI feedback)
-  const [optimisticProfile, setOptimisticProfile] = useState<any>(null);
+  // (already declared at top, remove this duplicate)
+
   const [optimisticError, setOptimisticError] = useState<string | null>(null);
 
 // Centralized profile update handler (optimistic UI)
@@ -185,7 +193,7 @@ const handleProfileUpdate = async (updates: any) => {
     return null;
   };
 
-  const currentProfile = optimisticProfile || profile;
+  
 
   return (
     <div className="neo-container py-8 animate-fade-in">
