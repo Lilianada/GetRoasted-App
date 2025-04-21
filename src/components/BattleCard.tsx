@@ -80,12 +80,12 @@ const BattleCard = ({
         </CardDescription>
       </CardHeader>
       
-      <CardContent>
+      <CardContent className="p-0">
         <div className="flex items-center justify-center gap-4 py-4">
           {participants.map((participant, index) => (
             <React.Fragment key={participant.id}>
               <div className="flex flex-col items-center text-center gap-1.5">
-                <Avatar className="h-14 w-14 border-2 border-night-700">
+                <Avatar className="h-14 w-14 border-2 border-flame-500 rounded-full">
                   <AvatarImage src={participant.avatar} alt={participant.name} />
                   <AvatarFallback className="bg-night-700 text-flame-500">{participant.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
@@ -105,7 +105,7 @@ const BattleCard = ({
                 <div className="h-14 w-14 border-2 border-dashed border-night-700 rounded-full flex items-center justify-center">
                   <span className="text-night-400">?</span>
                 </div>
-                <span className="text-sm font-semibold text-night-400">Waiting...</span>
+                <span className="text-sm font-semibold text-night-400">Waiting</span>
               </div>
             </>
           )}

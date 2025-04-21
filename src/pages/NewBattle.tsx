@@ -37,6 +37,12 @@ const NewBattle = () => {
     }
     if (!title.trim()) {
       toast.error("Please provide a battle title");
+      playSound('error');
+      return;
+    }
+    if (!timePerTurn || isNaN(Number(timePerTurn)) || Number(timePerTurn) <= 0) {
+      toast.error("Please provide a valid time per turn.");
+      playSound('error');
       return;
     }
     setIsCreating(true);
@@ -47,7 +53,7 @@ const NewBattle = () => {
           title,
           type: battleType,
           round_count: parseInt(roundCount),
-          time_per_turn: parseInt(timePerTurn),
+          time_per_turn: Number(timePerTurn),
           created_by: user.id,
           status: 'waiting',
           allow_spectators: allowSpectators
@@ -65,12 +71,13 @@ const NewBattle = () => {
       toast.success("Battle created successfully!");
       playSound('success');
       navigate(`/battle/waiting/${battleData.id}`);
-    } catch (error) {
-      console.error('Error creating battle:', error);
+    } catch (error: any) {
+      let msg = "Failed to create battle";
+      if (error && typeof error === "object" && "message" in error) {
+        msg += `: ${error.message}`;
+      }
       playSound('error');
-      toast.error("Failed to create battle", {
-        description: error instanceof Error ? error.message : "An unknown error occurred"
-      });
+      toast.error(msg);
       setIsCreating(false);
     }
   };

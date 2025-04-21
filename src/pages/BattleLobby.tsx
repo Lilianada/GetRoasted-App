@@ -152,7 +152,7 @@ const BattleLobby = () => {
                   <Button asChild className="gap-2 bg-primary text-black border-2 border-black hover:bg-primary/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:translate-x-1 transition-all">
                     <Link to="/battles/new">
                       <Plus className="h-4 w-4" />
-                      Create a Battle
+                      Create a Battle!
                     </Link>
                   </Button>
                 </div>
@@ -170,7 +170,7 @@ const BattleLobby = () => {
                 </div>
               ) : (
                 <div className="text-center py-12 bg-secondary border-2 border-black rounded-xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-                  <p className="text-black font-bold">No active battles</p>
+                  <p className="text-black font-bold">No active battles!</p>
                 </div>
               )}
             </TabsContent>
@@ -186,7 +186,7 @@ const BattleLobby = () => {
                 </div>
               ) : (
                 <div className="text-center py-12 bg-secondary border-2 border-black rounded-xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-                  <p className="text-black font-bold">No battles waiting for players</p>
+                  <p className="text-black font-bold">No battles waiting for players!</p>
                 </div>
               )}
             </TabsContent>
@@ -202,7 +202,7 @@ const BattleLobby = () => {
                 </div>
               ) : (
                 <div className="text-center py-12 bg-secondary border-2 border-black rounded-xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-                  <p className="text-black font-bold">No completed battles</p>
+                  <p className="text-black font-bold">No completed battle!</p>
                 </div>
               )}
             </TabsContent>

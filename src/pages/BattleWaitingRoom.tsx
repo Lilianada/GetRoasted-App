@@ -227,13 +227,13 @@ const BattleWaitingRoom = () => {
               <div className="flex items-center justify-center gap-12">
                 {participants.map((participant, index) => (
                   <div key={index} className="flex flex-col items-center gap-2">
-                    <Avatar className="h-20 w-20 border-2 border-flame-500">
+                    <Avatar className="h-20 w-20 border-2 border-flame-500 rounded-full">
                       <AvatarImage src={participant.profiles?.avatar_url} />
                       <AvatarFallback className="bg-night-700 text-flame-500">
                         {participant.profiles?.username?.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="font-semibold text-lg">{participant.profiles?.username || "Unknown"}</span>
+                    <span className="font-semibold text-lg capitalize">{participant.profiles?.username || "Unknown"}</span>
                   </div>
                 ))}
                 
@@ -245,7 +245,7 @@ const BattleWaitingRoom = () => {
                       <div className="h-20 w-20 border-2 border-dashed border-night-500 rounded-full flex items-center justify-center">
                         <span className="text-night-400 text-3xl">?</span>
                       </div>
-                      <span className="font-semibold text-lg text-night-400">Waiting...</span>
+                      <span className="font-semibold text-lg text-night-400">Waiting</span>
                     </div>
                   </>
                 )}
