@@ -20,10 +20,10 @@ const Signup = () => {
         
         <Tabs defaultValue="signup" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6 bg-night-800 border border-night-700">
-            <TabsTrigger value="login" className="data-[state=active]:bg-yellow">
+            <TabsTrigger value="login" className="data-[state=active]:bg-yellow text-night-500">
               Login
             </TabsTrigger>
-            <TabsTrigger value="signup" className="data-[state=active]:bg-yellow">
+            <TabsTrigger value="signup" className="data-[state=active]:bg-yellow text-night-500">
               Sign Up
             </TabsTrigger>
           </TabsList>
