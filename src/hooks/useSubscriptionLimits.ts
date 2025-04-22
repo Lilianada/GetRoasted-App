@@ -1,68 +1,56 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useSubscription } from '@/hooks/useSubscription';
-import { toast } from '@/components/ui/sonner';
-import { useNavigate } from 'react-router-dom';
+import { useAuthContext } from '@/context/AuthContext';
 
 export function useSubscriptionLimits() {
-  const { isPro } = useSubscription();
-  const navigate = useNavigate();
-  const [dailyBattlesCreated, setDailyBattlesCreated] = useState(0);
-  const [dailyBattlesSpectated, setDailyBattlesSpectated] = useState(0);
+  const { user } = useAuthContext();
+  const [limits, setLimits] = useState({
+    maxBattlesPerDay: 3,
+    maxSpectatePerDay: 10,
+    currentBattlesCreated: 0,
+    currentBattlesSpectated: 0,
+    isPro: false,
+  });
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch current limits on mount
   useEffect(() => {
     const fetchLimits = async () => {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('daily_battles_created, daily_battles_spectated')
-        .single();
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
 
-      if (profile) {
-        setDailyBattlesCreated(profile.daily_battles_created);
-        setDailyBattlesSpectated(profile.daily_battles_spectated);
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('subscription_tier')
+          .eq('id', user.id)
+          .single();
+          
+        if (error) throw error;
+        
+        // Set default values based on subscription tier
+        const isPro = data?.subscription_tier === 'pro';
+        
+        // For now, just set default values
+        // In a real implementation, we would track usage in the database
+        setLimits({
+          maxBattlesPerDay: isPro ? 20 : 3,
+          maxSpectatePerDay: isPro ? 50 : 10,
+          currentBattlesCreated: 0,
+          currentBattlesSpectated: 0,
+          isPro,
+        });
+      } catch (error) {
+        console.error('Error fetching subscription limits:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
-
+    
     fetchLimits();
-  }, []);
-
-  const checkCanCreateBattle = () => {
-    if (isPro) return true;
-    if (dailyBattlesCreated >= 3) {
-      toast.error("Daily battle creation limit reached", {
-        description: "Upgrade to Pro to create unlimited battles!",
-        action: {
-          label: "Upgrade",
-          onClick: () => navigate('/billing')
-        }
-      });
-      return false;
-    }
-    return true;
-  };
-
-  const checkCanSpectateBattle = () => {
-    if (isPro) return true;
-    if (dailyBattlesSpectated >= 3) {
-      toast.error("Daily spectating limit reached", {
-        description: "Upgrade to Pro to spectate unlimited battles!",
-        action: {
-          label: "Upgrade",
-          onClick: () => navigate('/billing')
-        }
-      });
-      return false;
-    }
-    return true;
-  };
-
-  return {
-    checkCanCreateBattle,
-    checkCanSpectateBattle,
-    dailyBattlesCreated,
-    dailyBattlesSpectated,
-    isPro
-  };
+  }, [user]);
+  
+  return { limits, isLoading };
 }

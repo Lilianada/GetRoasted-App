@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from '@tanstack/react-query';
 import { useAuthContext } from "@/context/AuthContext";
@@ -21,11 +20,9 @@ import { usePlayerStats } from "@/hooks/usePlayerStats";
 const Profile = () => {
   const { user } = useAuthContext();
   const [profile, setProfile] = useState<any>(null);
-  // Optimistic profile state
   const [optimisticProfile, setOptimisticProfile] = useState<any>(null);
   const { stats, statsLoading, statsError } = usePlayerStats(user?.id);
 
-  // React Query: fetch profile
   const { data: profileData, isLoading: profileLoading, error: profileError } = useQuery({
     queryKey: ['profile', user?.id],
     queryFn: async () => {
@@ -40,11 +37,9 @@ const Profile = () => {
     enabled: !!user?.id,
   });
 
-  // Use profileData as the source of truth unless optimistic update is present
   const currentProfile = optimisticProfile || profileData;
   const loading = profileLoading;
 
-  // Set bio from profileData when fetched
   useEffect(() => {
     if (profileData && typeof profileData === 'object' && profileData !== null) {
       setProfile(profileData);
@@ -54,8 +49,6 @@ const Profile = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [bio, setBio] = useState("");
 
-
-  // Player stats
   const [playerStats, setPlayerStats] = useState({
     battles: 0,
     wins: 0,
@@ -65,29 +58,61 @@ const Profile = () => {
     averageScore: 0
   });
 
-  // Recent activity
   const [recentActivities, setRecentActivities] = useState([]);
 
-  // Achievements 
   const [achievements, setAchievements] = useState([]);
 
-  // Leaderboard position
   const [leaderboardStats, setLeaderboardStats] = useState({
     position: undefined,
     totalPlayers: 0,
     topPercentage: undefined
   });
 
-
+  const fetchUserRecentActivity = async (userId: string) => {
+    try {
+      const { data: battleData } = await supabase
+        .from('battle_participants')
+        .select(`
+          battle_id,
+          battles:battle_id (
+            id, 
+            title,
+            status, 
+            created_at
+          )
+        `)
+        .eq('user_id', userId)
+        .order('joined_at', { ascending: false })
+        .limit(5);
+      
+      const { data: votesData } = await supabase
+        .from('battle_votes')
+        .select(`
+          score,
+          battles:battle_id (
+            id, 
+            title
+          )
+        `)
+        .eq('voted_for_user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      
+      return {
+        recentBattles: battleData?.map((item) => item.battles) || [],
+        recentVotes: votesData || []
+      };
+    } catch (error) {
+      console.error('Error fetching recent activity:', error);
+      return { recentBattles: [], recentVotes: [] };
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
 
-
-    // Fetch player stats
     const fetchPlayerStats = async () => {
       try {
-        // Get battles and wins count for the user
         const { data: battleData, error: battleError } = await supabase
           .from('battle_participants')
           .select('battle_id')
@@ -97,70 +122,54 @@ const Profile = () => {
 
         const battlesCount = battleData?.length || 0;
 
-        // Get wins data
         const { data: winData, error: winError } = await supabase
-          .from('votes')
+          .from('battle_votes')
           .select('score')
-          .eq('voted_for_id', user.id);
+          .eq('voted_for_user_id', user.id);
 
         if (winError) throw winError;
 
-        // Calculate wins - this is simplified, but you'd need to define what a 'win' is
-        // For this example, let's say a win is when a user got votes
         const winsCount = winData?.length || 0;
 
-        // Calculate win rate
         const winRate = battlesCount > 0 ? Math.round((winsCount / battlesCount) * 100) : 0;
 
-        // Get average score
         let averageScore = 0;
         if (winData && winData.length > 0) {
           const totalScore = winData.reduce((sum, vote) => sum + vote.score, 0);
           averageScore = totalScore / winData.length;
         }
 
-        // For now, these are placeholders - you would fetch actual data
         setPlayerStats({
           battles: battlesCount,
           wins: winsCount,
           winRate: winRate,
-          longestStreak: 0, // You would calculate this based on consecutive wins
-          lastBattle: undefined, // You would get this from the most recent battle
+          longestStreak: 0,
+          lastBattle: undefined,
           averageScore: averageScore
         });
 
-        // Also update the profile card stats
         setLeaderboardStats({
-          position: undefined, // You would get this from leaderboard ranking
-          totalPlayers: 0,     // Total number of players in the system
-          topPercentage: undefined // Calculate based on position and total players
+          position: undefined,
+          totalPlayers: 0,
+          topPercentage: undefined
         });
 
-        // For recent activities, you'd fetch actual battles/achievement data
         setRecentActivities([]);
 
-        // For achievements, you would define criteria and fetch progress
         setAchievements([]);
-
       } catch (error) {
         console.error("Error fetching player stats:", error);
         toast.error("Could not load player statistics");
       } finally {
-        // No setStatsLoading -- removed to fix undefined error
       }
     };
 
     fetchPlayerStats();
   }, [user, profile]);
 
-
-  // Optimistic profile editing (keep for instant UI feedback)
-  // (already declared at top, remove this duplicate)
-
   const [optimisticError, setOptimisticError] = useState<string | null>(null);
 
-// Centralized profile update handler (optimistic UI)
-const handleProfileUpdate = async (updates: any) => {
+  const handleProfileUpdate = async (updates: any) => {
     setOptimisticError(null);
     const prevProfile = { ...profile };
     setOptimisticProfile({ ...profile, ...updates });
@@ -179,20 +188,16 @@ const handleProfileUpdate = async (updates: any) => {
     setIsSaving(false);
   };
 
-  // Avatar upload callback (update avatar in parent state)
   const handleAvatarUpdated = (avatar_url: string) => {
     setProfile((prev: any) => ({ ...prev, avatar_url }));
   };
 
-  // Validation helpers
   const validateProfile = (fields: any) => {
     if (!fields.username || fields.username.length < 3) return 'Username must be at least 3 characters.';
     if (!fields.email || !/^[^@]+@[^@]+\.[^@]+$/.test(fields.email)) return 'Please enter a valid email.';
     if (fields.bio && fields.bio.length > 160) return 'Bio must be less than 160 characters.';
     return null;
   };
-
-  
 
   if (statsError) {
     return <div className="text-red-500">Could not load player statistics: {statsError.message}</div>;

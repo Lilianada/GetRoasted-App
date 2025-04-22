@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -11,160 +11,26 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Bell, Check, Calendar, Trophy, User, Flame, X } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuthContext } from "@/context/AuthContext";
-import { toast } from "@/components/ui/sonner";
+import { Bell, Check, Trophy, User, Flame, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-
-interface Notification {
-  id: string;
-  user_id: string;
-  title: string;
-  message: string;
-  read: boolean;
-  created_at: string;
-  type: 'battle_invite' | 'battle_start' | 'battle_end' | 'leaderboard' | 'account' | 'general';
-  action_url?: string;
-}
+import { useNavigate } from 'react-router-dom';
+import { useNotifications } from '@/hooks/useNotifications';
+import { Notification } from '@/types/notification';
 
 interface NotificationsModalProps {
   children?: React.ReactNode;
 }
 
 const NotificationsModal = ({ children }: NotificationsModalProps) => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
-  const { user } = useAuthContext();
-  
-  // Mock notifications for now - in a real implementation, you would fetch from the database
-  const mockNotifications: Notification[] = [
-    {
-      id: "1",
-      user_id: user?.id || "",
-      title: "Battle Invitation",
-      message: "RoastMaster has invited you to a battle!",
-      read: false,
-      created_at: new Date().toISOString(),
-      type: 'battle_invite',
-      action_url: "/battles/join/123"
-    },
-    {
-      id: "2",
-      user_id: user?.id || "",
-      title: "Your Battle is Starting",
-      message: "Your battle with ComebackKing is about to begin!",
-      read: true,
-      created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-      type: 'battle_start',
-      action_url: "/battles/live/456"
-    }
-  ];
-  
-  useEffect(() => {
-    if (!user) return;
-    
-    // For the temporary implementation, use the mock data
-    setNotifications(mockNotifications);
-    setUnreadCount(mockNotifications.filter(n => !n.read).length);
-    
-    /* Real implementation would be something like:
-    const fetchNotifications = async () => {
-      try {
-        // This assumes you have a notifications table in your database
-        const { data, error } = await supabase
-          .from('notifications')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(20);
-          
-        if (error) throw error;
-        
-        setNotifications(data || []);
-        setUnreadCount(data?.filter(n => !n.read).length || 0);
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
-      }
-    };
-    
-    fetchNotifications();
-    
-    // Subscribe to new notifications for real-time updates
-    const channel = supabase
-      .channel('notifications_changes')
-      .on('postgres_changes', 
-        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, 
-        (payload) => {
-          const newNotification = payload.new as Notification;
-          setNotifications(prev => [newNotification, ...prev]);
-          setUnreadCount(prev => prev + 1);
-          
-          // Show toast for new notification
-          toast.info(newNotification.title, {
-            description: newNotification.message,
-          });
-        }
-      )
-      .subscribe();
-      
-    return () => {
-      supabase.removeChannel(channel);
-    };
-    */
-  }, [user]);
-  
-  const markAsRead = async (id: string) => {
-    // In a real implementation, you would update the database
-    setNotifications(notifications.map(n => 
-      n.id === id ? { ...n, read: true } : n
-    ));
-    setUnreadCount(prev => Math.max(0, prev - 1));
-    
-    /* Real implementation would be something like:
-    try {
-      await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('id', id);
-      
-      setNotifications(notifications.map(n => 
-        n.id === id ? { ...n, read: true } : n
-      ));
-      setUnreadCount(prev => Math.max(0, prev - 1));
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
-    }
-    */
-  };
-  
-  const markAllAsRead = async () => {
-    if (notifications.length === 0) return;
-    
-    // In a real implementation, you would update the database
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
-    setUnreadCount(0);
-    toast.success("All notifications marked as read");
-    
-    /* Real implementation would be something like:
-    try {
-      await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('user_id', user?.id)
-        .eq('read', false);
-      
-      setNotifications(notifications.map(n => ({ ...n, read: true })));
-      setUnreadCount(0);
-      
-      toast.success("All notifications marked as read");
-    } catch (error) {
-      console.error('Error marking all notifications as read:', error);
-      toast.error("Failed to mark all as read");
-    }
-    */
-  };
+  const navigate = useNavigate();
+  const {
+    notifications,
+    unreadCount,
+    isLoading,
+    markAsRead,
+    markAllAsRead
+  } = useNotifications();
   
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -188,6 +54,15 @@ const NotificationsModal = ({ children }: NotificationsModalProps) => {
       return 'Yesterday';
     } else {
       return date.toLocaleDateString();
+    }
+  };
+  
+  const handleNotificationAction = (notification: Notification) => {
+    markAsRead(notification.id);
+    setOpen(false);
+    
+    if (notification.action_url) {
+      navigate(notification.action_url);
     }
   };
   
@@ -219,7 +94,7 @@ const NotificationsModal = ({ children }: NotificationsModalProps) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {triggerElement}
-      <DialogContent className=" sm:max-w-md max-h-[80vh] flex flex-col">
+      <DialogContent className="sm:max-w-md max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>Notifications</span>
@@ -242,7 +117,11 @@ const NotificationsModal = ({ children }: NotificationsModalProps) => {
         
         <ScrollArea className="flex-1 max-h-[60vh]">
           <div className="space-y-1 pr-3">
-            {notifications.length > 0 ? (
+            {isLoading ? (
+              <div className="py-8 text-center text-muted-foreground">
+                Loading notifications...
+              </div>
+            ) : notifications.length > 0 ? (
               notifications.map((notification) => (
                 <div 
                   key={notification.id}
@@ -271,11 +150,7 @@ const NotificationsModal = ({ children }: NotificationsModalProps) => {
                           variant="link" 
                           size="sm" 
                           className="h-auto p-0 text-flame-500" 
-                          onClick={() => {
-                            markAsRead(notification.id);
-                            setOpen(false);
-                            window.location.href = notification.action_url!;
-                          }}
+                          onClick={() => handleNotificationAction(notification)}
                         >
                           View Details
                         </Button>

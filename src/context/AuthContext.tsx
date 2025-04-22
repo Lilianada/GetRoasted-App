@@ -11,6 +11,7 @@ interface AuthContextType {
   signInWithEmail: (email: string, password: string) => Promise<any>;
   signUpWithEmail: (email: string, password: string, username: string) => Promise<any>;
   signInWithGoogle: () => Promise<any>;
+  deleteAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

@@ -1,76 +1,104 @@
 
-import { useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits";
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuthContext } from '@/context/AuthContext';
 
-/**
- * Tracks and updates the spectator count for a battle. Increments on mount, decrements on unmount.
- * Returns the current spectator count (subscribed to in real-time).
- */
-export function useSpectatorCount(battleId: string, isParticipant: boolean) {
-  const { checkCanSpectateBattle } = useSubscriptionLimits();
-  const [spectatorCount, setSpectatorCount] = useState(0);
+interface BattleSpectatorLogicProps {
+  battleId: string;
+  onSpectatorCountChange?: (count: number) => void;
+}
+
+const BattleSpectatorLogic = ({ battleId, onSpectatorCountChange }: BattleSpectatorLogicProps) => {
+  const [spectators, setSpectators] = useState<any[]>([]);
+  const { user } = useAuthContext();
 
   useEffect(() => {
-    if (!battleId || isParticipant) return;
+    if (!battleId || !user) return;
 
-    // Check if user can spectate before adding them
-    if (!checkCanSpectateBattle()) {
-      return;
-    }
+    const fetchSpectators = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('battle_spectators')
+          .select('*')
+          .eq('battle_id', battleId);
 
-    // Add this user as a spectator (optional: only if not already present)
-    const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id;
-
-    if (userId) {
-      await supabase.from('battle_spectators').upsert({ 
-        battle_id: battleId, 
-        user_id: userId 
-      });
-    }
-
-    // Subscribe to real-time updates for battle spectators
-    const channel = supabase
-      .channel('battle-spectators')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'battle_spectators',
-          filter: `battle_id=eq.${battleId}`
-        },
-        () => {
-          // Re-fetch count on any change
-          supabase
-            .from('battle_spectators')
-            .select('*', { count: 'exact', head: true })
-            .eq('battle_id', battleId)
-            .then(({ count }) => setSpectatorCount(count || 0));
+        if (error) throw error;
+        setSpectators(data || []);
+        if (onSpectatorCountChange) {
+          onSpectatorCountChange(data?.length || 0);
         }
-      )
+      } catch (error) {
+        console.error('Error fetching spectators:', error);
+      }
+    };
+
+    const joinAsSpectator = async () => {
+      try {
+        // Check if user is already a participant
+        const { data: isParticipant, error: participantError } = await supabase
+          .from('battle_participants')
+          .select('id')
+          .eq('battle_id', battleId)
+          .eq('user_id', user.id)
+          .single();
+
+        if (participantError && participantError.code !== 'PGRST116') {
+          throw participantError;
+        }
+
+        // If user is a participant, don't add as spectator
+        if (isParticipant) return;
+
+        // Check if user is already a spectator
+        const { data: existingSpectator, error: spectatorError } = await supabase
+          .from('battle_spectators')
+          .select('id')
+          .eq('battle_id', battleId)
+          .eq('user_id', user.id)
+          .single();
+
+        if (spectatorError && spectatorError.code !== 'PGRST116') {
+          throw spectatorError;
+        }
+
+        // If not already a spectator, add them
+        if (!existingSpectator) {
+          const { error: insertError } = await supabase
+            .from('battle_spectators')
+            .insert([
+              { battle_id: battleId, user_id: user.id }
+            ]);
+
+          if (insertError) throw insertError;
+        }
+      } catch (error) {
+        console.error('Error joining as spectator:', error);
+      }
+    };
+
+    // Subscribe to changes in spectators
+    const channel = supabase
+      .channel(`battle-spectators-${battleId}`)
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'battle_spectators',
+        filter: `battle_id=eq.${battleId}` 
+      }, () => {
+        fetchSpectators();
+      })
       .subscribe();
 
-    // Initial fetch
-    supabase
-      .from('battle_spectators')
-      .select('*', { count: 'exact', head: true })
-      .eq('battle_id', battleId)
-      .then(({ count }) => setSpectatorCount(count || 0));
+    // Fetch initial spectators and join as spectator
+    fetchSpectators();
+    joinAsSpectator();
 
-    // Cleanup: remove spectator on leave
     return () => {
-      if (userId) {
-        supabase
-          .from('battle_spectators')
-          .delete()
-          .eq('battle_id', battleId)
-          .eq('user_id', userId);
-      }
-      channel.unsubscribe();
+      supabase.removeChannel(channel);
     };
-  }, [battleId, isParticipant, checkCanSpectateBattle]);
+  }, [battleId, user, onSpectatorCountChange]);
 
-  return spectatorCount;
-}
+  return null; // This is a logic component, it doesn't render anything
+};
+
+export default BattleSpectatorLogic;

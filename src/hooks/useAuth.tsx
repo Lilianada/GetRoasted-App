@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
@@ -110,10 +111,13 @@ export const useAuth = () => {
   };
 
   const deleteAccount = async () => {
-    if (!user) return;
+    if (!user) {
+      toast.error("You need to be logged in to delete your account");
+      return;
+    }
     
     try {
-      // Call a Supabase function or API endpoint to delete the user's account
+      // Call the Supabase function to delete the user's account
       const { error } = await supabase.functions.invoke('delete-account', {
         body: { userId: user.id }
       });
@@ -123,7 +127,8 @@ export const useAuth = () => {
       // Sign out after deletion
       await signOut();
       toast.success("Account deleted successfully");
-    } catch (error) {
+      navigate('/');
+    } catch (error: any) {
       toast.error("Failed to delete account", {
         description: error instanceof Error ? error.message : "An unknown error occurred"
       });
