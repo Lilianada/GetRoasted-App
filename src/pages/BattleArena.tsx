@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, Clock, Mic, MicOff } from "lucide-react";
@@ -11,7 +12,7 @@ import React from "react";
 interface Participant {
   id: string;
   username: string;
-  // Add avatar_url if available
+  avatar_url?: string;
 }
 
 interface BattleArenaProps {
@@ -27,6 +28,14 @@ interface BattleArenaProps {
   formatTime: (s: number) => string;
   isPlayerTurn: () => boolean;
   handleSendRoast: () => void;
+  currentRound?: number;
+  totalRounds?: number;
+  currentTurnUserId?: string;
+  showRoundSummary?: boolean;
+  onNextRound?: () => void;
+  battleEnded?: boolean;
+  winner?: any;
+  onRematch?: () => void;
 }
 
 const BattleArena: React.FC<BattleArenaProps> = ({
@@ -42,6 +51,15 @@ const BattleArena: React.FC<BattleArenaProps> = ({
   formatTime,
   isPlayerTurn,
   handleSendRoast,
+  // Add the new props with default handling
+  currentRound,
+  totalRounds,
+  currentTurnUserId,
+  showRoundSummary,
+  onNextRound,
+  battleEnded,
+  winner,
+  onRematch
 }) => {
   return (
     <Card className="p-4 bg-yellow border-2 border-black border-night-700">
@@ -49,8 +67,7 @@ const BattleArena: React.FC<BattleArenaProps> = ({
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="bg-flame-600/20 text-flame-500">
-              {/* TODO: Add round info when available */}
-              Battle
+              {currentRound && totalRounds ? `Round ${currentRound}/${totalRounds}` : "Battle"}
             </Badge>
             <Badge variant="outline" className="bg-night-700">
               <Users className="h-3 w-3 mr-1" />
@@ -99,18 +116,23 @@ const BattleArena: React.FC<BattleArenaProps> = ({
         {participants.map((player, index) => (
           <div key={player.id} className={`flex ${index === 0 ? "flex-row" : "flex-row-reverse"} items-center gap-3`}>
             <Avatar className="h-12 w-12 border-2 border-night-700">
-              {/* If you have avatar_url, use it here */}
+              {player.avatar_url && (
+                <img src={player.avatar_url} alt={player.username} className="w-full h-full object-cover" />
+              )}
               <AvatarFallback className="bg-night-700 text-yellow-500">
                 {player.username?.substring(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className={`text-${index === 0 ? "left" : "right"}`}>
               <div className="font-medium">{player.username}</div>
+              {currentTurnUserId === player.id && (
+                <div className="text-xs text-flame-500">Current Turn</div>
+              )}
             </div>
           </div>
         ))}
       </div>
-      {/* TODO: Render real roasts here when implemented */}
+      {/* Roast message display area would go here */}
       {!isSpectator && (
         <div className="relative">
           <Textarea 
