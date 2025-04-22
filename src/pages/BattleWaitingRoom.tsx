@@ -1,13 +1,10 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-
-
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "@/components/ui/sonner";
-import { Copy, ArrowLeft, Share2 } from "lucide-react";
+import { Copy, ArrowLeft, Share2, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
@@ -24,6 +21,39 @@ const BattleWaitingRoom = () => {
   
   const battleUrl = `${window.location.origin}/battles/join/${battleId}`;
   
+  const checkAndRedirectBattle = async () => {
+    try {
+      const { data: participantsData, error: participantsError } = await supabase
+        .from('battle_participants')
+        .select('*')
+        .eq('battle_id', battleId);
+        
+      if (participantsError) throw participantsError;
+      
+      if (participantsData && participantsData.length >= 2) {
+        // Double check battle status before redirect
+        const { data: battle } = await supabase
+          .from('battles')
+          .select('status')
+          .eq('id', battleId)
+          .single();
+          
+        if (battle?.status !== 'active') {
+          // Update battle status to active
+          await supabase
+            .from('battles')
+            .update({ status: 'active' })
+            .eq('id', battleId);
+        }
+        
+        toast.success("Battle is starting!");
+        navigate(`/battles/live/${battleId}`);
+      }
+    } catch (error) {
+      console.error('Error checking battle status:', error);
+    }
+  };
+  
   useEffect(() => {
     if (!battleId || !user) return;
     
@@ -38,9 +68,15 @@ const BattleWaitingRoom = () => {
           
         if (battleError) throw battleError;
         
+        // If battle is already active, redirect immediately
+        if (battle.status === 'active') {
+          navigate(`/battles/live/${battleId}`);
+          return;
+        }
+        
         setBattleData(battle);
         
-        // Fetch participants
+        // Fetch initial participants
         const { data: participantsData, error: participantsError } = await supabase
           .from('battle_participants')
           .select('*, profiles:user_id(*)')
@@ -51,14 +87,19 @@ const BattleWaitingRoom = () => {
         setParticipants(participantsData);
         setLoading(false);
         
+        // Check if battle should start immediately
+        if (participantsData.length >= 2) {
+          await checkAndRedirectBattle();
+        }
+        
         // Set up real-time subscription for participants
         const channel = supabase
           .channel('battle_participants_changes')
           .on('postgres_changes', 
             { event: 'INSERT', schema: 'public', table: 'battle_participants', filter: `battle_id=eq.${battleId}` }, 
-            (payload) => {
-              // Update participants when someone joins
-              fetchParticipants();
+            async () => {
+              // Recheck participant count and status when someone joins
+              await checkAndRedirectBattle();
             }
           )
           .subscribe();
@@ -73,43 +114,15 @@ const BattleWaitingRoom = () => {
       }
     };
     
-    const fetchParticipants = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('battle_participants')
-          .select('*, profiles:user_id(*)')
-          .eq('battle_id', battleId);
-          
-        if (error) throw error;
-        
-        setParticipants(data);
-        
-        // If the battle has enough participants, redirect to the active battle
-        if (data.length > 1) {
-          // Update battle status to active
-          await supabase
-            .from('battles')
-            .update({ status: 'active' })
-            .eq('id', battleId);
-            
-          // Redirect to the battle page
-          toast.success("Battle is starting!");
-          navigate(`/battles/live/${battleId}`);
-        }
-      } catch (error) {
-        console.error('Error fetching participants:', error);
-      }
-    };
-    
     fetchBattleData();
   }, [battleId, user, navigate]);
   
   const handleCopyLink = () => {
     navigator.clipboard.writeText(battleUrl);
     setShowCopied(true);
-    toast.success("Invitation link copied to clipboard");
+    toast.success("Invitation link copied!");
     
-    // Hide the "Copied" message after 2 seconds
+    // Hide the checkmark after 2 seconds
     setTimeout(() => {
       setShowCopied(false);
     }, 2000);
@@ -257,7 +270,7 @@ const BattleWaitingRoom = () => {
                     onClick={handleCopyLink}
                   >
                     {showCopied ? (
-                      <span className="text-xs font-medium text-green-500">Copied!</span>
+                      <Check className="h-4 w-4 text-green-500" />
                     ) : (
                       <Copy className="h-4 w-4" />
                     )}
