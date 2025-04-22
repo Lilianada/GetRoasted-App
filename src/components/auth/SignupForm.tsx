@@ -134,11 +134,11 @@ const SignupForm = () => {
           </Button>
           <p className="mt-4 text-xs text-muted-foreground">
             By signing up, you agree to our{" "}
-            <Link to="/terms" className="text-flame-500 hover:underline">
+            <Link to="/terms" className="text-flame-600 hover:underline">
               Terms of Service
             </Link>{" "}
             and{" "}
-            <Link to="/privacy" className="text-flame-500 hover:underline">
+            <Link to="/privacy" className="text-flame-600 hover:underline">
               Privacy Policy
             </Link>
           </p>

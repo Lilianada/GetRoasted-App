@@ -74,7 +74,7 @@ const LoginForm = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                <a href="#" className="text-xs text-flame-500 hover:underline">
+                <a href="#" className="text-xs text-flame-600 hover:underline">
                   Forgot password?
                 </a>
               </div>
