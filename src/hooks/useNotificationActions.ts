@@ -4,6 +4,10 @@ import { toast } from "@/components/ui/use-toast";
 import { useAuthContext } from "@/context/AuthContext";
 
 export function useNotificationActions() {
+  // For test/demo notifications, dispatch a window event
+  const addNotification = (notification: any) => {
+    window.dispatchEvent(new CustomEvent('add-notification', { detail: notification }));
+  }
   const { user } = useAuthContext();
 
   const markAsRead = async (id: string) => {
@@ -53,5 +57,5 @@ export function useNotificationActions() {
     }
   };
 
-  return { markAsRead, markAllAsRead };
+  return { markAsRead, markAllAsRead, addNotification };
 }

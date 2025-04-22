@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import FloatingNotificationBell from "@/components/notifications/FloatingNotificationBell";
 import { Button } from "@/components/ui/button";
 import {
   Flame,
@@ -95,9 +96,9 @@ const NavBar = () => {
           </span>
         </Link>
 
-        {/* Notification bell for desktop */}
-        <div className="hidden md:flex items-center gap-2">
-          <RecentNotificationsModal />
+        {/* Floating notification bell for desktop - only appears if there are unread notifications */}
+        <div className="hidden md:block">
+          <FloatingNotificationBell />
         </div>
 
         {/* Always show the hamburger menu button */}

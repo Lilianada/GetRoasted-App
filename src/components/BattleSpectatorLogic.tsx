@@ -63,13 +63,13 @@ const BattleSpectatorLogic = ({ battleId, onSpectatorCountChange }: BattleSpecta
 
         // If not already a spectator, add them
         if (!existingSpectator) {
-          const { error: insertError } = await supabase
+          const { error } = await supabase
             .from('battle_spectators')
-            .insert([
+            .upsert([
               { battle_id: battleId, user_id: user.id }
-            ]);
+            ], { onConflict: 'battle_id,user_id' });
 
-          if (insertError) throw insertError;
+          if (error) throw error;
         }
       } catch (error) {
         console.error('Error joining as spectator:', error);

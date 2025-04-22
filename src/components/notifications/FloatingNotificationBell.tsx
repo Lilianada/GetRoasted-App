@@ -1,5 +1,6 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { playNotificationSound } from '@/utils/notificationSound';
 import { Button } from "@/components/ui/button";
 import { Bell } from "lucide-react";
 import NotificationsModal from "@/components/notifications/NotificationsModal";
@@ -8,7 +9,15 @@ import { cn } from '@/lib/utils';
 
 const FloatingNotificationBell = () => {
   const { unreadCount } = useNotifications();
-  
+  const prevUnreadCount = useRef(unreadCount);
+
+  useEffect(() => {
+    if (unreadCount > prevUnreadCount.current) {
+      playNotificationSound();
+    }
+    prevUnreadCount.current = unreadCount;
+  }, [unreadCount]);
+
   if (unreadCount === 0) return null;
   
   return (

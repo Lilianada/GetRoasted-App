@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import {
   Dialog,
@@ -16,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '@/hooks/useNotifications';
 import { Notification } from '@/types/notification';
 import NotificationsList from './NotificationsList';
+import TestNotificationButton from './TestNotificationButton';
 
 interface NotificationsModalProps {
   children?: React.ReactNode;
