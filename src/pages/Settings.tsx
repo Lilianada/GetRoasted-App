@@ -1,37 +1,14 @@
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
 import { Settings as SettingsIcon } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-<<<<<<< HEAD
-=======
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-} from "@/components/ui/dialog";
->>>>>>> f6bf68a (Feat: Unifinished notifications logic)
-import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/context/AuthContext";
 
-import { NotificationSettings, AccountSettings, AppearanceSettings } from "@/components/SettingsSections";
+import ProfileSettings from "@/components/settings/ProfileSettings";
+import NotificationSettingsCard from "@/components/settings/NotificationSettingsCard";
+import AppearanceSettingsCard from "@/components/settings/AppearanceSettingsCard";
+import AccountSettingsCard from "@/components/settings/AccountSettingsCard";
 
 const Settings = () => {
   const [profileData, setProfileData] = useState({
@@ -116,143 +93,20 @@ const Settings = () => {
           </div>
 
           <div className="grid gap-6">
-            <Card className="border-night-700">
-              <CardHeader>
-                <CardTitle className="text-xl">Profile Information</CardTitle>
-                <CardDescription>
-                  Update your account information
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="displayName">Display Name</Label>
-                  <Input 
-                    id="displayName" 
-                    value={profileData.displayName}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input 
-                    id="email" 
-                    value={profileData.email}
-                    disabled
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    To change your email, please contact support
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="bio">Bio</Label>
-                  <Textarea 
-                    id="bio" 
-                    value={profileData.bio} 
-                    onChange={handleInputChange}
-                    placeholder="Tell us a bit about yourself"
-                    className="min-h-[100px]"
-                  />
-                </div>
-              </CardContent>
-              <CardFooter className="border-t border-night-700 pt-6">
-                <Button 
-                  className="bg-yellow hover:opacity-90"
-                  onClick={handleSaveSettings}
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Saving...' : 'Save Changes'}
-                </Button>
-              </CardFooter>
-            </Card>
+            <ProfileSettings
+              displayName={profileData.displayName}
+              email={profileData.email}
+              bio={profileData.bio}
+              isLoading={isLoading}
+              onInputChange={handleInputChange}
+              onSave={handleSaveSettings}
+            />
 
-            <Card className="border-night-700">
-              <CardHeader>
-                <CardTitle className="text-xl">
-                  Notification Settings
-                </CardTitle>
-                <CardDescription>
-                  Manage how and when you receive notifications
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <NotificationSettings />
-              </CardContent>
-            </Card>
+            <NotificationSettingsCard />
 
-            <Card className="border-night-700">
-              <CardHeader>
-                <CardTitle className="text-xl">
-                  Display Preferences
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <AppearanceSettings />
-              </CardContent>
-              <CardFooter className="border-t border-night-700 pt-6">
-                <Button 
-                  className="bg-yellow hover:opacity-90"
-                  onClick={handleSaveSettings}
-                >
-                  Save Preferences
-                </Button>
-              </CardFooter>
-            </Card>
+            <AppearanceSettingsCard onSave={handleSaveSettings} />
 
-            <Card className="border-night-700">
-              <CardHeader>
-                <CardTitle className="text-xl">
-                  Account
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-<<<<<<< HEAD
-                <AccountSettings />
-=======
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="destructive" className="w-full sm:w-auto">
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Delete Account
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="bg-night-800 border-night-700">
-                    <DialogHeader>
-                      <DialogTitle className="text-destructive">Delete Account</DialogTitle>
-                      <DialogDescription>  
-                        This action cannot be undone. This will permanently delete your account
-                        and remove all your data from our servers.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <p className="text-sm text-muted-foreground">
-                        To confirm, type <span className="font-bold text-destructive">DELETE</span> in the field below:
-                      </p>
-                      <Input
-                        className="border-night-700"
-                        value={deleteConfirmation}
-                        onChange={(e) => setDeleteConfirmation(e.target.value)}
-                      />
-                    </div>
-                    <DialogFooter>
-                      <DialogClose asChild>
-                        <Button type="button" variant="ghost">
-                          Cancel
-                        </Button>
-                      </DialogClose>
-                      <Button 
-                        type="button" 
-                        variant="destructive"
-                        onClick={handleDeleteAccount}
-                        disabled={deleteConfirmation !== "DELETE"}
-                      >
-                        Delete Account
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
->>>>>>> f6bf68a (Feat: Unifinished notifications logic)
-              </CardContent>
-            </Card>
+            <AccountSettingsCard />
           </div>
         </div>
       </main>

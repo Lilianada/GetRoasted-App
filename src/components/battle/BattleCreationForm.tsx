@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,8 @@ import { BattleTimeSelection } from "./BattleTimeSelection";
 import { BattleSettings } from "./BattleSettings";
 import { useNewBattleForm } from "@/hooks/useNewBattleForm";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { notifyBattleStart, sendBattleInvitation } from '@/utils/notificationUtils';
+import { useAuthContext } from '@/context/AuthContext';
 
 export const BattleCreationForm = () => {
   const {
@@ -19,8 +22,48 @@ export const BattleCreationForm = () => {
     timePerTurn, setTimePerTurn,
     allowSpectators, setAllowSpectators,
     quickMatch, setQuickMatch,
-    handleCreateBattle
+    handleCreateBattle: originalHandleCreateBattle
   } = useNewBattleForm();
+  
+  const { user } = useAuthContext();
+  const [invitedUsers, setInvitedUsers] = useState<string[]>([]);
+
+  // Enhanced handler that also sends notifications
+  const handleCreateBattle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!user) return;
+    
+    try {
+      // Call the original handler which returns the battle ID
+      const battleId = await originalHandleCreateBattle(e);
+      
+      if (battleId && battleType === 'private' && invitedUsers.length > 0) {
+        // Send battle invitations to invited users
+        await sendBattleInvitation({
+          inviterId: user.id,
+          inviterName: user.user_metadata?.username || 'A user',
+          inviteeIds: invitedUsers,
+          battleId,
+          battleTitle: title
+        });
+      }
+      
+      if (battleId && quickMatch) {
+        // Notify participants that a quick match is starting
+        await notifyBattleStart({
+          battleId,
+          battleTitle: title,
+          participantIds: [user.id] // Initially just the creator
+        });
+      }
+      
+      return battleId;
+    } catch (error) {
+      console.error('Error creating battle with notifications:', error);
+      throw error;
+    }
+  };
 
   return (
     <Card className="bg-secondary border-2 border-black p-6">

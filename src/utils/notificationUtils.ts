@@ -62,6 +62,18 @@ export async function sendBattleInvitation({
   try {
     const { error } = await supabase.from('notifications').insert(notifications);
     if (error) throw error;
+    
+    // Trigger email notifications for premium users
+    await triggerEmailNotifications({
+      userIds: inviteeIds, 
+      templateId: 'battle_invite',
+      data: {
+        inviter_name: inviterName,
+        battle_title: battleTitle,
+        battle_url: `/battles/join/${battleId}`
+      }
+    });
+    
     return true;
   } catch (error) {
     console.error('Error sending battle invitations:', error);
@@ -92,6 +104,18 @@ export async function notifyBattleStart({
   try {
     const { error } = await supabase.from('notifications').insert(notifications);
     if (error) throw error;
+    
+    // Email notification for battle start is high priority
+    await triggerEmailNotifications({
+      userIds: participantIds,
+      templateId: 'battle_start',
+      data: {
+        battle_title: battleTitle,
+        battle_url: `/battles/${battleId}`
+      },
+      priority: true
+    });
+    
     return true;
   } catch (error) {
     console.error('Error sending battle start notifications:', error);
@@ -129,9 +153,179 @@ export async function notifyBattleEnded({
   try {
     const { error } = await supabase.from('notifications').insert(notifications);
     if (error) throw error;
+    
+    // Only send email for the winner and the battle creator
+    const priorityUserIds = winnerId ? [winnerId] : [];
+    if (priorityUserIds.length > 0) {
+      await triggerEmailNotifications({
+        userIds: priorityUserIds,
+        templateId: 'battle_results',
+        data: {
+          battle_title: battleTitle,
+          battle_url: `/battles/${battleId}/results`,
+          winner_name: winnerName || 'No winner'
+        }
+      });
+    }
+    
     return true;
   } catch (error) {
     console.error('Error sending battle end notifications:', error);
     return false;
   }
+}
+
+/**
+ * Notify a user when they receive votes or comments
+ */
+export async function notifyUserInteraction({
+  userId,
+  actorName,
+  actionType,
+  battleId,
+  battleTitle
+}: {
+  userId: string;
+  actorName: string;
+  actionType: 'vote' | 'comment';
+  battleId: string;
+  battleTitle: string;
+}) {
+  const title = actionType === 'vote' ? 'New Vote Received' : 'New Comment';
+  const message = actionType === 'vote' 
+    ? `${actorName} voted for you in "${battleTitle}"`
+    : `${actorName} commented on your performance in "${battleTitle}"`;
+  
+  try {
+    await createNotification({
+      userId,
+      title,
+      message,
+      type: 'battle_end',
+      actionUrl: `/battles/${battleId}/results`
+    });
+    
+    // No email for votes/comments - these are lower priority
+    return true;
+  } catch (error) {
+    console.error('Error sending interaction notification:', error);
+    return false;
+  }
+}
+
+/**
+ * Notify a user about account related actions
+ */
+export async function notifyAccountAction({
+  userId,
+  title,
+  message,
+  actionUrl
+}: {
+  userId: string;
+  title: string;
+  message: string;
+  actionUrl?: string;
+}) {
+  try {
+    await createNotification({
+      userId,
+      title,
+      message,
+      type: 'account',
+      actionUrl
+    });
+    
+    // Account notifications are important - send email too
+    await triggerEmailNotifications({
+      userIds: [userId],
+      templateId: 'account_notification',
+      data: {
+        notification_title: title,
+        notification_message: message,
+        action_url: actionUrl || ''
+      },
+      priority: true
+    });
+    
+    return true;
+  } catch (error) {
+    console.error('Error sending account notification:', error);
+    return false;
+  }
+}
+
+/**
+ * Trigger email notifications for users who have enabled email notifications
+ */
+async function triggerEmailNotifications({
+  userIds,
+  templateId,
+  data,
+  priority = false
+}: {
+  userIds: string[];
+  templateId: string;
+  data: Record<string, string>;
+  priority?: boolean;
+}) {
+  if (userIds.length === 0) return;
+  
+  try {
+    // First get users who have email notifications enabled
+    const { data: profiles, error } = await supabase
+      .from('profiles')
+      .select('id, username, email_notifications')
+      .in('id', userIds)
+      .eq('email_notifications', true);
+    
+    if (error) throw error;
+    
+    // If no users have email notifications enabled or no user data found
+    if (!profiles || profiles.length === 0) return;
+    
+    // Get the emails of users from auth.users (in production, we'd use an edge function for this)
+    const { data: users, error: usersError } = await supabase.auth
+      .admin.listUsers();
+    
+    if (usersError) throw usersError;
+    
+    if (!users) return;
+    
+    // For each profile with email_notifications enabled, find their email and send
+    for (const profile of profiles) {
+      const user = users.find(u => u.id === profile.id);
+      if (user && user.email) {
+        // Call the email sending API endpoint
+        await fetch('/api/send-reminder-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: user.email,
+            name: profile.username || 'User',
+            reminder_text: data.notification_message || 'You have a new notification',
+            templateId
+          }),
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error sending email notifications:', error);
+  }
+}
+
+/**
+ * Integrate notification creation into battle creation
+ */
+export function setupBattleNotificationTriggers(battleId: string, creatorId: string, invitedUserIds: string[] = []) {
+  // This function would be called when a battle is created
+  // It would set up the notification triggers for the battle
+  // We could store this information in a separate table to track
+  // which notifications need to be sent for which battles
+  console.log('Setting up notification triggers for battle:', battleId, 'creator:', creatorId, 'invited users:', invitedUserIds);
+  
+  // In a real implementation, we'd store this info and use it
+  // to trigger notifications at the appropriate times
 }

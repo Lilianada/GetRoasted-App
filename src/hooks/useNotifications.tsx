@@ -5,12 +5,14 @@ import { useAuthContext } from '@/context/AuthContext';
 import { Notification } from '@/types/notification';
 import { toast } from '@/hooks/use-toast';
 import { playNotificationSound } from '@/utils/notificationSound';
+import { useSettings } from '@/hooks/useSettings';
 
 export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuthContext();
+  const { soundEnabled } = useSettings();
 
   useEffect(() => {
     if (!user) {
@@ -31,7 +33,7 @@ export function useNotifications() {
 
         if (error) throw error;
 
-        const typedData = data as unknown as Notification[];
+        const typedData = data as Notification[];
         setNotifications(typedData || []);
         setUnreadCount(typedData?.filter(n => !n.read).length || 0);
       } catch (error) {
@@ -48,8 +50,8 @@ export function useNotifications() {
 
     fetchNotifications();
 
-    // Set up real-time subscription for new notifications
-    const channel = supabase
+    // Set up real-time subscription for notifications changes
+    const notificationsChannel = supabase
       .channel('notifications-changes')
       .on('postgres_changes', {
         event: 'INSERT',
@@ -61,8 +63,10 @@ export function useNotifications() {
         setNotifications(prev => [newNotification, ...prev]);
         setUnreadCount(prev => prev + 1);
         
-        // Play sound
-        playNotificationSound();
+        // Play sound if enabled
+        if (soundEnabled) {
+          playNotificationSound();
+        }
 
         // Show toast for new notification
         toast({
@@ -70,12 +74,47 @@ export function useNotifications() {
           description: newNotification.message
         });
       })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'notifications',
+        filter: `user_id=eq.${user.id}`
+      }, (payload) => {
+        const updatedNotification = payload.new as unknown as Notification;
+        setNotifications(prev => 
+          prev.map(n => n.id === updatedNotification.id ? updatedNotification : n)
+        );
+        
+        // Update unread count if read status changed
+        setUnreadCount(prev => {
+          const oldNotification = notifications.find(n => n.id === updatedNotification.id);
+          if (oldNotification && oldNotification.read !== updatedNotification.read) {
+            return updatedNotification.read ? prev - 1 : prev + 1;
+          }
+          return prev;
+        });
+      })
+      .on('postgres_changes', {
+        event: 'DELETE',
+        schema: 'public', 
+        table: 'notifications',
+        filter: `user_id=eq.${user.id}`
+      }, (payload) => {
+        const deletedId = payload.old.id as string;
+        const wasUnread = notifications.find(n => n.id === deletedId && !n.read);
+        
+        setNotifications(prev => prev.filter(n => n.id !== deletedId));
+        
+        if (wasUnread) {
+          setUnreadCount(prev => Math.max(0, prev - 1));
+        }
+      })
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(notificationsChannel);
     };
-  }, [user]);
+  }, [user, soundEnabled]);
 
   const markAsRead = async (id: string) => {
     if (!user) return;
@@ -89,11 +128,7 @@ export function useNotifications() {
 
       if (error) throw error;
 
-      // Update local state
-      setNotifications(prev => 
-        prev.map(n => n.id === id ? { ...n, read: true } : n)
-      );
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      // Local state will be updated by the real-time subscription
     } catch (error) {
       console.error('Error marking notification as read:', error);
       toast({
@@ -116,9 +151,7 @@ export function useNotifications() {
 
       if (error) throw error;
 
-      // Update local state
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-      setUnreadCount(0);
+      // Local state will be updated by the real-time subscription
       toast({
         title: 'Success',
         description: 'All notifications marked as read'
@@ -145,13 +178,7 @@ export function useNotifications() {
 
       if (error) throw error;
 
-      // Update local state
-      const removedNotification = notifications.find(n => n.id === id);
-      setNotifications(prev => prev.filter(n => n.id !== id));
-      if (removedNotification && !removedNotification.read) {
-        setUnreadCount(prev => Math.max(0, prev - 1));
-      }
-      
+      // Local state will be updated by the real-time subscription
       toast({
         title: 'Success',
         description: 'Notification deleted'
