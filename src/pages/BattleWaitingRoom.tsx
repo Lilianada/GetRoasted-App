@@ -13,6 +13,7 @@ import Loader from "@/components/ui/loader";
 import { playNotificationSound } from "@/utils/notificationSound";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import BattleTimer from "@/components/BattleTimer";
+import BattlePresenceManager from "@/components/BattlePresenceManager";
 
 const BattleWaitingRoom = () => {
   const { battleId } = useParams<{ battleId: string }>();
@@ -23,48 +24,11 @@ const BattleWaitingRoom = () => {
   const [loading, setLoading] = useState(true);
   const [showCopied, setShowCopied] = useState(false);
   const [showGetReadyModal, setShowGetReadyModal] = useState(false);
+  const [battleState, setBattleState] = useState<'waiting' | 'ready' | 'active' | 'completed'>('waiting');
   const [countdown, setCountdown] = useState(3);
+  const [spectatorCount, setSpectatorCount] = useState(0);
   
   const battleUrl = `${window.location.origin}/battles/join/${battleId}`;
-  
-  const checkAndUpdateBattle = async () => {
-    try {
-      const { data: participantsData, error: participantsError } = await supabase
-        .from('battle_participants')
-        .select('*')
-        .eq('battle_id', battleId);
-        
-      if (participantsError) throw participantsError;
-      
-      if (participantsData && participantsData.length >= 2) {
-        // Double check battle status before redirect
-        const { data: battle } = await supabase
-          .from('battles')
-          .select('status')
-          .eq('id', battleId)
-          .single();
-          
-        if (battle?.status !== 'active') {
-          // Update battle status to active
-          await supabase
-            .from('battles')
-            .update({ status: 'active' })
-            .eq('id', battleId);
-          
-          // Play notification sound and show Get Ready modal
-          playNotificationSound();
-          setShowGetReadyModal(true);
-          
-          // Auto-close the modal after 3 seconds
-          setTimeout(() => {
-            setShowGetReadyModal(false);
-          }, 3000);
-        }
-      }
-    } catch (error) {
-      console.error('Error checking battle status:', error);
-    }
-  };
   
   useEffect(() => {
     if (!battleId || !user) return;
@@ -92,37 +56,6 @@ const BattleWaitingRoom = () => {
         
         setParticipants(participantsData);
         setLoading(false);
-        
-        // Check if battle should start immediately
-        if (participantsData.length >= 2) {
-          await checkAndUpdateBattle();
-        }
-        
-        // Set up real-time subscription for participants
-        const channel = supabase
-          .channel('battle_participants_changes')
-          .on('postgres_changes', 
-            { event: 'INSERT', schema: 'public', table: 'battle_participants', filter: `battle_id=eq.${battleId}` }, 
-            async () => {
-              // Recheck participant count and status when someone joins
-              await checkAndUpdateBattle();
-              
-              // Refresh participants list
-              const { data: newParticipantsData } = await supabase
-                .from('battle_participants')
-                .select('*, profiles:user_id(*)')
-                .eq('battle_id', battleId);
-                
-              if (newParticipantsData) {
-                setParticipants(newParticipantsData);
-              }
-            }
-          )
-          .subscribe();
-          
-        return () => {
-          supabase.removeChannel(channel);
-        };
       } catch (error) {
         console.error('Error fetching battle data:', error);
         toast.error("Failed to load battle information");
@@ -131,6 +64,29 @@ const BattleWaitingRoom = () => {
     };
     
     fetchBattleData();
+    
+    // Set up real-time subscription for participants
+    const channel = supabase
+      .channel('battle_participants_changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'battle_participants', filter: `battle_id=eq.${battleId}` }, 
+        async () => {
+          // Refresh participants list
+          const { data: newParticipantsData } = await supabase
+            .from('battle_participants')
+            .select('*, profiles:user_id(*)')
+            .eq('battle_id', battleId);
+            
+          if (newParticipantsData) {
+            setParticipants(newParticipantsData);
+          }
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [battleId, user, navigate]);
   
   // Countdown effect for the Get Ready modal
@@ -164,7 +120,9 @@ const BattleWaitingRoom = () => {
   };
   
   const handleEnterBattleRoom = () => {
-    if (battleData.status === 'active') {
+    if (battleData?.status === 'active') {
+      navigate(`/battles/live/${battleId}`);
+    } else if (participants.length >= 2) {
       navigate(`/battles/live/${battleId}`);
     } else {
       toast.info("The battle hasn't started yet. Waiting for opponent to join.");
@@ -228,6 +186,31 @@ const BattleWaitingRoom = () => {
     }
   };
   
+  const handleBattleStateChange = (newState: 'waiting' | 'ready' | 'active' | 'completed') => {
+    setBattleState(newState);
+    
+    // If battle is now active or ready and wasn't before, we may want to auto-redirect or show a notification
+    if (newState === 'active' && battleState !== 'active') {
+      // We could auto-redirect here, but we'll let the user click the button instead
+      toast.success("Battle is now active! You can enter the battle room.");
+    }
+  };
+  
+  const handleGetReadyModal = () => {
+    // Play notification sound and show Get Ready modal
+    playNotificationSound();
+    setShowGetReadyModal(true);
+    
+    // Auto-close the modal after 3 seconds
+    setTimeout(() => {
+      setShowGetReadyModal(false);
+      // Auto-redirect to battle room after modal closes
+      if (battleId) {
+        navigate(`/battles/live/${battleId}`);
+      }
+    }, 3000);
+  };
+  
   if (loading) {
     return (
       <div className="min-h-screen bg-night flex flex-col">
@@ -256,8 +239,20 @@ const BattleWaitingRoom = () => {
   
   return (
     <div className="min-h-screen bg-night flex flex-col">
+      {/* Battle Presence Manager */}
+      {battleId && (
+        <BattlePresenceManager 
+          battleId={battleId}
+          onParticipantCountChange={(count) => console.log('Participant count:', count)}
+          onSpectatorCountChange={setSpectatorCount}
+          onBattleStateChange={handleBattleStateChange}
+          onGetReadyModal={handleGetReadyModal}
+          maxParticipants={2}
+        />
+      )}
+      
       <div className="container py-8">      
-        <Card className=" max-w-3xl mx-auto">
+        <Card className="max-w-3xl mx-auto">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">{battleData.title}</CardTitle>
             <CardDescription>
@@ -341,7 +336,7 @@ const BattleWaitingRoom = () => {
                     <p className="text-center text-green-500 font-medium">
                       Opponent has joined! Ready to start the battle?
                     </p>
-                    {!battleData.status || battleData.status === 'waiting' ? (
+                    {battleState === 'waiting' ? (
                       <p className="text-sm text-muted-foreground">
                         The battle will begin automatically when both players are ready.
                       </p>

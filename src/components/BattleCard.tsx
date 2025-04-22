@@ -16,7 +16,7 @@ interface BattleCardProps {
     avatar?: string;
   }[];
   spectatorCount: number;
-  status: 'waiting' | 'active' | 'completed';
+  status: 'waiting' | 'ready' | 'active' | 'completed';
   timeRemaining?: number;
   type: 'public' | 'private';
   roundCount: number;
@@ -37,6 +37,7 @@ const BattleCard = ({
   const getStatusColor = () => {
     switch (status) {
       case 'waiting': return 'bg-primary text-black border-2 border-black';
+      case 'ready': return 'bg-amber-400 text-black border-2 border-black';
       case 'active': return 'bg-secondary text-black border-2 border-black';
       case 'completed': return 'bg-accent text-black border-2 border-black';
       default: return '';
@@ -55,6 +56,8 @@ const BattleCard = ({
     return `${Math.floor(seconds / 60)} min`;
   };
 
+  const isBattleFull = participants.length >= 2;
+
   return (
     <Card className={`
       relative transform transition-all duration-200 
@@ -67,13 +70,13 @@ const BattleCard = ({
         <div className="flex justify-between items-start">
           <CardTitle className="text-lg text-black">{title}</CardTitle>
           <Badge variant="outline" className={`${getStatusColor()} uppercase text-xs font-bold`}>
-            {status}
+            {status === 'ready' ? 'Starting' : status}
           </Badge>
         </div>
         <CardDescription className="flex items-center gap-2 text-black">
           <span className="inline-flex items-center gap-1">
             <Users className="h-3.5 w-3.5" />
-            {participants.length}/3
+            {participants.length}/2
           </span>
           <span className="inline-flex items-center gap-1">
             <Eye className="h-3.5 w-3.5" />
@@ -128,13 +131,17 @@ const BattleCard = ({
           asChild
           className="bg-primary text-black border-2 border-black hover:bg-primary/90 shadow-neo hover:shadow-neo-hover"
         >
-          {status === 'waiting' ? (
+          {status === 'waiting' && !isBattleFull ? (
             <Link to={`/battles/waiting/${id}`}>
               Join Battle
             </Link>
-          ) : status === 'active' ? (
-            <Link to={`/battles/${id}`}>
-              Watch
+          ) : status === 'waiting' && isBattleFull ? (
+            <Link to={`/battles/waiting/${id}`}>
+              Battle Full
+            </Link>
+          ) : status === 'ready' || status === 'active' ? (
+            <Link to={isBattleFull ? `/battles/live/${id}` : `/battles/waiting/${id}`}>
+              {isBattleFull ? "Watch" : "Join as Spectator"}
             </Link>
           ) : (
             <Link to={`/battles/${id}`}>

@@ -10,6 +10,7 @@ interface BattleTimerProps {
   onTimeout?: () => void;
   showWarningAt?: number;
   onTimerUpdate?: (remainingSeconds: number) => void;
+  isSynchronized?: boolean;
 }
 
 const BattleTimer = ({
@@ -18,6 +19,7 @@ const BattleTimer = ({
   onTimeout,
   showWarningAt = 30,
   onTimerUpdate,
+  isSynchronized = false,
 }: BattleTimerProps) => {
   const [seconds, setSeconds] = useState(initialSeconds);
   const [isWarning, setIsWarning] = useState(false);
@@ -30,7 +32,8 @@ const BattleTimer = ({
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
     
-    if (isActive && seconds > 0) {
+    // Only run the countdown if we're active and not synchronized externally
+    if (isActive && seconds > 0 && !isSynchronized) {
       interval = setInterval(() => {
         setSeconds((prevSeconds) => {
           const newSeconds = prevSeconds - 1;
@@ -53,12 +56,22 @@ const BattleTimer = ({
       }, 1000);
     } else if (seconds === 0) {
       setIsWarning(false);
+      if (onTimeout) onTimeout();
     }
     
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isActive, seconds, onTimeout, showWarningAt, onTimerUpdate]);
+  }, [isActive, seconds, onTimeout, showWarningAt, onTimerUpdate, isSynchronized]);
+  
+  // If seconds changes externally (due to synchronization) we should update the warning state
+  useEffect(() => {
+    if (seconds <= showWarningAt) {
+      setIsWarning(true);
+    } else {
+      setIsWarning(false);
+    }
+  }, [seconds, showWarningAt]);
   
   const formatTime = (totalSeconds: number) => {
     const minutes = Math.floor(totalSeconds / 60);

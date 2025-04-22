@@ -1,63 +1,69 @@
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Users } from "lucide-react";
+
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import React from "react";
+import { Eye, MessageCircle, Send } from "lucide-react";
+import { BattleChat } from "@/components/BattleChat";
+import { useAuthContext } from "@/context/AuthContext";
+import { useParams } from "react-router-dom";
 
 interface BattleChatPanelProps {
   spectatorCount: number;
   chatInput: string;
-  setChatInput: (v: string) => void;
+  setChatInput: (value: string) => void;
   handleSendChat: () => void;
   showChat: boolean;
+  isSpectator?: boolean;
 }
 
-const BattleChatPanel: React.FC<BattleChatPanelProps> = ({
+const BattleChatPanel = ({
   spectatorCount,
   chatInput,
   setChatInput,
   handleSendChat,
   showChat,
-}) => {
+  isSpectator = false
+}: BattleChatPanelProps) => {
+  const { user } = useAuthContext();
+  const { battleId } = useParams<{ battleId: string }>();
+  
+  if (!showChat) return null;
+  
   return (
-    <div className={`w-full lg:w-80 ${showChat ? "block" : "hidden lg:block"}`}>
-      <Card className="bg-yellow border-2 border-black border-night-700 h-full">
-        <div className="flex items-center justify-between p-3 border-b border-night-700">
-          <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-flame-500" />
-            <h2 className="font-medium">Spectator Chat</h2>
-          </div>
-          <Badge variant="outline" className="bg-night-700">
-            {spectatorCount}
-          </Badge>
-        </div>
-        <div className="p-3 h-[500px] lg:h-[calc(100vh-350px)] flex flex-col">
-          <div className="flex-1 overflow-y-auto space-y-3 mb-3">
-            {/* TODO: Render real spectator chat when implemented */}
-          </div>
-          <Separator className="bg-night-700 my-2" />
-          <div className="relative">
-            <Input 
-              placeholder="Type a message..."
-              className="pr-10 border-night-700 focus-visible:ring-flame-500"
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-            />
-            <Button 
-              size="icon" 
-              className="absolute right-1 top-1 h-6 w-6 rounded-full bg-flame-500 hover:bg-flame-600"
-              onClick={handleSendChat}
-              disabled={chatInput.trim() === ""}
-            >
-              <Send className="h-3 w-3" />
-            </Button>
+    <Card className="bg-secondary border-2 border-black flex-1 lg:max-w-[320px]">
+      <CardHeader className="border-b-2 border-black pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg text-black flex items-center gap-2">
+            <MessageCircle className="h-5 w-5 text-flame-500" />
+            Chat
+          </CardTitle>
+          <div className="flex items-center gap-1 text-sm text-black">
+            <Eye className="h-4 w-4" />
+            <span>{spectatorCount}</span>
           </div>
         </div>
-      </Card>
-    </div>
+      </CardHeader>
+      <CardContent className="p-4">
+        {user && battleId ? (
+          <BattleChat 
+            battleId={battleId} 
+            user={user}
+            canSend={!isSpectator}
+          />
+        ) : (
+          <div className="text-center py-4 text-sm text-gray-500">
+            You need to be logged in to chat.
+          </div>
+        )}
+        
+        {isSpectator && (
+          <div className="mt-2 bg-night-800 rounded p-2 text-xs text-center">
+            You are in spectator mode and cannot participate in the roast battle.
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
