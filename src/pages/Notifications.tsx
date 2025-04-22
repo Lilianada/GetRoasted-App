@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/context/AuthContext";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/sonner";
 
 import type { Notification } from '@/types/notification';
 

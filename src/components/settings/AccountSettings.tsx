@@ -1,4 +1,4 @@
-// Move the existing AccountSettings component here
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/context/AuthContext";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/sonner";
 
 export function AccountSettings() {
   const [deleteConfirmation, setDeleteConfirmation] = useState('');

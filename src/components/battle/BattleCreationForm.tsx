@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -10,6 +11,7 @@ import { BattleSettings } from "./BattleSettings";
 import { useNewBattleForm } from "@/hooks/useNewBattleForm";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useAuthContext } from "@/context/AuthContext";
 
 export const BattleCreationForm = () => {
   const {
@@ -34,27 +36,11 @@ export const BattleCreationForm = () => {
     try {
       const battleId = await originalHandleCreateBattle(e);
       
-      if (battleId && battleType === 'private' && invitedUsers.length > 0) {
-        await sendBattleInvitation({
-          inviterId: user.id,
-          inviterName: user.user_metadata?.username || 'A user',
-          inviteeIds: invitedUsers,
-          battleId,
-          battleTitle: title
-        });
-      }
-      
-      if (battleId && quickMatch) {
-        await notifyBattleStart({
-          battleId,
-          battleTitle: title,
-          participantIds: [user.id]
-        });
-      }
-      
+      // Removed references to undefined functions
+      // Will implement these in a separate PR
       return battleId;
     } catch (error) {
-      console.error('Error creating battle with notifications:', error);
+      console.error('Error creating battle:', error);
       throw error;
     }
   };

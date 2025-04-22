@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom";
 import { useBattle, useBattleParticipants, useSpectatorCount } from "@/hooks/useBattleData";
 import BattleArena from "./BattleArena";
 import BattleChatPanel from "./BattleChatPanel";
+import { Participant } from "@/types/battle";
 
 const Battle = () => {
   const { battleId } = useParams<{ battleId: string }>();
@@ -16,8 +17,15 @@ const Battle = () => {
 
   // Fetch battle data
   const { data: battle, isLoading: battleLoading, error: battleError } = useBattle(battleId);
-  const { data: participants = [], isLoading: participantsLoading } = useBattleParticipants(battleId);
+  const { data: participantsData = [], isLoading: participantsLoading } = useBattleParticipants(battleId);
   const { data: spectatorCount = 0, isLoading: spectatorLoading } = useSpectatorCount(battleId);
+
+  // Convert participants to the required Participant type
+  const participants: Participant[] = participantsData.map(p => ({
+    id: p.id,
+    username: p.username || 'Unknown',
+    avatar_url: p.avatar_url
+  }));
 
   // Wait for all data to load
   const loading = battleLoading || participantsLoading || spectatorLoading;

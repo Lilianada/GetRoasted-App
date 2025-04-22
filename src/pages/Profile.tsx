@@ -21,7 +21,7 @@ const Profile = () => {
   const { user } = useAuthContext();
   const [profile, setProfile] = useState<any>(null);
   const [optimisticProfile, setOptimisticProfile] = useState<any>(null);
-  const { stats, statsLoading, statsError } = usePlayerStats(user?.id);
+  const { stats, isLoading: statsLoading } = usePlayerStats(user?.id);
 
   const { data: profileData, isLoading: profileLoading, error: profileError } = useQuery({
     queryKey: ['profile', user?.id],
@@ -160,7 +160,6 @@ const Profile = () => {
       } catch (error) {
         console.error("Error fetching player stats:", error);
         toast.error("Could not load player statistics");
-      } finally {
       }
     };
 
@@ -199,8 +198,8 @@ const Profile = () => {
     return null;
   };
 
-  if (statsError) {
-    return <div className="text-red-500">Could not load player statistics: {statsError.message}</div>;
+  if (profileError) {
+    return <div className="text-red-500">Could not load profile: {profileError.message}</div>;
   }
   return (
     <div className="neo-container py-8 animate-fade-in">

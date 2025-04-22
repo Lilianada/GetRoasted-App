@@ -2,7 +2,7 @@
 import React from 'react';
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/context/AuthContext";
 
