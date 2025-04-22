@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { NotificationSettingsForm } from "@/components/SettingsSections";
+import { NotificationSettingsForm } from "@/components/settings/NotificationSettingsForm";
 
 const NotificationSettingsCard: React.FC = () => {
   return (

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -10,8 +9,7 @@ import { BattleTimeSelection } from "./BattleTimeSelection";
 import { BattleSettings } from "./BattleSettings";
 import { useNewBattleForm } from "@/hooks/useNewBattleForm";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { notifyBattleStart, sendBattleInvitation } from '@/utils/notificationUtils';
-import { useAuthContext } from '@/context/AuthContext';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const BattleCreationForm = () => {
   const {
@@ -28,18 +26,15 @@ export const BattleCreationForm = () => {
   const { user } = useAuthContext();
   const [invitedUsers, setInvitedUsers] = useState<string[]>([]);
 
-  // Enhanced handler that also sends notifications
   const handleCreateBattle = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!user) return;
     
     try {
-      // Call the original handler which returns the battle ID
       const battleId = await originalHandleCreateBattle(e);
       
       if (battleId && battleType === 'private' && invitedUsers.length > 0) {
-        // Send battle invitations to invited users
         await sendBattleInvitation({
           inviterId: user.id,
           inviterName: user.user_metadata?.username || 'A user',
@@ -50,11 +45,10 @@ export const BattleCreationForm = () => {
       }
       
       if (battleId && quickMatch) {
-        // Notify participants that a quick match is starting
         await notifyBattleStart({
           battleId,
           battleTitle: title,
-          participantIds: [user.id] // Initially just the creator
+          participantIds: [user.id]
         });
       }
       
@@ -76,9 +70,13 @@ export const BattleCreationForm = () => {
               placeholder="Enter a catchy title..."
               className="border-night-700 focus-visible:ring-flame-500"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => setTitle(e.target.value.slice(0, 24))}
+              maxLength={24}
               required
             />
+            <p className="text-xs text-muted-foreground text-right">
+              {title.length}/24 characters
+            </p>
           </div>
           
           <div className="space-y-2">
@@ -122,7 +120,24 @@ export const BattleCreationForm = () => {
           setQuickMatch={setQuickMatch}
         />
         
-        <div className="pt-4 flex justify-end">
+        <div className="pt-4 flex justify-end gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  type="button"
+                  className="gap-2"
+                  disabled
+                >
+                  Quick Match
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Coming soon!</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
           <Button 
             type="submit"
             className="gap-2 bg-yellow hover:opacity-90"
