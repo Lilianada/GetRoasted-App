@@ -159,3 +159,50 @@ export function useBattleData(battleId: string | undefined) {
   
   return { battle, participants, votes, isLoading, error };
 }
+
+// Export these for backwards compatibility with any code that might be using them
+export const useBattle = (battleId: string | undefined) => {
+  const { battle, isLoading, error } = useBattleData(battleId);
+  return { data: battle, isLoading, isError: !!error, error };
+};
+
+export const useBattleParticipants = (battleId: string | undefined) => {
+  const { participants, isLoading, error } = useBattleData(battleId);
+  return { data: participants, isLoading, isError: !!error, error };
+};
+
+export const useSpectatorCount = (battleId: string | undefined) => {
+  const { participants, isLoading, error } = useBattleData(battleId);
+  // This is a placeholder - you might want to implement actual spectator count logic
+  const spectatorCount = participants?.length || 0;
+  return { data: spectatorCount, isLoading, isError: !!error, error };
+};
+
+export const useBattleVotes = (battleId: string | undefined) => {
+  const { votes, isLoading, error } = useBattleData(battleId);
+  return { data: votes, isLoading, isError: !!error, error };
+};
+
+export const useVoteMutation = () => {
+  return {
+    mutate: async ({ battleId, voterId, votedForId, score }: { battleId: string, voterId: string, votedForId: string, score: number }, 
+    { onSuccess, onError }: { onSuccess?: () => void, onError?: (error: Error) => void } = {}) => {
+      try {
+        const { error } = await supabase
+          .from('battle_votes')
+          .insert({
+            battle_id: battleId,
+            voter_id: voterId,
+            voted_for_user_id: votedForId,
+            score: score
+          });
+        
+        if (error) throw new Error(error.message);
+        if (onSuccess) onSuccess();
+      } catch (err: any) {
+        if (onError) onError(err);
+        throw err;
+      }
+    }
+  };
+};

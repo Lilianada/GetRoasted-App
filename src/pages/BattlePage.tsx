@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
 import { ArrowLeft } from "lucide-react";
 import { useAuthContext } from "@/context/AuthContext";
-import { useBattle, useBattleParticipants, useSpectatorCount, useBattleVotes, useVoteMutation } from '@/hooks/useBattleData';
+import { useBattleData } from '@/hooks/useBattleData';
 import type { Participant } from '@/types/battle';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState } from 'react';
@@ -22,48 +22,45 @@ const BattlePage = () => {
   const [voteSubmitted, setVoteSubmitted] = useState(false);
   const [votedFor, setVotedFor] = useState<string | null>(null);
 
-  // --- React Query hooks (always called unconditionally at the top) ---
-  const {
-    data: battle,
-    isLoading: battleLoading,
-    isError: battleError,
-    error: battleErrObj,
-  } = useBattle(battleId);
-  const {
-    data: participants,
-    isLoading: participantsLoading,
-    isError: participantsError,
-    error: participantsErrObj,
-  } = useBattleParticipants(battleId);
-  const {
-    data: spectatorCount = 0,
-    isLoading: spectatorLoading,
-    isError: spectatorError,
-    error: spectatorErrObj,
-  } = useSpectatorCount(battleId);
-  const {
-    data: votes,
-    isLoading: votesLoading,
-    isError: votesError,
-    error: votesErrObj,
-  } = useBattleVotes(battleId);
-  // --- Voting mutation hook (must be here, not inside any conditional) ---
-  const voteMutation = useVoteMutation();
+  // Use the combined battle data hook
+  const { battle, participants, votes, isLoading, error } = useBattleData(battleId);
+  // Get spectator count from participants data if available
+  const spectatorCount = participants?.length || 0;
 
-  // --- Participation logic ---
-  const isParticipant = !!participants?.find(p => p.id === user?.id);
+  // --- Voting logic ---
+  const handleVote = async (userId: string) => {
+    if (!user || !battleId) return;
+    
+    try {
+      // Call the Supabase function to store the vote
+      const { error } = await supabase.from('battle_votes').insert({
+        battle_id: battleId,
+        voter_id: user.id,
+        voted_for_user_id: userId,
+        score: 1
+      });
+      
+      if (error) throw error;
+      
+      setVotedFor(userId);
+      setVoteSubmitted(true);
+      toast.success('Thank you for voting!');
+    } catch (err: any) {
+      toast.error('Failed to submit vote: ' + err.message);
+    }
+  };
 
   // --- Centralized error handling ---
-  // Move all returns after hooks
   if (!battleId) {
     return <div>Invalid battle ID</div>;
   }
-  if (battleError || participantsError || spectatorError || votesError) {
+  
+  if (error) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-night text-red-600">
         <h2 className="text-2xl font-bold mb-2">Failed to load battle data</h2>
         <div className="mb-4">
-          {battleErrObj?.message || participantsErrObj?.message || spectatorErrObj?.message || votesErrObj?.message}
+          {error.message}
         </div>
         <Button onClick={() => window.location.reload()}>Retry</Button>
       </div>
@@ -71,7 +68,7 @@ const BattlePage = () => {
   }
 
   // --- Loading state ---
-  if (battleLoading || participantsLoading || spectatorLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-night flex flex-col">
         <div className="container py-6">
@@ -88,29 +85,12 @@ const BattlePage = () => {
     );
   }
 
-  // --- Voting logic ---
-  // Move vote upsert logic to a custom hook
-  // Use mutation from React Query for voting
-  const handleVote = async (userId: string) => {
-    if (!user || !battleId) return;
-    voteMutation.mutate(
-      { battleId, voterId: user.id, votedForId: userId, score: 1 },
-      {
-        onSuccess: () => {
-          setVotedFor(userId);
-          setVoteSubmitted(true);
-          toast.success('Thank you for voting!');
-        },
-        onError: (err: any) => {
-          toast.error('Failed to submit vote: ' + err.message);
-        },
-      }
-    );
-  };
-
+  // --- Participation logic ---
+  const isParticipant = !!participants?.find(p => p.user_id === user?.id);
 
   // --- Battle duration ---
-  const battleDuration = battle?.roundCount ? battle.roundCount * 60 : 120;
+  const battleDuration = battle?.round_count ? battle.round_count * 60 : 120;
+  
   return (
     <div className="min-h-screen bg-night flex flex-col">
       <div className="container py-6">
@@ -146,7 +126,7 @@ const BattlePage = () => {
             />
             {battleEnded && !isParticipant && !voteSubmitted && (
               <BattleVotePanel
-                participants={participants as Participant[]}
+                participants={participants as unknown as Participant[]}
                 onVote={handleVote}
                 votedFor={votedFor}
                 disabled={voteSubmitted}

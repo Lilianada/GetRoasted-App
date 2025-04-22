@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.192.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.5";
+import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -26,9 +27,9 @@ serve(async (req) => {
   try {
     // Get request body
     const requestBody = await req.json() as EmailRequest;
-    const { email, name, templateId, subject, data } = requestBody;
+    const { email, name, subject, data } = requestBody;
 
-    if (!email || !templateId) {
+    if (!email) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         { 
@@ -38,19 +39,20 @@ serve(async (req) => {
       );
     }
 
-    // Initialize SendPulse with environment variables from Supabase Secrets
-    const SENDPULSE_USER_ID = Deno.env.get("SENDPULSE_USER_ID");
-    const SENDPULSE_SECRET = Deno.env.get("SENDPULSE_SECRET");
+    // Initialize Resend with API key
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
     
-    if (!SENDPULSE_USER_ID || !SENDPULSE_SECRET) {
+    if (!resendApiKey) {
       return new Response(
-        JSON.stringify({ error: "SendPulse credentials not configured" }),
+        JSON.stringify({ error: "Resend API key not configured" }),
         { 
           status: 500, 
           headers: { ...corsHeaders, "Content-Type": "application/json" } 
         }
       );
     }
+    
+    const resend = new Resend(resendApiKey);
 
     // Initialize Supabase client to update notification status
     const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
@@ -58,23 +60,40 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceRole);
 
-    // Here we would communicate with SendPulse API
-    // For now we'll simulate a successful email sending
+    // Build email HTML
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #333;">${subject}</h1>
+        <p>Hello ${name},</p>
+        <p>${data.message || 'You have a new notification from GetRoastedOnline.'}</p>
+        ${data.actionUrl ? `<p><a href="${data.actionUrl}" style="background-color: #4F46E5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">View Details</a></p>` : ''}
+        <p>Best regards,<br>The GetRoastedOnline Team</p>
+      </div>
+    `;
+    
+    // Send email via Resend
+    const emailResponse = await resend.emails.send({
+      from: "GetRoastedOnline <notifications@getroastedonline.com>",
+      to: [email],
+      subject: subject,
+      html: htmlContent
+    });
 
-    // Record the email sending attempt in a new table if desired
+    console.log("Email response:", emailResponse);
+    
+    // Record the email sending attempt in a new table
     await supabase.from("email_logs").insert({
       recipient_email: email,
-      template_id: templateId,
-      status: "success",
+      subject: subject,
+      status: "success", 
       sent_at: new Date().toISOString()
     });
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: "Email scheduled for delivery",
-        recipientEmail: email,
-        templateId: templateId
+        message: "Email sent successfully",
+        recipientEmail: email
       }),
       { 
         status: 200, 
