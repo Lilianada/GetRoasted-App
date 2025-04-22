@@ -1,9 +1,10 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star, Trophy } from "lucide-react";
-import { Button } from "./ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "@/components/ui/sonner";
 
 interface VotingOption {
   id: string;
@@ -13,28 +14,36 @@ interface VotingOption {
 
 interface VotingSystemProps {
   options: VotingOption[];
-  onVote: (scores: Record<string, { creativity: number; humor: number; savagery: number }>) => void;
+  onVote: (optionId: string) => void;
+  disabled?: boolean;
+  votedFor?: string | null;
 }
 
-const VotingSystem = ({ options, onVote }: VotingSystemProps) => {
-  const [selectedWinner, setSelectedWinner] = useState<string | null>(null);
+const VotingSystem = ({ options, onVote, disabled, votedFor }: VotingSystemProps) => {
+  const [selectedWinner, setSelectedWinner] = useState<string | null>(votedFor || null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    if (!selectedWinner) return;
+  const handleSubmit = async () => {
+    if (!selectedWinner) {
+      toast.error("Please select a winner before submitting");
+      return;
+    }
     
-    // For backward compatibility, we still use the old scoring structure
-    // even though we've simplified the UI
-    const scores: Record<string, { creativity: number; humor: number; savagery: number }> = {};
+    if (disabled || votedFor) {
+      toast.info("You've already voted or voting is closed");
+      return;
+    }
     
-    options.forEach((option) => {
-      if (option.id === selectedWinner) {
-        scores[option.id] = { creativity: 5, humor: 5, savagery: 5 };
-      } else {
-        scores[option.id] = { creativity: 3, humor: 3, savagery: 3 };
-      }
-    });
-    
-    onVote(scores);
+    try {
+      setIsSubmitting(true);
+      await onVote(selectedWinner);
+      toast.success("Your vote has been recorded!");
+    } catch (error) {
+      console.error("Error submitting vote:", error);
+      toast.error("Failed to submit your vote. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -55,7 +64,7 @@ const VotingSystem = ({ options, onVote }: VotingSystemProps) => {
                 ? 'border-black bg-[#F8C537] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' 
                 : 'border-black bg-[#FFB4A8] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
             }`}
-            onClick={() => setSelectedWinner(option.id)}
+            onClick={() => !disabled && setSelectedWinner(option.id)}
           >
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10 border-2 border-black needs-radius">
@@ -67,7 +76,16 @@ const VotingSystem = ({ options, onVote }: VotingSystemProps) => {
               
               <div className="flex-1">
                 <h3 className="font-bold text-black">{option.name}</h3>
-                <p className="text-xs text-black/70">Tap to select</p>
+                <p className="text-xs text-black/70">
+                  {!disabled 
+                    ? selectedWinner === option.id 
+                      ? 'Selected as winner' 
+                      : 'Tap to select'
+                    : votedFor === option.id 
+                      ? 'Your vote' 
+                      : 'Voting closed'
+                  }
+                </p>
               </div>
               
               <div className="flex items-center">
@@ -89,10 +107,15 @@ const VotingSystem = ({ options, onVote }: VotingSystemProps) => {
       <CardFooter className="border-t-2 border-black pt-4">
         <Button 
           onClick={handleSubmit} 
-          disabled={!selectedWinner} 
+          disabled={!selectedWinner || disabled || !!votedFor || isSubmitting} 
           className="w-full bg-[#F8C537] text-black border-2 border-black hover:bg-[#F8C537]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:translate-x-1 transition-all transform font-bold text-lg h-12"
         >
-          Submit Vote
+          {isSubmitting 
+            ? 'Submitting...' 
+            : votedFor 
+              ? 'Vote Submitted' 
+              : 'Submit Vote'
+          }
         </Button>
       </CardFooter>
     </Card>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { Vote } from '@/types/vote';
@@ -203,6 +202,19 @@ export const useVoteMutation = () => {
         if (onError) onError(err);
         throw err;
       }
+    },
+    mutateAsync: async ({ battleId, voterId, votedForId, score }: { battleId: string, voterId: string, votedForId: string, score: number }) => {
+      const { error } = await supabase
+        .from('battle_votes')
+        .insert({
+          battle_id: battleId,
+          voter_id: voterId,
+          voted_for_user_id: votedForId,
+          score: score
+        });
+      
+      if (error) throw new Error(error.message);
+      return;
     }
   };
 };
