@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Users, Timer, Eye } from "lucide-react";
 import { Button } from "./ui/button";
 import { Link } from "react-router-dom";
+import BattleStatusBadge from './battle/BattleStatusBadge';
 
 interface BattleCardProps {
   id: string;
@@ -69,9 +69,7 @@ const BattleCard = ({
       <CardHeader className="pb-3 border-b-2 border-black">
         <div className="flex justify-between items-start">
           <CardTitle className="text-lg text-black">{title}</CardTitle>
-          <Badge variant="outline" className={`${getStatusColor()} uppercase text-xs font-bold`}>
-            {status === 'ready' ? 'Starting' : status}
-          </Badge>
+          <BattleStatusBadge status={status} />
         </div>
         <CardDescription className="flex items-center gap-2 text-black">
           <span className="inline-flex items-center gap-1">
