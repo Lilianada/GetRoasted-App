@@ -5,7 +5,7 @@ import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/context/AuthContext";
 
-import ProfileSettings from "@/components/settings/ProfileSettings";
+import ChangePasswordForm from "@/components/settings/ChangePasswordForm";
 import NotificationSettingsCard from "@/components/settings/NotificationSettingsCard";
 import AppearanceSettingsCard from "@/components/settings/AppearanceSettingsCard";
 import AccountSettingsCard from "@/components/settings/AccountSettingsCard";
@@ -93,19 +93,9 @@ const Settings = () => {
           </div>
 
           <div className="grid gap-6">
-            <ProfileSettings
-              displayName={profileData.displayName}
-              email={profileData.email}
-              bio={profileData.bio}
-              isLoading={isLoading}
-              onInputChange={handleInputChange}
-              onSave={handleSaveSettings}
-            />
-
+            <ChangePasswordForm />
             <NotificationSettingsCard />
-
-            <AppearanceSettingsCard onSave={handleSaveSettings} />
-
+            <AppearanceSettingsCard onSave={handleSaveSettings}/>
             <AccountSettingsCard />
           </div>
         </div>

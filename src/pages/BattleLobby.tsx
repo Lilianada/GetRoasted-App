@@ -68,7 +68,7 @@ const BattleLobby = () => {
           status: battle.status as 'waiting' | 'active' | 'completed',
           timeRemaining: undefined, // We don't have this info yet
           type: battle.type as 'public' | 'private',
-          roundCount: battle.round_count
+          roundCount: typeof battle.round_count === 'number' && battle.round_count >= 0 ? battle.round_count : 0
         }));
         
         setBattles(formattedBattles);

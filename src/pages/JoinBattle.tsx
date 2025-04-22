@@ -150,7 +150,32 @@ const JoinBattle = () => {
           .from('battles')
           .update({ status: 'active' })
           .eq('id', battleId);
-          
+
+        // Send notification to the creator
+        if (battleData && battleData.created_by && user) {
+          let joinerName = '';
+          // Try to get the joiner's username from the profile
+          const { data: joinerProfile } = await supabase
+            .from('profiles')
+            .select('username')
+            .eq('id', user.id)
+            .single();
+          if (joinerProfile && joinerProfile.username) {
+            joinerName = joinerProfile.username;
+          } else if (user.email) {
+            joinerName = user.email;
+          } else {
+            joinerName = 'A user';
+          }
+          await supabase.from('notifications').insert({
+            user_id: battleData.created_by,
+            title: 'Your battle is starting!',
+            message: `${joinerName} has joined your battle. Get ready to roast!`,
+            action_url: `/battles/live/${battleId}`,
+            created_at: new Date().toISOString(),
+          });
+        }
+
         toast.success("Battle joined! Get ready to roast!");
         navigate(`/battles/live/${battleId}`);
       } else {

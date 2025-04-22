@@ -115,7 +115,7 @@ const BattleCard = ({
       <CardFooter className="justify-between border-t-2 border-black pt-4">
         <div className="text-xs text-black font-medium">
           <span className="inline-flex items-center gap-1">
-            {roundCount} Rounds • {type === 'private' ? 'Private' : 'Public'}
+            Rounds: {typeof roundCount === 'number' && roundCount > 0 ? roundCount : 'N/A'} • {type === 'private' ? 'Private' : 'Public'}
           </span>
         </div>
         <Button 
