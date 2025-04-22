@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -13,9 +14,7 @@ import { Bell, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/context/AuthContext";
 import { Badge } from "@/components/ui/badge";
-
-import type { Database } from '@/types/supabase';
-type Notification = Database['public']['Tables']['notifications']['Row'];
+import { Notification } from '@/types/notification';
 
 const MAX_RECENT = 5;
 
@@ -27,19 +26,23 @@ const RecentNotificationsModal = () => {
 
   useEffect(() => {
     if (!user) return;
+    
     // Fetch only the most recent notifications
     const fetchNotifications = async () => {
+      // We need to cast the result to Notification[] because the database schema doesn't match exactly
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(MAX_RECENT);
+      
       if (!error && data) {
-        setNotifications(data as Notification[]);
-        setUnreadCount((data as Notification[]).filter((n) => !n.read).length);
+        setNotifications(data as unknown as Notification[]);
+        setUnreadCount((data as unknown as Notification[]).filter((n) => !n.read).length);
       }
     };
+    
     fetchNotifications();
 
     // Real-time notifications subscription
@@ -48,15 +51,15 @@ const RecentNotificationsModal = () => {
       .on('postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
         (payload) => {
-          const newNotification = payload.new as Notification;
+          const newNotification = payload.new as unknown as Notification;
           setNotifications((prev) => [newNotification, ...prev].slice(0, MAX_RECENT));
           setUnreadCount((prev) => prev + 1);
           // Play notification sound
           import('@/utils/notificationSound').then(({ playNotificationSound }) => playNotificationSound());
-          // Optionally: show toast or popover here
         }
       )
       .subscribe();
+      
     return () => {
       supabase.removeChannel(channel);
     };
@@ -65,10 +68,12 @@ const RecentNotificationsModal = () => {
   const markAllAsRead = async () => {
     const unreadIds = notifications.filter(n => !n.read).map(n => n.id);
     if (unreadIds.length === 0) return;
+    
     await supabase
       .from('notifications')
       .update({ read: true })
       .in('id', unreadIds);
+      
     setNotifications(notifications.map(n => ({ ...n, read: true })));
     setUnreadCount(0);
   };

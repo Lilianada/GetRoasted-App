@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { Notification } from '@/types/notification';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 import { playNotificationSound } from '@/utils/notificationSound';
 import { useSettings } from '@/hooks/useSettings';
 
@@ -33,7 +33,7 @@ export function useNotifications() {
 
         if (error) throw error;
 
-        const typedData = data as Notification[];
+        const typedData = data as unknown as Notification[];
         setNotifications(typedData || []);
         setUnreadCount(typedData?.filter(n => !n.read).length || 0);
       } catch (error) {
@@ -114,7 +114,7 @@ export function useNotifications() {
     return () => {
       supabase.removeChannel(notificationsChannel);
     };
-  }, [user, soundEnabled]);
+  }, [user, soundEnabled, notifications]);
 
   const markAsRead = async (id: string) => {
     if (!user) return;

@@ -1,3 +1,4 @@
+
 // src/types/notification.ts
 
 export interface Notification {
@@ -8,5 +9,5 @@ export interface Notification {
   read: boolean;
   created_at: string;
   type: 'battle_invite' | 'battle_start' | 'battle_end' | 'leaderboard' | 'account' | 'other';
-  action_url?: string;
+  action_url?: string | null;
 }

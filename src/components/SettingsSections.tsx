@@ -33,7 +33,7 @@ export const NotificationSettings = () => {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('email_notifications, sound_notifications')
+          .select('*')
           .eq('id', user.id)
           .single();
 
@@ -128,7 +128,7 @@ export const AppearanceSettings = () => {
 export const AccountSettings = () => {
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
-  const { user, logout } = useAuthContext();
+  const { user, signOut } = useAuthContext();
   const navigate = useNavigate();
 
   const handleDeleteAccount = async () => {
@@ -149,7 +149,7 @@ export const AccountSettings = () => {
       if (!res.ok) throw new Error(data.error || 'Failed to delete account');
       
       toast.success("Account deleted successfully");
-      logout();
+      signOut();
       navigate('/');
     } catch (error) {
       console.error('Error deleting account:', error);

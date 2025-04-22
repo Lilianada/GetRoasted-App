@@ -12,7 +12,7 @@ import { useBattleData } from '@/hooks/useBattleData';
 import type { Participant } from '@/types/battle';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState } from 'react';
-
+import { supabase } from "@/integrations/supabase/client";
 
 const BattlePage = () => {
   const { battleId } = useParams<{ battleId: string }>();

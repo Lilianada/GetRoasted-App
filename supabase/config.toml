@@ -1,11 +1,15 @@
 
+# This is the Supabase config file for the project
 project_id = "ziocbfqhcqlmovvulxmr"
 
-[functions.generate-comeback]
-verify_jwt = true
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage"]
 
-[functions.initialize-payment]
-verify_jwt = true
+[db]
+port = 54322
 
-[functions.verify-payment]
+[functions]
+[functions.send-email]
 verify_jwt = true

@@ -11,11 +11,9 @@ const corsHeaders = {
 type EmailRequest = {
   email: string;
   name: string;
-  templateId: string;
   subject: string;
-  data: {
-    [key: string]: string;
-  };
+  message: string;
+  actionUrl?: string;
 };
 
 serve(async (req) => {
@@ -27,7 +25,7 @@ serve(async (req) => {
   try {
     // Get request body
     const requestBody = await req.json() as EmailRequest;
-    const { email, name, subject, data } = requestBody;
+    const { email, name, subject, message, actionUrl } = requestBody;
 
     if (!email) {
       return new Response(
@@ -54,19 +52,13 @@ serve(async (req) => {
     
     const resend = new Resend(resendApiKey);
 
-    // Initialize Supabase client to update notification status
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
-    const supabaseServiceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") as string;
-    
-    const supabase = createClient(supabaseUrl, supabaseServiceRole);
-
     // Build email HTML
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #333;">${subject}</h1>
         <p>Hello ${name},</p>
-        <p>${data.message || 'You have a new notification from GetRoastedOnline.'}</p>
-        ${data.actionUrl ? `<p><a href="${data.actionUrl}" style="background-color: #4F46E5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">View Details</a></p>` : ''}
+        <p>${message || 'You have a new notification from GetRoastedOnline.'}</p>
+        ${actionUrl ? `<p><a href="${actionUrl}" style="background-color: #4F46E5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">View Details</a></p>` : ''}
         <p>Best regards,<br>The GetRoastedOnline Team</p>
       </div>
     `;
@@ -81,7 +73,13 @@ serve(async (req) => {
 
     console.log("Email response:", emailResponse);
     
-    // Record the email sending attempt in a new table
+    // Initialize Supabase client to log the email attempt
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
+    const supabaseServiceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") as string;
+    
+    const supabase = createClient(supabaseUrl, supabaseServiceRole);
+
+    // Record the email sending attempt in a logs table
     await supabase.from("email_logs").insert({
       recipient_email: email,
       subject: subject,
