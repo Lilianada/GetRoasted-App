@@ -256,13 +256,48 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          action_url: string | null
+          created_at: string
+          id: string
+          message: string
+          read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          action_url?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          action_url?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          email_notifications: boolean | null
           id: string
           is_admin: boolean | null
+          sound_notifications: boolean | null
           subscription_expires_at: string | null
           subscription_tier: string
           updated_at: string
@@ -272,8 +307,10 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          email_notifications?: boolean | null
           id: string
           is_admin?: boolean | null
+          sound_notifications?: boolean | null
           subscription_expires_at?: string | null
           subscription_tier?: string
           updated_at?: string
@@ -283,8 +320,10 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          email_notifications?: boolean | null
           id?: string
           is_admin?: boolean | null
+          sound_notifications?: boolean | null
           subscription_expires_at?: string | null
           subscription_tier?: string
           updated_at?: string
