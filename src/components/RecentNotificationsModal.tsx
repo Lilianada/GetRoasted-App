@@ -93,14 +93,14 @@ const RecentNotificationsModal = () => {
       <DialogContent className="sm:max-w-md max-h-[70vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>Recent Notifications</span>
+            <span className='text-night-700'>Recent Notifications</span>
             {unreadCount > 0 && (
               <Button variant="ghost" size="sm" className="text-xs gap-1" onClick={markAllAsRead}>
                 <Check className="h-3 w-3" /> Mark all as read
               </Button>
             )}
           </DialogTitle>
-          <DialogDescription>Only your 5 most recent notifications are shown here.</DialogDescription>
+          <DialogDescription className='text-night-500'>Only your 5 most recent notifications are shown here.</DialogDescription>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto space-y-2 pr-2">
           {notifications.length > 0 ? (
@@ -122,18 +122,13 @@ const RecentNotificationsModal = () => {
             ))
           ) : (
             <div className="py-8 text-center text-muted-foreground">
-              <Bell className="h-8 w-8 mx-auto mb-2 opacity-40" />
-              <p>No notifications yet</p>
+              <Bell className="h-8 w-8 mx-auto mb-2 text-flame-500" />
+              <p className='text-night-500'>No notifications yet</p>
             </div>
           )}
         </div>
         <div className="flex justify-center pt-2">
-          <DialogClose asChild>
-            <Button variant="ghost" size="sm">Close</Button>
-          </DialogClose>
-        </div>
-        <div className="flex justify-center pt-2">
-          <Button variant="link" size="sm" onClick={() => { setOpen(false); window.location.href = '/notifications'; }}>
+          <Button variant="link" size="sm" onClick={() => { setOpen(false); window.location.href = '/notifications'; }} className='text-night-500'>
             See all notifications
           </Button>
         </div>
