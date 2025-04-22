@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import {
   Flame,
   Menu,
+  Bell,
 } from "lucide-react";
+import RecentNotificationsModal from "@/components/RecentNotificationsModal";
 import {
   Sheet,
   SheetClose,
@@ -93,6 +95,11 @@ const NavBar = () => {
           </span>
         </Link>
 
+        {/* Notification bell for desktop */}
+        <div className="hidden md:flex items-center gap-2">
+          <RecentNotificationsModal />
+        </div>
+
         {/* Always show the hamburger menu button */}
         <Sheet open={isOpen || isClosing} onOpenChange={(open) => {
           if (!open) {
@@ -165,8 +172,12 @@ const NavBar = () => {
                         Rules
                       </Link>
                     </SheetClose>
-                    
-                    
+                    {/* Notification bell for mobile (sidebar menu) */}
+                    <SheetClose asChild>
+                      <Link to="/notifications" className="neo-button w-full text-center p-2">
+                      Notifications
+                      </Link>
+                    </SheetClose>
                     <SheetClose asChild>
                       <Link to="/settings" className="neo-button w-full text-center p-2">
                         Settings

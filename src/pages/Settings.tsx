@@ -13,6 +13,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+<<<<<<< HEAD
+=======
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
+>>>>>>> f6bf68a (Feat: Unifinished notifications logic)
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -192,7 +205,52 @@ const Settings = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
+<<<<<<< HEAD
                 <AccountSettings />
+=======
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="destructive" className="w-full sm:w-auto">
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Account
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-night-800 border-night-700">
+                    <DialogHeader>
+                      <DialogTitle className="text-destructive">Delete Account</DialogTitle>
+                      <DialogDescription>  
+                        This action cannot be undone. This will permanently delete your account
+                        and remove all your data from our servers.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <p className="text-sm text-muted-foreground">
+                        To confirm, type <span className="font-bold text-destructive">DELETE</span> in the field below:
+                      </p>
+                      <Input
+                        className="border-night-700"
+                        value={deleteConfirmation}
+                        onChange={(e) => setDeleteConfirmation(e.target.value)}
+                      />
+                    </div>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button type="button" variant="ghost">
+                          Cancel
+                        </Button>
+                      </DialogClose>
+                      <Button 
+                        type="button" 
+                        variant="destructive"
+                        onClick={handleDeleteAccount}
+                        disabled={deleteConfirmation !== "DELETE"}
+                      >
+                        Delete Account
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+>>>>>>> f6bf68a (Feat: Unifinished notifications logic)
               </CardContent>
             </Card>
           </div>

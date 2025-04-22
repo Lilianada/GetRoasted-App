@@ -13,9 +13,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Bell, Check, Trophy, User, Flame, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+<<<<<<< HEAD
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '@/hooks/useNotifications';
 import { Notification } from '@/types/notification';
+=======
+
+import type { Notification } from '@/types/notification';
+>>>>>>> f6bf68a (Feat: Unifinished notifications logic)
 
 interface NotificationsModalProps {
   children?: React.ReactNode;
@@ -23,6 +28,7 @@ interface NotificationsModalProps {
 
 const NotificationsModal = ({ children }: NotificationsModalProps) => {
   const [open, setOpen] = useState(false);
+<<<<<<< HEAD
   const navigate = useNavigate();
   const {
     notifications,
@@ -31,6 +37,91 @@ const NotificationsModal = ({ children }: NotificationsModalProps) => {
     markAsRead,
     markAllAsRead
   } = useNotifications();
+=======
+  const { user } = useAuthContext();
+  
+  useEffect(() => {
+    if (!user) return;
+    let isMounted = true;
+
+    const fetchNotifications = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(20);
+        if (error) throw error;
+        if (isMounted && data) {
+          setNotifications(data as Notification[]);
+          setUnreadCount((data as Notification[]).filter(n => !n.read).length);
+        }
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+        toast.error('Failed to fetch notifications');
+        setNotifications([]);
+        setUnreadCount(0);
+      }
+    };
+    fetchNotifications();
+
+    // Real-time subscription
+    const channel = supabase
+      .channel('notifications_changes')
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          const newNotification = payload.new as Notification;
+          setNotifications(prev => [newNotification, ...prev]);
+          setUnreadCount(prev => prev + 1);
+          // Play notification sound
+          import('@/utils/notificationSound').then(({ playNotificationSound }) => playNotificationSound());
+          toast.info(newNotification.title, {
+            description: newNotification.message,
+          });
+        }
+      )
+      .subscribe();
+    return () => {
+      isMounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+  
+  const markAsRead = async (id: string) => {
+    try {
+      await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('id', id);
+      setNotifications(notifications.map(n => 
+        n.id === id ? { ...n, read: true } : n
+      ));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      toast.error('Failed to mark notification as read');
+    }
+  };
+  
+  const markAllAsRead = async () => {
+    if (notifications.length === 0) return;
+    try {
+      await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('user_id', user?.id)
+        .eq('read', false);
+      setNotifications(notifications.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
+      toast.success("All notifications marked as read");
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      toast.error('Failed to mark all as read');
+    }
+  };
+>>>>>>> f6bf68a (Feat: Unifinished notifications logic)
   
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -150,7 +241,15 @@ const NotificationsModal = ({ children }: NotificationsModalProps) => {
                           variant="link" 
                           size="sm" 
                           className="h-auto p-0 text-flame-500" 
+<<<<<<< HEAD
                           onClick={() => handleNotificationAction(notification)}
+=======
+                          onClick={async () => {
+                            await markAsRead(notification.id);
+                            setOpen(false);
+                            window.location.href = notification.action_url!;
+                          }}
+>>>>>>> f6bf68a (Feat: Unifinished notifications logic)
                         >
                           View Details
                         </Button>
