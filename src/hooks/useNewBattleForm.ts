@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -12,7 +13,7 @@ export function useNewBattleForm() {
   const [title, setTitle] = useState("");
   const [battleType, setBattleType] = useState<'public' | 'private'>('public');
   const [roundCount, setRoundCount] = useState("3");
-  const [timePerTurn, setTimePerTurn] = useState("180");
+  const [timePerTurn, setTimePerTurn] = useState("180"); // Default to 3 minutes
   const [allowSpectators, setAllowSpectators] = useState(true);
   const [quickMatch, setQuickMatch] = useState(false);
   const [battleId, setBattleId] = useState<string | null>(null);
@@ -56,8 +57,10 @@ export function useNewBattleForm() {
       if (participantError) throw participantError;
       toast.success("Battle created successfully!");
       navigate(`/battles/waiting/${battleData.id}`);
+      return battleData.id;
     } catch (error: any) {
       toast.error(error.message || "Failed to create battle");
+      return null;
     } finally {
       setIsCreating(false);
     }

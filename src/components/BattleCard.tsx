@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,7 @@ interface BattleCardProps {
   timeRemaining?: number;
   type: 'public' | 'private';
   roundCount: number;
+  timePerTurn?: number;
 }
 
 const BattleCard = ({
@@ -30,6 +32,7 @@ const BattleCard = ({
   timeRemaining,
   type,
   roundCount,
+  timePerTurn = 180,
 }: BattleCardProps) => {
   const getStatusColor = () => {
     switch (status) {
@@ -45,6 +48,11 @@ const BattleCard = ({
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const formatMinutes = (seconds?: number) => {
+    if (!seconds) return '--';
+    return `${Math.floor(seconds / 60)} min`;
   };
 
   return (
@@ -71,12 +79,10 @@ const BattleCard = ({
             <Eye className="h-3.5 w-3.5" />
             {spectatorCount}
           </span>
-          {timeRemaining && (
-            <span className="inline-flex items-center gap-1">
-              <Timer className="h-3.5 w-3.5" />
-              {formatTime(timeRemaining)}
-            </span>
-          )}
+          <span className="inline-flex items-center gap-1">
+            <Timer className="h-3.5 w-3.5" />
+            {timeRemaining ? formatTime(timeRemaining) : formatMinutes(timePerTurn)}
+          </span>
         </CardDescription>
       </CardHeader>
       

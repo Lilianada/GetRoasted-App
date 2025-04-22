@@ -9,6 +9,7 @@ interface BattleTimerProps {
   isActive?: boolean;
   onTimeout?: () => void;
   showWarningAt?: number;
+  onTimerUpdate?: (remainingSeconds: number) => void;
 }
 
 const BattleTimer = ({
@@ -16,9 +17,15 @@ const BattleTimer = ({
   isActive = true,
   onTimeout,
   showWarningAt = 30,
+  onTimerUpdate,
 }: BattleTimerProps) => {
   const [seconds, setSeconds] = useState(initialSeconds);
   const [isWarning, setIsWarning] = useState(false);
+  
+  useEffect(() => {
+    // Reset seconds when initialSeconds changes
+    setSeconds(initialSeconds);
+  }, [initialSeconds]);
   
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
@@ -36,6 +43,11 @@ const BattleTimer = ({
             setIsWarning(true);
           }
           
+          // Notify parent component about timer update for sync
+          if (onTimerUpdate) {
+            onTimerUpdate(newSeconds);
+          }
+          
           return newSeconds;
         });
       }, 1000);
@@ -46,7 +58,7 @@ const BattleTimer = ({
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isActive, seconds, onTimeout, showWarningAt]);
+  }, [isActive, seconds, onTimeout, showWarningAt, onTimerUpdate]);
   
   const formatTime = (totalSeconds: number) => {
     const minutes = Math.floor(totalSeconds / 60);

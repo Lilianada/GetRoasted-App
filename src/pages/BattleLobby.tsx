@@ -1,7 +1,4 @@
-
 import { useState, useEffect } from "react";
-
-
 import BattleCard from "@/components/BattleCard";
 import { Button } from "@/components/ui/button";
 import Loader from "@/components/ui/loader";
@@ -27,6 +24,7 @@ interface BattleData {
   timeRemaining?: number;
   type: 'public' | 'private';
   roundCount: number;
+  timePerTurn?: number;
 }
 
 const BattleLobby = () => {
@@ -68,7 +66,8 @@ const BattleLobby = () => {
           status: battle.status as 'waiting' | 'active' | 'completed',
           timeRemaining: undefined, // We don't have this info yet
           type: battle.type as 'public' | 'private',
-          roundCount: typeof battle.round_count === 'number' && battle.round_count >= 0 ? battle.round_count : 0
+          roundCount: typeof battle.round_count === 'number' && battle.round_count >= 0 ? battle.round_count : 0,
+          timePerTurn: battle.time_per_turn
         }));
         
         setBattles(formattedBattles);
@@ -105,7 +104,6 @@ const BattleLobby = () => {
   
   return (
     <div className="min-h-screen bg-night flex flex-col">
-
       <main className="flex-1 container py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Battle Lobby</h1>

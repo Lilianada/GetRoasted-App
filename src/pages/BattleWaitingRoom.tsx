@@ -1,14 +1,18 @@
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "@/components/ui/sonner";
-import { Copy, ArrowLeft, Share2, Check } from "lucide-react";
+import { Copy, ArrowLeft, Share2, Check, Timer, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import Loader from "@/components/ui/loader";
+import { playNotificationSound } from "@/utils/notificationSound";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import BattleTimer from "@/components/BattleTimer";
 
 const BattleWaitingRoom = () => {
   const { battleId } = useParams<{ battleId: string }>();
@@ -18,10 +22,12 @@ const BattleWaitingRoom = () => {
   const [participants, setParticipants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCopied, setShowCopied] = useState(false);
+  const [showGetReadyModal, setShowGetReadyModal] = useState(false);
+  const [countdown, setCountdown] = useState(3);
   
   const battleUrl = `${window.location.origin}/battles/join/${battleId}`;
   
-  const checkAndRedirectBattle = async () => {
+  const checkAndUpdateBattle = async () => {
     try {
       const { data: participantsData, error: participantsError } = await supabase
         .from('battle_participants')
@@ -44,10 +50,16 @@ const BattleWaitingRoom = () => {
             .from('battles')
             .update({ status: 'active' })
             .eq('id', battleId);
+          
+          // Play notification sound and show Get Ready modal
+          playNotificationSound();
+          setShowGetReadyModal(true);
+          
+          // Auto-close the modal after 3 seconds
+          setTimeout(() => {
+            setShowGetReadyModal(false);
+          }, 3000);
         }
-        
-        toast.success("Battle is starting!");
-        navigate(`/battles/live/${battleId}`);
       }
     } catch (error) {
       console.error('Error checking battle status:', error);
@@ -68,12 +80,6 @@ const BattleWaitingRoom = () => {
           
         if (battleError) throw battleError;
         
-        // If battle is already active, redirect immediately
-        if (battle.status === 'active') {
-          navigate(`/battles/live/${battleId}`);
-          return;
-        }
-        
         setBattleData(battle);
         
         // Fetch initial participants
@@ -89,7 +95,7 @@ const BattleWaitingRoom = () => {
         
         // Check if battle should start immediately
         if (participantsData.length >= 2) {
-          await checkAndRedirectBattle();
+          await checkAndUpdateBattle();
         }
         
         // Set up real-time subscription for participants
@@ -99,7 +105,17 @@ const BattleWaitingRoom = () => {
             { event: 'INSERT', schema: 'public', table: 'battle_participants', filter: `battle_id=eq.${battleId}` }, 
             async () => {
               // Recheck participant count and status when someone joins
-              await checkAndRedirectBattle();
+              await checkAndUpdateBattle();
+              
+              // Refresh participants list
+              const { data: newParticipantsData } = await supabase
+                .from('battle_participants')
+                .select('*, profiles:user_id(*)')
+                .eq('battle_id', battleId);
+                
+              if (newParticipantsData) {
+                setParticipants(newParticipantsData);
+              }
             }
           )
           .subscribe();
@@ -117,6 +133,25 @@ const BattleWaitingRoom = () => {
     fetchBattleData();
   }, [battleId, user, navigate]);
   
+  // Countdown effect for the Get Ready modal
+  useEffect(() => {
+    if (!showGetReadyModal) {
+      setCountdown(3);
+      return;
+    }
+    
+    if (countdown <= 0) {
+      setShowGetReadyModal(false);
+      return;
+    }
+    
+    const timer = setTimeout(() => {
+      setCountdown(countdown - 1);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, [showGetReadyModal, countdown]);
+  
   const handleCopyLink = () => {
     navigator.clipboard.writeText(battleUrl);
     setShowCopied(true);
@@ -126,6 +161,14 @@ const BattleWaitingRoom = () => {
     setTimeout(() => {
       setShowCopied(false);
     }, 2000);
+  };
+  
+  const handleEnterBattleRoom = () => {
+    if (battleData.status === 'active') {
+      navigate(`/battles/live/${battleId}`);
+    } else {
+      toast.info("The battle hasn't started yet. Waiting for opponent to join.");
+    }
   };
   
   const handleInviteContacts = () => {
@@ -188,7 +231,6 @@ const BattleWaitingRoom = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-night flex flex-col">
-        
         <main className="container flex-1 py-8 flex items-center justify-center">
           <Loader size="large" variant="colorful" />
         </main>
@@ -219,12 +261,18 @@ const BattleWaitingRoom = () => {
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">{battleData.title}</CardTitle>
             <CardDescription>
-              Waiting for opponent to join...
+              {participants.length < 2 ? "Waiting for opponent to join..." : "Battle starting soon!"}
             </CardDescription>
           </CardHeader>
           
           <CardContent className="space-y-6">
             <div className="flex flex-col items-center justify-center space-y-8">
+              {/* Battle Timer Info */}
+              <div className="w-full flex justify-center items-center space-x-2 bg-secondary/20 px-4 py-2 rounded-lg">
+                <Timer className="w-5 h-5 text-flame-500" />
+                <span>Time per turn: {battleData.time_per_turn / 60} minutes</span>
+              </div>
+              
               {/* Current participants */}
               <div className="flex items-center justify-center gap-12">
                 {participants.map((participant, index) => (
@@ -254,49 +302,99 @@ const BattleWaitingRoom = () => {
               </div>
               
               <div className="w-full max-w-md space-y-4">
-                <h3 className="text-lg font-semibold text-center">Invite an Opponent</h3>
-                
-                <div className="flex items-center gap-2 relative">
-                  <Input
-                    value={battleUrl}
-                    readOnly
-                    onClick={handleCopyLink}
-                    className="pr-10 border-night-700"
-                  />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="absolute right-0 border-night-700"
-                    onClick={handleCopyLink}
-                  >
-                    {showCopied ? (
-                      <Check className="h-4 w-4 text-green-500" />
+                {participants.length < 2 ? (
+                  <>
+                    <h3 className="text-lg font-semibold text-center">Invite an Opponent</h3>
+                    
+                    <div className="flex items-center gap-2 relative">
+                      <Input
+                        value={battleUrl}
+                        readOnly
+                        onClick={handleCopyLink}
+                        className="pr-10 border-night-700"
+                      />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="absolute right-0 border-night-700"
+                        onClick={handleCopyLink}
+                      >
+                        {showCopied ? (
+                          <Check className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    
+                    <Button 
+                      variant="outline" 
+                      className="w-full border-night-700 gap-2"
+                      onClick={handleInviteContacts}
+                    >
+                      <Share2 className="h-4 w-4" />
+                      Invite from Contacts
+                    </Button>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center gap-4 mt-6">
+                    <p className="text-center text-green-500 font-medium">
+                      Opponent has joined! Ready to start the battle?
+                    </p>
+                    {!battleData.status || battleData.status === 'waiting' ? (
+                      <p className="text-sm text-muted-foreground">
+                        The battle will begin automatically when both players are ready.
+                      </p>
                     ) : (
-                      <Copy className="h-4 w-4" />
+                      <Button
+                        className="bg-flame-500 hover:bg-flame-600 text-white gap-2"
+                        onClick={handleEnterBattleRoom}
+                      >
+                        Enter Battle Room
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
                     )}
-                  </Button>
-                </div>
-                
-                <Button 
-                  variant="outline" 
-                  className="w-full border-night-700 gap-2"
-                  onClick={handleInviteContacts}
-                >
-                  <Share2 className="h-4 w-4" />
-                  Invite from Contacts
-                </Button>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
           
-          <CardFooter className="flex justify-center border-t border-night-800 pt-6">
-            <div className="text-center text-sm text-muted-foreground">
-              <p>Battle will automatically start when an opponent joins.</p>
-              <p className="mt-2"><span className="font-semibold">Round count:</span> {battleData.round_count} • <span className="font-semibold">Type:</span> {battleData.type}</p>
-            </div>
+          <CardFooter className="flex justify-between border-t border-night-800 pt-6">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/battles')}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Lobby
+            </Button>
+            
+            {participants.length >= 1 && (
+              <Button
+                className="bg-flame-500 hover:bg-flame-600 text-white gap-2"
+                onClick={handleEnterBattleRoom}
+              >
+                Enter Battle Room
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            )}
           </CardFooter>
         </Card>
       </div>
+      
+      {/* Get Ready Modal */}
+      <Dialog open={showGetReadyModal} onOpenChange={setShowGetReadyModal}>
+        <DialogContent className="bg-night-800 border-flame-500 max-w-md text-center p-8">
+          <DialogTitle className="text-3xl font-bold text-flame-500">Get Ready!</DialogTitle>
+          <div className="flex flex-col items-center justify-center gap-6 py-6">
+            <div className="w-24 h-24 rounded-full bg-flame-500 flex items-center justify-center text-4xl font-bold text-white">
+              {countdown}
+            </div>
+            <p className="text-lg">Your battle is about to begin...</p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
