@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { Notification } from '@/types/notification';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/hooks/use-toast';
+import { playNotificationSound } from '@/utils/notificationSound';
 
 export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -30,10 +31,16 @@ export function useNotifications() {
 
         if (error) throw error;
 
-        setNotifications(data || []);
-        setUnreadCount(data?.filter(n => !n.read).length || 0);
+        const typedData = data as unknown as Notification[];
+        setNotifications(typedData || []);
+        setUnreadCount(typedData?.filter(n => !n.read).length || 0);
       } catch (error) {
         console.error('Error fetching notifications:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load notifications',
+          variant: 'destructive'
+        });
       } finally {
         setIsLoading(false);
       }
@@ -43,19 +50,23 @@ export function useNotifications() {
 
     // Set up real-time subscription for new notifications
     const channel = supabase
-      .channel('notifications-channel')
+      .channel('notifications-changes')
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
         table: 'notifications',
         filter: `user_id=eq.${user.id}`
       }, (payload) => {
-        const newNotification = payload.new as Notification;
+        const newNotification = payload.new as unknown as Notification;
         setNotifications(prev => [newNotification, ...prev]);
         setUnreadCount(prev => prev + 1);
+        
+        // Play sound
+        playNotificationSound();
 
         // Show toast for new notification
-        toast.info(newNotification.title, {
+        toast({
+          title: newNotification.title,
           description: newNotification.message
         });
       })
@@ -85,6 +96,11 @@ export function useNotifications() {
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
       console.error('Error marking notification as read:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update notification',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -103,10 +119,17 @@ export function useNotifications() {
       // Update local state
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       setUnreadCount(0);
-      toast.success('All notifications marked as read');
+      toast({
+        title: 'Success',
+        description: 'All notifications marked as read'
+      });
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
-      toast.error('Failed to mark all as read');
+      toast({
+        title: 'Error',
+        description: 'Failed to mark all as read', 
+        variant: 'destructive'
+      });
     }
   };
 
@@ -128,9 +151,18 @@ export function useNotifications() {
       if (removedNotification && !removedNotification.read) {
         setUnreadCount(prev => Math.max(0, prev - 1));
       }
+      
+      toast({
+        title: 'Success',
+        description: 'Notification deleted'
+      });
     } catch (error) {
       console.error('Error deleting notification:', error);
-      toast.error('Failed to delete notification');
+      toast({
+        title: 'Error',
+        description: 'Failed to delete notification', 
+        variant: 'destructive'
+      });
     }
   };
 

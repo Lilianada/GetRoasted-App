@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import { BattleRoundsSelection } from "./BattleRoundsSelection";
 import { BattleTimeSelection } from "./BattleTimeSelection";
 import { BattleSettings } from "./BattleSettings";
 import { useNewBattleForm } from "@/hooks/useNewBattleForm";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export const BattleCreationForm = () => {
   const {
