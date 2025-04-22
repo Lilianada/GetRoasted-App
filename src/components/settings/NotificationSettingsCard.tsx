@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { NotificationSettings } from "@/components/SettingsSections";
+import { NotificationSettingsForm } from "@/components/SettingsSections";
 
 const NotificationSettingsCard: React.FC = () => {
   return (
@@ -21,7 +21,7 @@ const NotificationSettingsCard: React.FC = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <NotificationSettings />
+        <NotificationSettingsForm />
       </CardContent>
     </Card>
   );
