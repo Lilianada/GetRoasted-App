@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "@/components/ui/sonner";
 import Loader from "@/components/ui/loader";
@@ -363,7 +362,7 @@ const Battle = () => {
     }
   };
 
-  // Handle voting
+  // Fix the Promise handling in the handleVote function
   const handleVote = async (votedForId: string) => {
     if (!user || !battleId) {
       toast.error("You need to be logged in to vote");

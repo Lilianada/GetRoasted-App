@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Star, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "@/components/ui/sonner";
 
 interface VotingOption {
   id: string;
@@ -20,10 +21,29 @@ interface VotingSystemProps {
 
 export const VotingSystem = ({ options, onVote, disabled, votedFor }: VotingSystemProps) => {
   const [selectedWinner, setSelectedWinner] = useState<string | null>(votedFor || null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    if (!selectedWinner) return;
-    onVote(selectedWinner);
+  const handleSubmit = async () => {
+    if (!selectedWinner) {
+      toast.error("Please select a winner before submitting");
+      return;
+    }
+    
+    if (disabled || votedFor) {
+      toast.info("You've already voted or voting is closed");
+      return;
+    }
+    
+    try {
+      setIsSubmitting(true);
+      await onVote(selectedWinner);
+      toast.success("Your vote has been recorded!");
+    } catch (error) {
+      console.error("Error submitting vote:", error);
+      toast.error("Failed to submit your vote. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -56,7 +76,16 @@ export const VotingSystem = ({ options, onVote, disabled, votedFor }: VotingSyst
               
               <div className="flex-1">
                 <h3 className="font-bold text-black">{option.name}</h3>
-                <p className="text-xs text-black/70">{!disabled ? 'Tap to select' : votedFor === option.id ? 'Your vote' : 'Voting closed'}</p>
+                <p className="text-xs text-black/70">
+                  {!disabled 
+                    ? selectedWinner === option.id 
+                      ? 'Selected as winner' 
+                      : 'Tap to select'
+                    : votedFor === option.id 
+                      ? 'Your vote' 
+                      : 'Voting closed'
+                  }
+                </p>
               </div>
               
               <div className="flex items-center">
@@ -78,10 +107,15 @@ export const VotingSystem = ({ options, onVote, disabled, votedFor }: VotingSyst
       <CardFooter className="border-t-2 border-black pt-4">
         <Button 
           onClick={handleSubmit} 
-          disabled={!selectedWinner || disabled || !!votedFor} 
+          disabled={!selectedWinner || disabled || !!votedFor || isSubmitting} 
           className="w-full bg-[#F8C537] text-black border-2 border-black hover:bg-[#F8C537]/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:translate-x-1 transition-all transform font-bold text-lg h-12"
         >
-          {votedFor ? 'Vote Submitted' : 'Submit Vote'}
+          {isSubmitting 
+            ? 'Submitting...' 
+            : votedFor 
+              ? 'Vote Submitted' 
+              : 'Submit Vote'
+          }
         </Button>
       </CardFooter>
     </Card>

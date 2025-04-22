@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Star } from "lucide-react";
+import { Trophy, Star, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,6 +27,7 @@ const RoundSummary = ({
 }: RoundSummaryProps) => {
   const [countdown, setCountdown] = useState(5);
   const [showScore, setShowScore] = useState(false);
+  const [showLeaderBadge, setShowLeaderBadge] = useState(false);
 
   // Sort participants by score
   const sortedParticipants = [...participants].sort((a, b) => 
@@ -34,6 +35,7 @@ const RoundSummary = ({
   );
   
   const roundLeader = sortedParticipants.length > 0 ? sortedParticipants[0] : null;
+  const maxScore = Math.max(...participants.map(p => p.score || 0), 1);
 
   useEffect(() => {
     // First show the scores with animation
@@ -41,12 +43,18 @@ const RoundSummary = ({
       setShowScore(true);
     }, 500);
     
+    // Then show the leader badge
+    const leaderBadgeTimer = setTimeout(() => {
+      setShowLeaderBadge(true);
+    }, 1500);
+    
     // Then start countdown
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown(prev => prev - 1), 1000);
       return () => {
         clearTimeout(timer);
         clearTimeout(scoreTimer);
+        clearTimeout(leaderBadgeTimer);
       };
     } else if (onNextRound) {
       onNextRound();
@@ -75,7 +83,7 @@ const RoundSummary = ({
               <div 
                 key={participant.id} 
                 className={`p-4 rounded-lg transition-all duration-300 ${
-                  index === 0 
+                  index === 0 && showLeaderBadge
                     ? 'border-2 border-yellow-500 bg-yellow-500/10' 
                     : 'border border-night-800'
                 } ${showScore ? 'opacity-100' : 'opacity-0'}`}
@@ -98,6 +106,12 @@ const RoundSummary = ({
                     <div className="flex items-center gap-1">
                       <div className="text-xl font-bold">{participant.score || 0}</div>
                       <div className="text-sm text-muted-foreground">points</div>
+                      
+                      {index === 0 && showLeaderBadge && (
+                        <Badge variant="outline" className="ml-2 bg-yellow-500/20 text-yellow-500 border-yellow-500">
+                          Round Leader
+                        </Badge>
+                      )}
                     </div>
                   </div>
                   
@@ -105,8 +119,8 @@ const RoundSummary = ({
                     <div className="flex">
                       {[1, 2, 3].map((star) => (
                         <Star key={star} 
-                          className={`h-5 w-5 ${
-                            star <= (roundNumber <= 3 ? roundNumber : 3) 
+                          className={`h-5 w-5 transition-all duration-300 ${
+                            showLeaderBadge && star <= (roundNumber <= 3 ? roundNumber : 3) 
                               ? 'text-yellow-500 fill-yellow-500' 
                               : 'text-night-500'
                           }`} 
@@ -118,10 +132,20 @@ const RoundSummary = ({
                 
                 <div className="mt-2">
                   <Progress 
-                    value={participant.score} 
-                    max={Math.max(...participants.map(p => p.score || 0)) || 100} 
+                    value={participant.score || 0} 
+                    max={maxScore} 
                     className="h-2" 
                   />
+                </div>
+                
+                {/* Round performance stats */}
+                <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                  <div>
+                    <span className="font-medium">Audience votes:</span> {index === 0 ? 'High' : 'Medium'}
+                  </div>
+                  <div>
+                    <span className="font-medium">Time efficiency:</span> {index === 0 ? 'Excellent' : 'Good'}
+                  </div>
                 </div>
               </div>
             ))}
@@ -133,9 +157,10 @@ const RoundSummary = ({
             </p>
             <Button 
               onClick={onNextRound} 
-              className="bg-flame-500 hover:bg-flame-600"
+              className="bg-flame-500 hover:bg-flame-600 gap-2"
             >
               Continue to Round {roundNumber + 1}
+              <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>

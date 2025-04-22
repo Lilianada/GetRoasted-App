@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { MessageCircle, Send } from "lucide-react";
 import BattleTimer from "./BattleTimer";
 import RoundSummary from "./battle/RoundSummary";
 import BattleResults from "./battle/BattleResults";
+import VotingSystem from "./VotingSystem";
 
 interface BattleArenaProps {
   participants: any[];
@@ -30,6 +30,9 @@ interface BattleArenaProps {
   battleEnded?: boolean;
   winner?: any;
   onRematch?: () => void;
+  canVote: boolean;
+  onVote: (optionId: string) => void;
+  userVote?: string;
 }
 
 const BattleArena = ({
@@ -52,7 +55,10 @@ const BattleArena = ({
   onNextRound,
   battleEnded,
   winner,
-  onRematch
+  onRematch,
+  canVote,
+  onVote,
+  userVote
 }: BattleArenaProps) => {
   if (battleEnded && winner) {
     return (
@@ -133,6 +139,21 @@ const BattleArena = ({
             Send Roast
           </Button>
         </div>
+
+        {isSpectator && canVote && (
+          <div className="mt-6">
+            <VotingSystem
+              options={participants.map(p => ({
+                id: p.id,
+                name: p.username || 'Unknown Player',
+                avatar: p.avatar_url
+              }))}
+              onVote={onVote || (() => {})}
+              disabled={!canVote}
+              votedFor={userVote}
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   );
