@@ -102,7 +102,17 @@ export function useAchievements() {
           .eq('user_id', user.id);
 
         if (error) throw error;
-        setUserAchievements(data || []);
+        
+        // Transform data to match UserAchievement interface
+        const achievementData: UserAchievement[] = (data || []).map(item => ({
+          id: item.id,
+          userId: item.user_id,
+          achievementId: item.achievement_id,
+          earnedAt: item.earned_at,
+          battleId: item.battle_id
+        }));
+        
+        setUserAchievements(achievementData);
       } catch (error) {
         console.error('Error fetching user achievements:', error);
       } finally {
@@ -167,52 +177,55 @@ export function useAchievements() {
   ) => {
     if (!user) return;
 
-    // Get total battles count
-    const { count: battlesCount } = await supabase
-      .from('battle_participants')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id);
-
-    // Get wins count
-    const { count: winsCount } = await supabase
-      .from('battles')
-      .select('*', { count: 'exact', head: true })
-      .eq('winner_id', user.id);
-    
-    // Check for first battle achievement
-    if (battlesCount === 1) {
-      awardAchievement('first-battle', battleData.id);
+    try {
+      // Get total battles count
+      const { count: battlesCount, error: battlesError } = await supabase
+        .from('battle_participants')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+  
+      if (battlesError) throw battlesError;
+  
+      // Get wins count
+      const { count: winsCount, error: winsError } = await supabase
+        .from('battles')
+        .select('*', { count: 'exact', head: true })
+        .eq('winner_id', user.id);
+      
+      if (winsError) throw winsError;
+      
+      // Check for first battle achievement
+      if (battlesCount === 1) {
+        awardAchievement('first-battle', battleData.id);
+      }
+      
+      // Check for tenth battle achievement
+      if (battlesCount === 10) {
+        awardAchievement('ten-battles', battleData.id);
+      }
+      
+      // Check for first win achievement
+      if (isWinner && winsCount === 1) {
+        awardAchievement('first-win', battleData.id);
+      }
+      
+      // Check for fifth win achievement
+      if (isWinner && winsCount === 5) {
+        awardAchievement('five-wins', battleData.id);
+      }
+      
+      // Check for perfect score
+      if (userScore >= 50) {  // Arbitrary threshold for "perfect" score
+        awardAchievement('perfect-score', battleData.id);
+      }
+      
+      // Check for popular battle
+      if (spectatorCount >= 10) {
+        awardAchievement('popular-battle', battleData.id);
+      }
+    } catch (error) {
+      console.error('Error checking battle achievements:', error);
     }
-    
-    // Check for tenth battle achievement
-    if (battlesCount === 10) {
-      awardAchievement('ten-battles', battleData.id);
-    }
-    
-    // Check for first win achievement
-    if (isWinner && winsCount === 1) {
-      awardAchievement('first-win', battleData.id);
-    }
-    
-    // Check for fifth win achievement
-    if (isWinner && winsCount === 5) {
-      awardAchievement('five-wins', battleData.id);
-    }
-    
-    // Check for perfect score
-    if (userScore >= 50) {  // Arbitrary threshold for "perfect" score
-      awardAchievement('perfect-score', battleData.id);
-    }
-    
-    // Check for popular battle
-    if (spectatorCount >= 10) {
-      awardAchievement('popular-battle', battleData.id);
-    }
-    
-    // Check for comeback win (would need more battle data)
-    
-    // Check for time efficiency (would need turn timing data)
-    
   }, [user, awardAchievement]);
 
   // Clear new achievement after it's been displayed

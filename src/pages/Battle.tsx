@@ -370,20 +370,15 @@ const Battle = () => {
     }
     
     try {
-      await voteMutation.mutateAsync(
-        { 
-          battleId, 
-          voterId: user.id, 
-          votedForId, 
-          score: 10 // Simple scoring system: 10 points per vote
-        }
-      ).then(() => {
-        toast.success("Vote submitted!");
-        setUserVote(votedForId);
-      }).catch((error) => {
-        toast.error("Failed to submit vote");
-        console.error('Vote error:', error);
+      await voteMutation.mutateAsync({ 
+        battleId, 
+        voterId: user.id, 
+        votedForId, 
+        score: 10 // Simple scoring system: 10 points per vote
       });
+      
+      toast.success("Vote submitted!");
+      setUserVote(votedForId);
     } catch (error) {
       console.error('Error submitting vote:', error);
       toast.error("Failed to submit vote");

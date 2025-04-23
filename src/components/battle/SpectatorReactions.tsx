@@ -1,7 +1,7 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Flame, ThumbsUp, ThumbsDown, Heart, Laugh, Zap, Send } from "lucide-react";
+import { Flame, ThumbsUp, ThumbsDown, Heart, Laugh, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
@@ -29,6 +29,79 @@ export default function SpectatorReactions({ battleId, roastId }: SpectatorReact
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Load existing reactions when component mounts
+  useEffect(() => {
+    const loadReactions = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('battle_reactions')
+          .select('reaction')
+          .eq('battle_id', battleId)
+          .eq('roast_id', roastId || null);
+
+        if (error) throw error;
+
+        // Count reactions
+        const counts = { ...reactionCounts };
+        if (data) {
+          data.forEach(item => {
+            if (counts[item.reaction] !== undefined) {
+              counts[item.reaction] += 1;
+            }
+          });
+          setReactionCounts(counts);
+        }
+
+        // Check if user already reacted
+        if (user) {
+          const { data: userReaction } = await supabase
+            .from('battle_reactions')
+            .select('reaction')
+            .eq('battle_id', battleId)
+            .eq('roast_id', roastId || null)
+            .eq('user_id', user.id)
+            .single();
+
+          if (userReaction) {
+            setSelectedReaction(userReaction.reaction);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading reactions:", error);
+      }
+    };
+
+    if (battleId) {
+      loadReactions();
+    }
+  }, [battleId, roastId, user]);
+
+  // Subscribe to reaction updates
+  useEffect(() => {
+    if (!battleId) return;
+
+    const channel = supabase.channel(`battle-reactions-${battleId}`)
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'battle_reactions',
+        filter: `battle_id=eq.${battleId}` 
+      }, payload => {
+        if (payload.new && payload.new.reaction) {
+          const reaction = payload.new.reaction as string;
+          setReactionCounts(prev => ({
+            ...prev,
+            [reaction]: (prev[reaction] || 0) + 1
+          }));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [battleId]);
+
   const handleReaction = async (emoji: string) => {
     if (!user) {
       toast.error("You need to be logged in to react");
@@ -37,45 +110,60 @@ export default function SpectatorReactions({ battleId, roastId }: SpectatorReact
 
     try {
       setIsSubmitting(true);
-      setSelectedReaction(emoji);
 
-      // Optimistically update UI
-      setReactionCounts(prev => ({
-        ...prev,
-        [emoji]: prev[emoji] + 1
-      }));
+      // Check if user already reacted
+      if (selectedReaction) {
+        // Remove previous reaction count
+        setReactionCounts(prev => ({
+          ...prev,
+          [selectedReaction]: Math.max(0, prev[selectedReaction] - 1)
+        }));
 
-      // Send reaction to database
-      const { error } = await supabase
-        .from('battle_reactions')
-        .insert({
-          battle_id: battleId,
-          roast_id: roastId,
-          user_id: user.id,
-          reaction: emoji
-        });
+        // Delete previous reaction
+        await supabase
+          .from('battle_reactions')
+          .delete()
+          .eq('battle_id', battleId)
+          .eq('roast_id', roastId || null)
+          .eq('user_id', user.id);
+      }
 
-      if (error) throw error;
+      // Optimistically update UI if selecting a new reaction
+      if (selectedReaction !== emoji) {
+        setSelectedReaction(emoji);
+        setReactionCounts(prev => ({
+          ...prev,
+          [emoji]: prev[emoji] + 1
+        }));
 
-      // Broadcast reaction to channel
-      const channel = supabase.channel(`battle-reactions-${battleId}`);
-      channel.send({
-        type: 'broadcast',
-        event: 'reaction',
-        payload: { emoji, userId: user.id }
-      });
+        // Send reaction to database
+        const { error } = await supabase
+          .from('battle_reactions')
+          .insert({
+            battle_id: battleId,
+            roast_id: roastId || null,
+            user_id: user.id,
+            reaction: emoji
+          });
 
+        if (error) throw error;
+      } else {
+        // User clicked the same reaction again, so we're removing it
+        setSelectedReaction(null);
+      }
     } catch (error) {
       console.error("Error sending reaction:", error);
       toast.error("Failed to send reaction");
       
       // Revert optimistic update on failure
-      setReactionCounts(prev => ({
-        ...prev,
-        [emoji]: prev[emoji] - 1
-      }));
-      
-      setSelectedReaction(null);
+      if (selectedReaction !== emoji) {
+        setReactionCounts(prev => ({
+          ...prev,
+          [emoji]: Math.max(0, prev[emoji] - 1)
+        }));
+        
+        setSelectedReaction(null);
+      }
     } finally {
       setIsSubmitting(false);
     }
