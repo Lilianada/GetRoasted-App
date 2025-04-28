@@ -12,7 +12,7 @@ export interface Participant {
 export interface Battle {
   id: string;
   title: string;
-  status: 'waiting' | 'active' | 'completed';
+  status: 'waiting' | 'ready' | 'active' | 'completed';
   roundCount: number;
   type: 'public' | 'private';
   participants: Participant[];
@@ -40,4 +40,39 @@ export interface RoastData {
   created_at: string;
   is_voice?: boolean;
   voice_url?: string;
+}
+
+export interface BattleParticipant {
+  id: string;
+  user_id: string;
+  battle_id: string;
+  joined_at: string;
+  username?: string;
+  avatar_url?: string;
+  profiles?: {
+    username: string;
+    avatar_url?: string;
+  };
+}
+
+export interface BattleSpectator {
+  id: string;
+  battle_id: string;
+  user_id: string;
+  joined_at: string;
+}
+
+export interface BattlePresence {
+  user_id: string;
+  last_seen: string;
+  is_online: boolean;
+}
+
+export interface BattleReaction {
+  id: string;
+  battle_id: string;
+  user_id: string;
+  reaction: string;
+  created_at: string;
+  roast_id?: string;
 }

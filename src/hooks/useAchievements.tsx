@@ -2,236 +2,272 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
-import { Achievement, UserAchievement } from '@/types/achievement';
+import { Achievement } from '@/types/achievement';
 import { toast } from '@/components/ui/sonner';
+import { playSound } from '@/utils/notificationSound';
 
-// Achievement definitions
+// Define achievement categories
+export const ACHIEVEMENT_CATEGORIES = {
+  BATTLE: 'battle',
+  PERFORMANCE: 'performance',
+  COMMUNITY: 'community',
+} as const;
+
+// Define achievement rarities
+export const ACHIEVEMENT_RARITIES = {
+  COMMON: 'common',
+  UNCOMMON: 'uncommon',
+  RARE: 'rare',
+  EPIC: 'epic',
+  LEGENDARY: 'legendary',
+} as const;
+
+// Define all achievements
 export const ACHIEVEMENTS: Record<string, Achievement> = {
-  'first-battle': {
-    id: 'first-battle',
-    name: 'Rookie Roaster',
-    description: 'Completed your first battle',
-    icon: 'trophy',
+  FIRST_BATTLE: {
+    id: 'first_battle',
+    name: 'Battle Rookie',
+    description: 'Participated in your first roast battle',
+    icon: '🔰',
     category: 'battle',
-    rarity: 'common'
+    rarity: 'common',
   },
-  'first-win': {
-    id: 'first-win',
+  FIRST_WIN: {
+    id: 'first_win',
     name: 'Victory Lap',
-    description: 'Won your first battle',
-    icon: 'award',
+    description: 'Won your first roast battle',
+    icon: '🏆',
     category: 'battle',
-    rarity: 'uncommon'
+    rarity: 'common',
   },
-  'perfect-score': {
-    id: 'perfect-score',
-    name: 'Perfect Roast',
-    description: 'Achieved a perfect score in a round',
-    icon: 'trophy',
-    category: 'performance',
-    rarity: 'rare'
-  },
-  'comeback-win': {
-    id: 'comeback-win',
-    name: 'Comeback King',
-    description: 'Won a battle after trailing in earlier rounds',
-    icon: 'trophy',
-    category: 'performance',
-    rarity: 'rare'
-  },
-  'ten-battles': {
-    id: 'ten-battles',
-    name: 'Seasoned Roaster',
-    description: 'Completed 10 battles',
-    icon: 'trophy',
+  FIVE_BATTLES: {
+    id: 'five_battles',
+    name: 'Battle Veteran',
+    description: 'Participated in 5 roast battles',
+    icon: '⚔️',
     category: 'battle',
-    rarity: 'uncommon'
+    rarity: 'uncommon',
   },
-  'popular-battle': {
-    id: 'popular-battle',
+  HIGH_SCORE: {
+    id: 'high_score',
     name: 'Crowd Pleaser',
-    description: 'Had 10+ spectators in a battle',
-    icon: 'trophy',
-    category: 'community',
-    rarity: 'rare'
-  },
-  'five-wins': {
-    id: 'five-wins',
-    name: 'Roast Master',
-    description: 'Won 5 battles',
-    icon: 'trophy',
+    description: 'Received a score of 50+ in a single battle',
+    icon: '🌟',
     category: 'performance',
-    rarity: 'epic'
+    rarity: 'rare',
   },
-  'no-time-wasted': {
-    id: 'no-time-wasted',
-    name: 'Quick Wit',
-    description: 'Used less than half the allotted time in all turns of a battle',
-    icon: 'trophy',
+  COMEBACK_KING: {
+    id: 'comeback_king',
+    name: 'Comeback King',
+    description: 'Won a battle after being behind in points',
+    icon: '👑',
     category: 'performance',
-    rarity: 'rare'
+    rarity: 'epic',
   },
-  'crowd-favorite': {
-    id: 'crowd-favorite',
-    name: 'Crowd Favorite',
-    description: 'Got the most audience votes in 3 consecutive battles',
-    icon: 'trophy',
+  WINNING_STREAK: {
+    id: 'winning_streak',
+    name: 'Hot Streak',
+    description: 'Won 3 battles in a row',
+    icon: '🔥',
+    category: 'performance',
+    rarity: 'rare',
+  },
+  POPULAR_ROASTER: {
+    id: 'popular_roaster',
+    name: 'Popular Roaster',
+    description: 'Received 10+ spectator reactions',
+    icon: '👋',
     category: 'community',
-    rarity: 'legendary'
-  }
+    rarity: 'uncommon',
+  },
+  LEGENDARY_STATUS: {
+    id: 'legendary_status',
+    name: 'Legendary Status',
+    description: 'Ranked in the top 10 on the leaderboard',
+    icon: '⭐',
+    category: 'community',
+    rarity: 'legendary',
+  },
 };
 
+// Hook for handling user achievements
 export function useAchievements() {
-  const { user } = useAuthContext();
-  const [userAchievements, setUserAchievements] = useState<UserAchievement[]>([]);
+  const [userAchievements, setUserAchievements] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [newAchievement, setNewAchievement] = useState<Achievement | null>(null);
+  const { user } = useAuthContext();
 
   // Fetch user achievements
-  useEffect(() => {
-    const fetchUserAchievements = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
+  const fetchAchievements = useCallback(async () => {
+    if (!user) {
+      setUserAchievements([]);
+      setLoading(false);
+      return;
+    }
 
-      try {
-        const { data, error } = await supabase
-          .from('user_achievements')
-          .select('*')
-          .eq('user_id', user.id);
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('user_achievements')
+        .select('achievement_id')
+        .eq('user_id', user.id);
 
-        if (error) throw error;
-        
-        // Transform data to match UserAchievement interface
-        const achievementData: UserAchievement[] = (data || []).map(item => ({
-          id: item.id,
-          userId: item.user_id,
-          achievementId: item.achievement_id,
-          earnedAt: item.earned_at,
-          battleId: item.battle_id
-        }));
-        
-        setUserAchievements(achievementData);
-      } catch (error) {
-        console.error('Error fetching user achievements:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+      if (error) throw error;
 
-    fetchUserAchievements();
+      setUserAchievements(data?.map(item => item.achievement_id) || []);
+    } catch (error) {
+      console.error('Error fetching user achievements:', error);
+    } finally {
+      setLoading(false);
+    }
   }, [user]);
 
   // Check if user has achievement
   const hasAchievement = useCallback((achievementId: string) => {
-    return userAchievements.some(ua => ua.achievementId === achievementId);
+    return userAchievements.includes(achievementId);
   }, [userAchievements]);
 
-  // Award achievement
-  const awardAchievement = useCallback(async (achievementId: string, battleId?: string) => {
-    if (!user || hasAchievement(achievementId)) return;
-    
+  // Award achievement to user
+  const awardAchievement = useCallback(async (
+    achievementId: string,
+    battleId?: string
+  ) => {
+    if (!user || !ACHIEVEMENTS[achievementId] || hasAchievement(achievementId)) {
+      return false;
+    }
+
     try {
-      const achievement = ACHIEVEMENTS[achievementId];
-      if (!achievement) {
-        console.error(`Achievement ${achievementId} not found`);
-        return;
-      }
-      
       const { error } = await supabase
         .from('user_achievements')
         .insert({
           user_id: user.id,
           achievement_id: achievementId,
-          earned_at: new Date().toISOString(),
-          battle_id: battleId
+          battle_id: battleId,
         });
-        
+
       if (error) throw error;
-      
-      // Set the new achievement to trigger popup
-      setNewAchievement(achievement);
-      
+
       // Update local state
-      setUserAchievements(prev => [...prev, {
-        id: `${user.id}-${achievementId}`,
-        userId: user.id,
-        achievementId: achievementId,
-        earnedAt: new Date().toISOString(),
-        battleId
-      }]);
-      
-      console.log(`Achievement unlocked: ${achievement.name}`);
+      setUserAchievements(prev => [...prev, achievementId]);
+      setNewAchievement(ACHIEVEMENTS[achievementId]);
+
+      // Show notification
+      toast.success(`Achievement Unlocked: ${ACHIEVEMENTS[achievementId].name}`);
+      playSound();
+
+      // Create notification
+      await supabase
+        .from('notifications')
+        .insert({
+          user_id: user.id,
+          type: 'achievement',
+          title: 'Achievement Unlocked',
+          message: `You earned the "${ACHIEVEMENTS[achievementId].name}" achievement!`,
+        });
+
+      return true;
     } catch (error) {
       console.error('Error awarding achievement:', error);
+      return false;
     }
   }, [user, hasAchievement]);
 
-  // Check for achievements based on battle results
-  const checkBattleAchievements = useCallback(async (
-    battleData: any, 
-    isWinner: boolean, 
-    userScore: number, 
-    spectatorCount: number
-  ) => {
+  // Check for battle-related achievements
+  const checkBattleAchievements = useCallback(async (battleId: string, isWinner: boolean) => {
     if (!user) return;
 
     try {
-      // Get total battles count
-      const { count: battlesCount, error: battlesError } = await supabase
+      // Count user's battles
+      const { data: battleCount, error: countError } = await supabase
         .from('battle_participants')
-        .select('*', { count: 'exact', head: true })
+        .select('id', { count: 'exact' })
         .eq('user_id', user.id);
-  
-      if (battlesError) throw battlesError;
-  
-      // Get wins count
-      const { count: winsCount, error: winsError } = await supabase
-        .from('battles')
-        .select('*', { count: 'exact', head: true })
-        .eq('winner_id', user.id);
-      
-      if (winsError) throw winsError;
-      
-      // Check for first battle achievement
-      if (battlesCount === 1) {
-        awardAchievement('first-battle', battleData.id);
+
+      if (countError) throw countError;
+
+      // First battle achievement
+      if (battleCount?.length === 1) {
+        await awardAchievement('FIRST_BATTLE', battleId);
       }
-      
-      // Check for tenth battle achievement
-      if (battlesCount === 10) {
-        awardAchievement('ten-battles', battleData.id);
+
+      // Five battles achievement
+      if (battleCount?.length === 5) {
+        await awardAchievement('FIVE_BATTLES', battleId);
       }
-      
-      // Check for first win achievement
-      if (isWinner && winsCount === 1) {
-        awardAchievement('first-win', battleData.id);
+
+      // First win achievement
+      if (isWinner) {
+        if (!hasAchievement('FIRST_WIN')) {
+          await awardAchievement('FIRST_WIN', battleId);
+        }
+
+        // Check for winning streak
+        const { data: recentBattles, error: recentError } = await supabase
+          .from('battles')
+          .select(`
+            id,
+            battle_votes(voted_for_user_id, score)
+          `)
+          .eq('status', 'completed')
+          .order('created_at', { ascending: false })
+          .limit(4);
+
+        if (recentError) throw recentError;
+
+        // Count consecutive wins
+        let winStreak = 0;
+        if (recentBattles) {
+          for (const battle of recentBattles) {
+            const votes = battle.battle_votes;
+            if (!votes || votes.length === 0) continue;
+
+            // Group votes by user
+            const votesByUser: Record<string, number> = {};
+            for (const vote of votes) {
+              if (!votesByUser[vote.voted_for_user_id]) {
+                votesByUser[vote.voted_for_user_id] = 0;
+              }
+              votesByUser[vote.voted_for_user_id] += vote.score;
+            }
+
+            // Find winner
+            let highestScore = 0;
+            let winnerId = null;
+            for (const [userId, score] of Object.entries(votesByUser)) {
+              if (score > highestScore) {
+                highestScore = score;
+                winnerId = userId;
+              }
+            }
+
+            if (winnerId === user.id) {
+              winStreak++;
+            } else {
+              break;
+            }
+          }
+        }
+
+        // Award streak achievement
+        if (winStreak >= 3 && !hasAchievement('WINNING_STREAK')) {
+          await awardAchievement('WINNING_STREAK', battleId);
+        }
       }
-      
-      // Check for fifth win achievement
-      if (isWinner && winsCount === 5) {
-        awardAchievement('five-wins', battleData.id);
-      }
-      
-      // Check for perfect score
-      if (userScore >= 50) {  // Arbitrary threshold for "perfect" score
-        awardAchievement('perfect-score', battleData.id);
-      }
-      
-      // Check for popular battle
-      if (spectatorCount >= 10) {
-        awardAchievement('popular-battle', battleData.id);
-      }
+
     } catch (error) {
       console.error('Error checking battle achievements:', error);
     }
-  }, [user, awardAchievement]);
+  }, [user, awardAchievement, hasAchievement]);
 
-  // Clear new achievement after it's been displayed
+  // Clear new achievement notification
   const clearNewAchievement = useCallback(() => {
     setNewAchievement(null);
   }, []);
+
+  // Load achievements on mount
+  useEffect(() => {
+    fetchAchievements();
+  }, [fetchAchievements]);
 
   return {
     userAchievements,

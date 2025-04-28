@@ -1,15 +1,5 @@
 
-# This is the Supabase config file for the project
 project_id = "ziocbfqhcqlmovvulxmr"
 
-[api]
-enabled = true
-port = 54321
-schemas = ["public", "storage"]
-
-[db]
-port = 54322
-
-[functions]
-[functions.send-email]
+[functions.cleanup-expired-battles]
 verify_jwt = true

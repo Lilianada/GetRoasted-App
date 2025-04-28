@@ -1,8 +1,8 @@
 
-import { render, screen, fireEvent, waitFor } from '@/utils/testUtils';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import SpectatorReactions from './SpectatorReactions';
 import { supabase } from '@/integrations/supabase/client';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach } from 'vitest';
 
 // Mock Supabase
 vi.mock('@/integrations/supabase/client', () => ({
