@@ -1,5 +1,5 @@
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@/utils/testUtils';
 import SpectatorReactions from './SpectatorReactions';
 import { supabase } from '@/integrations/supabase/client';
 import { vi, describe, test, expect, beforeEach } from 'vitest';

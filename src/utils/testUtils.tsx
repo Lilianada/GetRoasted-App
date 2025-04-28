@@ -3,6 +3,7 @@ import React, { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
+import '@testing-library/jest-dom';
 
 // Create a custom render method that includes providers
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {

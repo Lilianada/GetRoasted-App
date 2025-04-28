@@ -2,4 +2,5 @@
 project_id = "ziocbfqhcqlmovvulxmr"
 
 [functions.cleanup-expired-battles]
-verify_jwt = true
+verify_jwt = false
+

@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { BattleParticipant, BattleSpectator } from '@/types/battle';
-import { playSound } from '@/utils/notificationSound';
 import { toast } from '@/components/ui/sonner';
 
 interface BattlePresenceManagerProps {
@@ -22,7 +21,6 @@ interface BattlePresenceManagerProps {
  * - Tracking participants and spectators
  * - Managing battle state transitions
  * - Handling user join/leave events
- * - Maintaining presence with periodic pings
  */
 const BattlePresenceManager = ({
   battleId,
@@ -173,8 +171,7 @@ const BattlePresenceManager = ({
           
         if (joinError) throw joinError;
         
-        // Play sound and show notification
-        playSound();
+        // Show notification
         toast.success("You've joined as a participant!");
       } 
       // Otherwise join as spectator
@@ -262,81 +259,19 @@ const BattlePresenceManager = ({
   useEffect(() => {
     if (!battleId || !user) return;
     
-    // Create a function to ping the server periodically to indicate presence
-    const pingPresence = async () => {
-      try {
-        const now = new Date().toISOString();
-        
-        // Update presence data in a dedicated table
-        const { data, error } = await supabase
-          .from('battle_presence')
-          .upsert(
-            { 
-              battle_id: battleId, 
-              user_id: user.id, 
-              last_seen: now,
-              is_online: true
-            },
-            { onConflict: 'battle_id,user_id' }
-          );
-          
-        if (error) {
-          console.error('Error updating presence:', error);
-        }
-      } catch (error) {
-        console.error('Error pinging presence:', error);
-      }
-    };
-    
-    // Ping presence immediately and then every 30 seconds
-    pingPresence();
-    const pingInterval = setInterval(pingPresence, 30000);
-    
     // Setup beforeunload event to handle disconnects
-    const handleBeforeUnload = async () => {
-      try {
-        // Mark user as offline on page unload
-        await supabase
-          .from('battle_presence')
-          .upsert(
-            { 
-              battle_id: battleId, 
-              user_id: user.id, 
-              last_seen: new Date().toISOString(),
-              is_online: false
-            },
-            { onConflict: 'battle_id,user_id' }
-          );
-      } catch (error) {
-        // Cannot log here effectively as the page is unloading
-        console.error('Error updating offline status:', error);
-      }
+    const handleBeforeUnload = () => {
+      // No async operation here, as beforeunload doesn't wait
+      console.log('User leaving battle page');
     };
     
     window.addEventListener('beforeunload', handleBeforeUnload);
     
     return () => {
-      clearInterval(pingInterval);
       window.removeEventListener('beforeunload', handleBeforeUnload);
       
-      // Mark user as offline when component unmounts
-      (async () => {
-        try {
-          await supabase
-            .from('battle_presence')
-            .upsert(
-              { 
-                battle_id: battleId, 
-                user_id: user.id, 
-                last_seen: new Date().toISOString(),
-                is_online: false
-              },
-              { onConflict: 'battle_id,user_id' }
-            );
-        } catch (error) {
-          console.error('Error updating offline status on unmount:', error);
-        }
-      })();
+      // This would run synchronously on component unmount
+      console.log('Component unmounting, user leaving battle');
     };
   }, [battleId, user]);
 

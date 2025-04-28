@@ -2,14 +2,11 @@
 import { useNotificationsQuery } from './useNotificationsQuery';
 import { useNotificationActions } from './useNotificationActions';
 import { useSettings } from './useSettings';
-
-
 import { useState, useEffect } from 'react';
 
 export function useNotifications() {
   const { notifications: remoteNotifications, isLoading } = useNotificationsQuery();
   const { markAsRead, markAllAsRead } = useNotificationActions();
-
 
   // Local notifications for demo/testing
   const [localNotifications, setLocalNotifications] = useState<any[]>([]);
@@ -24,7 +21,6 @@ export function useNotifications() {
 
   const notifications = [...localNotifications, ...remoteNotifications];
   const unreadCount = notifications.filter(n => !n.read).length;
-
 
   return {
     notifications,

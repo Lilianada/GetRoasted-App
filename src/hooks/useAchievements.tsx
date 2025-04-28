@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { Achievement } from '@/types/achievement';
 import { toast } from '@/components/ui/sonner';
-import { playSound } from '@/utils/notificationSound';
 
 // Define achievement categories
 export const ACHIEVEMENT_CATEGORIES = {
@@ -153,7 +152,6 @@ export function useAchievements() {
 
       // Show notification
       toast.success(`Achievement Unlocked: ${ACHIEVEMENTS[achievementId].name}`);
-      playSound();
 
       // Create notification
       await supabase

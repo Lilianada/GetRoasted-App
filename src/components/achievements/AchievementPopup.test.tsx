@@ -1,7 +1,7 @@
 
 import { render, screen, waitFor, fireEvent } from '@/utils/testUtils';
 import AchievementPopup from './AchievementPopup';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
 
 describe('AchievementPopup', () => {
   const mockAchievement = {
