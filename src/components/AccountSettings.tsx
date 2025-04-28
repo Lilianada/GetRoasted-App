@@ -10,27 +10,33 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Trash2, AlertTriangle } from "lucide-react";
 import { useAuthContext } from "@/context/AuthContext";
 import { toast } from "@/components/ui/sonner";
 
-const AccountSettings = () => {
-  const [deleteConfirmation, setDeleteConfirmation] = useState("");
-  const { user, deleteAccount } = useAuthContext();
+const CONFIRM_STRING = "DELETE";
+
+const AccountSettings: React.FC = () => {
+  const [deleteConfirmation, setDeleteConfirmation] = useState<string>("");
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const { user, deleteAccount }: { user: any, deleteAccount: () => Promise<void> } = useAuthContext();
 
   const handleDeleteAccount = async () => {
-    if (deleteConfirmation !== "DELETE") {
+    if (deleteConfirmation !== CONFIRM_STRING) {
       toast.error("Confirmation text doesn't match");
       return;
     }
-    
+    setIsDeleting(true);
     try {
       await deleteAccount();
-      // Note: The redirect happens in the deleteAccount function after successful deletion
+      toast.success("Account deleted successfully");
     } catch (error) {
-      console.error("Error deleting account:", error);
       toast.error("Failed to delete account");
+    } finally {
+      setIsDeleting(false);
+      setDeleteConfirmation("");
     }
   };
 
@@ -62,25 +68,27 @@ const AccountSettings = () => {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <p className="text-sm text-muted-foreground">
-                To confirm, type <span className="font-bold text-destructive">DELETE</span> in the field below:
+                To confirm, type <span className="font-bold text-destructive">{CONFIRM_STRING}</span> in the field below:
               </p>
               <Input
                 className="border-night-700"
                 value={deleteConfirmation}
                 onChange={(e) => setDeleteConfirmation(e.target.value)}
+                aria-label="Delete confirmation"
+                disabled={isDeleting}
               />
             </div>
             <DialogFooter>
-              <Button type="button" variant="ghost">
-                Cancel
-              </Button>
+              <DialogClose asChild>
+                <Button type="button" variant="ghost" disabled={isDeleting}>Cancel</Button>
+              </DialogClose>
               <Button 
                 type="button" 
                 variant="destructive"
                 onClick={handleDeleteAccount}
-                disabled={deleteConfirmation !== "DELETE"}
+                disabled={deleteConfirmation !== CONFIRM_STRING || isDeleting}
               >
-                Delete Account
+                {isDeleting ? "Deleting..." : "Delete Account"}
               </Button>
             </DialogFooter>
           </DialogContent>

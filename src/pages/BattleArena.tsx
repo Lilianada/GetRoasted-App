@@ -91,9 +91,9 @@ const BattleArena: React.FC<BattleArenaProps> = ({
               >
                 <div className="flex items-center gap-3">
                   <Avatar className="h-12 w-12 border-2 border-night-700">
-                    {player.avatar_url && (
-                      <img src={player.avatar_url} alt={player.username} className="w-full h-full object-cover" />
-                    )}
+                    {player.avatar_url ? (
+                      <img src={player.avatar_url} alt={player.username || "Participant avatar"} className="w-full h-full object-cover" />
+                    ) : null}
                     <AvatarFallback className="bg-night-700 text-yellow-500">
                       {player.username?.substring(0, 2).toUpperCase()}
                     </AvatarFallback>

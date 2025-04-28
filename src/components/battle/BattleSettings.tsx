@@ -1,26 +1,27 @@
-
-import React from 'react';
-import { Label } from "@/components/ui/label";
+import React from "react";
 import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
+// Props for battle settings
 interface BattleSettingsProps {
   allowSpectators: boolean;
-  setAllowSpectators: (value: boolean) => void;
+  setAllowSpectators: (v: boolean) => void;
   quickMatch: boolean;
-  setQuickMatch: (value: boolean) => void;
+  setQuickMatch: (v: boolean) => void;
 }
 
-export const BattleSettings = ({
-  allowSpectators,
-  setAllowSpectators,
-  quickMatch,
-  setQuickMatch
-}: BattleSettingsProps) => {
+/**
+ * Battle settings component
+ * 
+ * Allows users to configure battle settings such as allowing spectators and quick match
+ */
+const BattleSettings: React.FC<BattleSettingsProps> = ({ allowSpectators, setAllowSpectators, quickMatch, setQuickMatch }) => {
   return (
     <div className="space-y-4">
+      {/* Allow spectators setting */}
       <div className="flex items-center justify-between">
         <div className="space-y-0.5">
-          <Label htmlFor="spectators">Allow Spectators</Label>
+          <Label htmlFor="spectators" aria-label="Allow spectators toggle">Allow Spectators</Label>
           <p className="text-sm text-muted-foreground">
             Spectators can watch and vote
           </p>

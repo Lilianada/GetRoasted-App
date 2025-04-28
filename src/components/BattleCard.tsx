@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -10,6 +9,7 @@ import BattleStatusBadge from './battle/BattleStatusBadge';
 
 const MAX_PARTICIPANTS = 2;
 
+// Render a participant avatar and name, or an empty slot if undefined
 function renderParticipant(participant: { id: string; name: string; avatar?: string } | undefined, idx: number) {
   if (participant) {
     const initials = participant.name ? participant.name.substring(0, 2).toUpperCase() : "??";
@@ -26,7 +26,7 @@ function renderParticipant(participant: { id: string; name: string; avatar?: str
     );
   } else {
     return (
-      <div key={`empty-${idx}`} aria-label="Empty participant slot">
+      <div key={`empty-${idx}`} aria-label="Empty participant slot" role="img">
         <div className="flex flex-col items-center text-center gap-1.5">
           <div className="h-14 w-14 border-2 border-dashed border-night-700 rounded-full flex items-center justify-center">
             <span className="text-night-400" aria-hidden>?</span>
@@ -148,24 +148,6 @@ const BattleCard = ({
       </CardFooter>
     </Card>
   );
-};
-
-BattleCard.propTypes = {
-  id: PropTypes.string.isRequired,
-  title: PropTypes.string.isRequired,
-  participants: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      avatar: PropTypes.string
-    })
-  ).isRequired,
-  spectatorCount: PropTypes.number.isRequired,
-  status: PropTypes.oneOf(['waiting', 'ready', 'active', 'completed']).isRequired,
-  timeRemaining: PropTypes.number,
-  type: PropTypes.oneOf(['public', 'private']).isRequired,
-  roundCount: PropTypes.number.isRequired,
-  timePerTurn: PropTypes.number
 };
 
 export default BattleCard;

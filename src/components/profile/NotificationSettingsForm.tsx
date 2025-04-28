@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -8,7 +7,6 @@ import { useAuthContext } from "@/context/AuthContext";
 
 export function NotificationSettingsForm() {
   const [emailNotifications, setEmailNotifications] = React.useState(false);
-  const [soundNotifications, setSoundNotifications] = React.useState(true);
   const [isLoading, setIsLoading] = React.useState(false);
   const { user } = useAuthContext();
 
@@ -19,14 +17,13 @@ export function NotificationSettingsForm() {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('email_notifications, sound_notifications')
+          .select('email_notifications')
           .eq('id', user.id)
           .single();
 
         if (error) throw error;
         
         setEmailNotifications(data?.email_notifications ?? false);
-        setSoundNotifications(data?.sound_notifications ?? true);
       } catch (error) {
         console.error('Error fetching notification preferences:', error);
       }
@@ -52,7 +49,6 @@ export function NotificationSettingsForm() {
       toast.error("Failed to update settings");
       // Revert the local state if the update failed
       if (key === 'email_notifications') setEmailNotifications(!value);
-      if (key === 'sound_notifications') setSoundNotifications(!value);
     } finally {
       setIsLoading(false);
     }
@@ -78,23 +74,6 @@ export function NotificationSettingsForm() {
         />
       </div>
       
-      <div className="flex items-center justify-between">
-        <div className="space-y-0.5">
-          <Label htmlFor="sound-notifications">Notification Settings</Label>
-          <p className="text-sm text-muted-foreground">
-            Enable notifications for battle updates
-          </p>
-        </div>
-        <Switch
-          id="sound-notifications"
-          checked={soundNotifications}
-          disabled={isLoading}
-          onCheckedChange={(checked) => {
-            setSoundNotifications(checked);
-            updatePreference('sound_notifications', checked);
-          }}
-        />
-      </div>
     </div>
   );
 }
