@@ -54,8 +54,6 @@ const RecentNotificationsModal = () => {
           const newNotification = payload.new as unknown as Notification;
           setNotifications((prev) => [newNotification, ...prev].slice(0, MAX_RECENT));
           setUnreadCount((prev) => prev + 1);
-          // Play notification sound
-          import('@/utils/notificationSound').then(({ playNotificationSound }) => playNotificationSound());
         }
       )
       .subscribe();

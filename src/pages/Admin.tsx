@@ -1,5 +1,13 @@
 
 import { useState } from "react";
+import PropTypes from "prop-types";
+
+// Helper for safe display of user names/strings
+function safeDisplay(str: string | undefined) {
+  if (!str || typeof str !== "string") return "";
+  return str.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+const MAX_USERNAME_LENGTH = 32;
 
 
 import {
@@ -32,7 +40,7 @@ import {
   Edit,
   Trash,
   ExternalLink,
-  BarChart3
+  BarChart3,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -42,6 +50,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
+
 
 // Mock data for users
 const mockUsers = [
@@ -130,9 +139,6 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-night flex flex-col">
-      
-      
-      
       <main className="container flex-1 py-8">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Admin Sidebar */}
@@ -217,18 +223,18 @@ const Admin = () => {
                                 <div className="flex items-center gap-3">
                                   <Avatar className="h-8 w-8 border border-night-700">
                                     <AvatarFallback className="bg-night-700 text-flame-500 text-xs">
-                                      {user.username.substring(0, 2).toUpperCase()}
+                                      {safeDisplay(user.username?.substring(0, 2).toUpperCase())}
                                     </AvatarFallback>
                                   </Avatar>
                                   <div>
-                                    <div className="font-medium">{user.username}</div>
+                                    <div className="font-medium">{safeDisplay(user.username?.slice(0, MAX_USERNAME_LENGTH))}</div>
                                     <div className="text-xs text-muted-foreground">
                                       Joined {new Date(user.joinDate).toLocaleDateString()}
                                     </div>
                                   </div>
                                 </div>
                               </td>
-                              <td className="px-4 py-3 text-muted-foreground">{user.email}</td>
+                              <td className="px-4 py-3 text-muted-foreground">{safeDisplay(user.email)}</td>
                               <td className="px-4 py-3 text-center">
                                 <Badge
                                   variant={user.status === "active" ? "default" : user.status === "inactive" ? "outline" : "destructive"}
@@ -250,7 +256,7 @@ const Admin = () => {
                               <td className="px-4 py-3 text-right">
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <Button aria-label={`Open menu for user ${safeDisplay(user.username)}`} className="h-8 w-8 p-0">
                                       <span className="sr-only">Open menu</span>
                                       <MoreHorizontal className="h-4 w-4" />
                                     </Button>
@@ -330,7 +336,7 @@ const Admin = () => {
                               <span>{report.type}</span>
                             </CardTitle>
                             <CardDescription className="mt-1">
-                              Reported {new Date(report.date).toLocaleDateString()} by {report.reportedBy}
+                              Reported {new Date(report.date).toLocaleDateString()} by {safeDisplay(report.reportedBy)}
                             </CardDescription>
                           </div>
                           <Badge variant={report.status === "resolved" ? "default" : "outline"} className="capitalize">
@@ -342,7 +348,7 @@ const Admin = () => {
                             <div className="mb-3">
                               <div className="text-muted-foreground text-xs mb-1">Reported Content:</div>
                               <div className="bg-night-900 rounded-md p-3 border border-night-700">
-                                {report.content}
+                                {safeDisplay(report.content)}
                               </div>
                             </div>
                             
@@ -354,7 +360,7 @@ const Admin = () => {
                                     {report.reportedUser.substring(0, 2).toUpperCase()}
                                   </AvatarFallback>
                                 </Avatar>
-                                <span>{report.reportedUser}</span>
+                                <span>{safeDisplay(report.reportedUser)}</span>
                               </div>
                             </div>
                           </div>
@@ -537,4 +543,6 @@ const Admin = () => {
   );
 };
 
+Admin.propTypes = {};
+// Only add PropTypes to Admin, not third-party or library components.
 export default Admin;

@@ -27,7 +27,6 @@ const NavBar = () => {
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const { playSound } = useSettings();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -65,11 +64,9 @@ const NavBar = () => {
       toast.success("Logged out successfully", {
         description: "See you next time!"
       });
-      playSound('success');
       
       navigate('/');
     } catch (error) {
-      playSound('error');
       toast.error("Logout Failed", {
         description: error instanceof Error ? error.message : "An unknown error occurred"
       });

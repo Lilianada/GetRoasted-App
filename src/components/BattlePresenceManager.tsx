@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
-import { playNotificationSound } from '@/utils/notificationSound';
 
 interface BattlePresenceManagerProps {
   battleId: string;
@@ -140,10 +139,6 @@ const BattlePresenceManager = ({
             
           if (joinError) throw joinError;
           
-          // If this is the second participant, play notification sound
-          if (participantCount === maxParticipants - 1) {
-            playNotificationSound();
-          }
         } 
         // Otherwise join as spectator
         else {

@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import Loader from "@/components/ui/loader";
-import { playNotificationSound } from "@/utils/notificationSound";
+
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import BattleTimer from "@/components/BattleTimer";
 import BattlePresenceManager from "@/components/BattlePresenceManager";
@@ -197,8 +197,8 @@ const BattleWaitingRoom = () => {
   };
   
   const handleGetReadyModal = () => {
-    // Play notification sound and show Get Ready modal
-    playNotificationSound();
+    // Show Get Ready modal
+
     setShowGetReadyModal(true);
     
     // Auto-close the modal after 3 seconds

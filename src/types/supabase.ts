@@ -309,7 +309,7 @@ export type Database = {
           updated_at: string
           username: string
           email_notifications: boolean | null
-          sound_notifications: boolean | null
+          _notifications: boolean | null
         }
         Insert: {
           avatar_url?: string | null
@@ -322,7 +322,7 @@ export type Database = {
           updated_at?: string
           username: string
           email_notifications?: boolean | null
-          sound_notifications?: boolean | null
+          _notifications?: boolean | null
         }
         Update: {
           avatar_url?: string | null
@@ -335,7 +335,7 @@ export type Database = {
           updated_at?: string
           username?: string
           email_notifications?: boolean | null
-          sound_notifications?: boolean | null
+          _notifications?: boolean | null
         }
         Relationships: []
       }

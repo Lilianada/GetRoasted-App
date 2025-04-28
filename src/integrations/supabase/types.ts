@@ -297,7 +297,7 @@ export type Database = {
           email_notifications: boolean | null
           id: string
           is_admin: boolean | null
-          sound_notifications: boolean | null
+          
           subscription_expires_at: string | null
           subscription_tier: string
           updated_at: string
@@ -310,7 +310,7 @@ export type Database = {
           email_notifications?: boolean | null
           id: string
           is_admin?: boolean | null
-          sound_notifications?: boolean | null
+          
           subscription_expires_at?: string | null
           subscription_tier?: string
           updated_at?: string
@@ -323,7 +323,7 @@ export type Database = {
           email_notifications?: boolean | null
           id?: string
           is_admin?: boolean | null
-          sound_notifications?: boolean | null
+          
           subscription_expires_at?: string | null
           subscription_tier?: string
           updated_at?: string
