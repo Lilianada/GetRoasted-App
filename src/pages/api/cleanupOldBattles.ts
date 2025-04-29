@@ -9,8 +9,9 @@ interface Request {
 }
 
 interface Response {
-  status: number;
-  json: (data: any) => Response;
+  status: (code: number) => {
+    json: (data: any) => Response;
+  };
 }
 
 export default async function handler(req: Request, res: Response) {
