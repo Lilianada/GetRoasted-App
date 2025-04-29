@@ -429,10 +429,24 @@ export const BattleProvider = ({
     }
   };
 
+  // Convert BattleData to Battle type for the context
+  const convertedBattle: Battle | null = battle ? {
+    id: battle.id,
+    title: battle.title,
+    status: battle.status as 'waiting' | 'ready' | 'active' | 'completed',
+    roundCount: battle.round_count || 3,
+    type: battle.type as 'public' | 'private',
+    participants: participants,
+    spectatorCount: spectatorCount,
+    timeRemaining: timeRemaining,
+    round_count: battle.round_count,
+    time_per_turn: battle.time_per_turn
+  } : null;
+
   return (
     <BattleContext.Provider value={{
       battleId,
-      battle: battle as Battle,
+      battle: convertedBattle,
       participants,
       isSpectator,
       currentRound,
