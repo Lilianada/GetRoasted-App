@@ -85,12 +85,13 @@ export function useVoteMutation() {
         
         if (error) throw new Error(error.message);
         if (onSuccess) onSuccess();
+        return Promise.resolve();
       } catch (err: any) {
         if (onError) onError(err);
-        throw err;
+        return Promise.reject(err);
       }
     },
-    mutateAsync: async ({ battleId, voterId, votedForId, score }: { battleId: string, voterId: string, votedForId: string, score: number }) => {
+    mutateAsync: async ({ battleId, voterId, votedForId, score }: { battleId: string, voterId: string, votedForId: string, score: number }): Promise<void> => {
       const { error } = await supabase
         .from('battle_votes')
         .insert({
@@ -101,7 +102,7 @@ export function useVoteMutation() {
         });
       
       if (error) throw new Error(error.message);
-      return;
+      return Promise.resolve();
     }
   };
 }
