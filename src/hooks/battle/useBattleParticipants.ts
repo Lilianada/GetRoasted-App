@@ -6,7 +6,7 @@ import { BattleParticipant } from '@/types/battle';
 /**
  * Hook to fetch and subscribe to battle participants
  */
-export function useBattleParticipantsBase(battleId: string | undefined) {
+export function useBattleParticipants(battleId: string | undefined) {
   const [participants, setParticipants] = useState<BattleParticipant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -90,4 +90,12 @@ export function useBattleParticipantsBase(battleId: string | undefined) {
   }, [battleId]);
   
   return { participants, isLoading, error };
+}
+
+/**
+ * Adapter hook for backward compatibility with existing code
+ */
+export function useBattleParticipantsAdapter(battleId: string | undefined) {
+  const { participants, isLoading, error } = useBattleParticipants(battleId);
+  return { data: participants, isLoading, isError: !!error, error };
 }

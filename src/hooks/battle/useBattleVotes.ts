@@ -6,7 +6,7 @@ import { Vote } from '@/types/vote';
 /**
  * Hook to fetch and subscribe to battle votes
  */
-export function useBattleVotesBase(battleId: string | undefined) {
+export function useBattleVotes(battleId: string | undefined) {
   const [votes, setVotes] = useState<Vote[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -67,12 +67,22 @@ export function useBattleVotesBase(battleId: string | undefined) {
 }
 
 /**
+ * Adapter hook for backward compatibility with existing code
+ */
+export function useBattleVotesAdapter(battleId: string | undefined) {
+  const { votes, isLoading, error } = useBattleVotes(battleId);
+  return { data: votes, isLoading, isError: !!error, error };
+}
+
+/**
  * Hook that provides voting mutation functionality
  */
 export function useVoteMutation() {
   return {
-    mutate: async ({ battleId, voterId, votedForId, score }: { battleId: string, voterId: string, votedForId: string, score: number }, 
-    { onSuccess, onError }: { onSuccess?: () => void, onError?: (error: Error) => void } = {}) => {
+    mutate: async (
+      { battleId, voterId, votedForId, score }: { battleId: string, voterId: string, votedForId: string, score: number }, 
+      { onSuccess, onError }: { onSuccess?: () => void, onError?: (error: Error) => void } = {}
+    ): Promise<void> => {
       try {
         const { error } = await supabase
           .from('battle_votes')

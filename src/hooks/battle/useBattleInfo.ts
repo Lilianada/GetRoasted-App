@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 
-interface BattleInfo {
+export interface BattleInfo {
   id: string;
   title: string;
   status: 'waiting' | 'ready' | 'active' | 'completed';

@@ -10,7 +10,8 @@ import BattlePresenceManager from "@/components/BattlePresenceManager";
 // Main container component
 const BattleContainer = () => {
   const [showChat, setShowChat] = useState(false);
-  const { spectatorCount, setSpectatorCount, setBattleState, isLoading, error } = useBattleContext();
+  const [chatInput, setChatInput] = useState('');
+  const { spectatorCount, setSpectatorCount, setBattleState, isLoading, error, isSpectator } = useBattleContext();
 
   if (isLoading) {
     return <div className="flex justify-center items-center min-h-[300px]"><Loader size="large" variant="colorful" /></div>;
@@ -19,6 +20,12 @@ const BattleContainer = () => {
   if (error) {
     return <div className="text-center text-red-500 py-12">Failed to load battle data.</div>;
   }
+
+  const handleSendChat = () => {
+    // Chat send functionality would go here
+    console.log('Sending chat message:', chatInput);
+    setChatInput('');
+  };
 
   return (
     <div className="min-h-screen bg-night flex flex-col">
@@ -38,11 +45,11 @@ const BattleContainer = () => {
           
           <BattleChatPanel
             spectatorCount={spectatorCount}
-            chatInput={''}
-            setChatInput={() => {}}
-            handleSendChat={() => {}}
+            chatInput={chatInput}
+            setChatInput={setChatInput}
+            handleSendChat={handleSendChat}
             showChat={showChat}
-            isSpectator={useBattleContext().isSpectator}
+            isSpectator={isSpectator}
           />
         </div>
       </main>

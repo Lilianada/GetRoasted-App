@@ -1,16 +1,15 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Users } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useBattleContext } from '@/context/BattleContext';
 import BattleTimerDisplay from './BattleTimerDisplay';
 import BattleTurnIndicator from './BattleTurnIndicator';
 import RoastInput from './RoastInput';
 import RoundSummary from './RoundSummary';
 import BattleResults from './BattleResults';
-import { VotingSystem } from './VotingSystem';
+import BattleVotingPanel from './BattleVotingPanel';
+import BattleControls from './BattleControls';
+import BattleArenaHeader from './BattleArenaHeader';
 
 interface BattleArenaContainerProps {
   setShowChat: (value: boolean) => void;
@@ -76,21 +75,13 @@ const BattleArenaContainer: React.FC<BattleArenaContainerProps> = ({
           </Button>
         </div>
         
-        {/* Voting section for spectators */}
-        {isSpectator && canVote && (
-          <div className="mt-6">
-            <VotingSystem
-              options={participants.map(p => ({
-                id: p.id,
-                name: p.username || 'Unknown Player',
-                avatar: p.avatar_url
-              }))}
-              onVote={handleVote}
-              disabled={!canVote}
-              votedFor={userVote || undefined}
-            />
-          </div>
-        )}
+        <BattleVotingPanel
+          isSpectator={isSpectator}
+          canVote={canVote}
+          participants={participants}
+          onVote={handleVote}
+          userVote={userVote}
+        />
       </div>
     );
   }
@@ -109,21 +100,11 @@ const BattleArenaContainer: React.FC<BattleArenaContainerProps> = ({
   return (
     <Card className="flex-1">
       <CardHeader className="border-b-2 border-black pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg text-black flex items-center gap-2">
-            <MessageCircle className="h-5 w-5 text-flame-500" />
-            Roast Battle
-          </CardTitle>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-black">
-              Round {currentRound}/{totalRounds}
-            </Badge>
-            <Badge variant="outline" className="flex items-center gap-1 text-black">
-              <Users className="h-3 w-3" />
-              <span>{spectatorCount}</span>
-            </Badge>
-          </div>
-        </div>
+        <BattleArenaHeader 
+          currentRound={currentRound}
+          totalRounds={totalRounds}
+          spectatorCount={spectatorCount}
+        />
       </CardHeader>
       
       <CardContent className="p-4 space-y-4">
@@ -131,37 +112,25 @@ const BattleArenaContainer: React.FC<BattleArenaContainerProps> = ({
         <BattleTurnIndicator />
         <RoastInput />
 
-        <div className="flex justify-between">
-          {isSpectator && (
-            <Button
-              variant="outline"
-              onClick={() => setShowChat(!showChat)}
-              className="gap-2"
-            >
-              <MessageCircle className="h-4 w-4" />
-              {showChat ? 'Hide Chat' : 'Show Chat'}
-            </Button>
-          )}
-        </div>
+        <BattleControls 
+          isSpectator={isSpectator}
+          showChat={showChat}
+          setShowChat={setShowChat}
+        />
 
-        {/* Spectator voting */}
-        {isSpectator && canVote && (
-          <div className="mt-6">
-            <VotingSystem
-              options={participants.map(p => ({
-                id: p.id,
-                name: p.username || 'Unknown Player',
-                avatar: p.avatar_url
-              }))}
-              onVote={handleVote}
-              disabled={!canVote}
-              votedFor={userVote || undefined}
-            />
-          </div>
-        )}
+        <BattleVotingPanel
+          isSpectator={isSpectator}
+          canVote={canVote}
+          participants={participants}
+          onVote={handleVote}
+          userVote={userVote}
+        />
       </CardContent>
     </Card>
   );
 };
 
 export default BattleArenaContainer;
+
+// Import Button component for TypeScript support
+import { Button } from "@/components/ui/button";
