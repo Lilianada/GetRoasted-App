@@ -1,4 +1,3 @@
-
 // Custom command for login
 Cypress.Commands.add('login', (email, password) => {
   cy.visit('/signup');
@@ -76,4 +75,42 @@ Cypress.Commands.add('updateProfile', (displayName, bio) => {
   
   // Verify success message
   cy.contains(/Profile updated|Changes saved/).should('be.visible');
+});
+
+// Enhanced commands for performance testing
+Cypress.Commands.add('measurePageLoad', (url, expectedElementSelector) => {
+  const start = performance.now();
+  cy.visit(url);
+  cy.get(expectedElementSelector).should('be.visible').then(() => {
+    const loadTime = performance.now() - start;
+    cy.log(`Page loaded in ${loadTime}ms`);
+    return loadTime;
+  });
+});
+
+// Command to check network requests timing
+Cypress.Commands.add('checkApiTiming', (method, urlPattern, maxAllowedTime = 1000) => {
+  cy.intercept(method, urlPattern).as('apiCall');
+  cy.wait('@apiCall').its('duration').should('be.lessThan', maxAllowedTime);
+});
+
+// Command to test accessibility
+Cypress.Commands.add('checkAccessibility', () => {
+  cy.get('body').should('have.attr', 'role').then((role) => {
+    cy.log(`Body role: ${role}`);
+  });
+  
+  // Simple accessibility check for form elements
+  cy.get('input').each(($input) => {
+    const id = $input.attr('id');
+    if (id) {
+      cy.get(`label[for="${id}"]`).should('exist');
+    }
+  });
+});
+
+// Command to test visual state snapshots
+Cypress.Commands.add('visualSnapshot', (name) => {
+  cy.screenshot(name);
+  cy.log(`Visual snapshot taken: ${name}`);
 });
