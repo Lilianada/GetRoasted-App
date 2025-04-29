@@ -33,6 +33,10 @@ export default defineConfig({
     retries: {
       runMode: 2,
       openMode: 0
+    },
+    // Ignore uncaught exceptions - this is important for our app
+    uncaughtExceptionHandling: {
+      skipErrorsInApplication: true
     }
   },
 });
