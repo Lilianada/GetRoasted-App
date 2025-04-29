@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Battle, Participant } from "@/types/battle";
@@ -433,7 +432,7 @@ export const BattleProvider = ({
   return (
     <BattleContext.Provider value={{
       battleId,
-      battle,
+      battle: battle as Battle,
       participants,
       isSpectator,
       currentRound,
