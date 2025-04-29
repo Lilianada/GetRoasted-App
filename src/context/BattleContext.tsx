@@ -410,7 +410,7 @@ export const BattleProvider = ({
   const handleVote = async (votedForId: string) => {
     if (!user || !battleId) {
       toast.error("You need to be logged in to vote");
-      return;
+      return Promise.resolve();
     }
     
     try {
@@ -423,9 +423,11 @@ export const BattleProvider = ({
       
       toast.success("Vote submitted!");
       setUserVote(votedForId);
+      return Promise.resolve();
     } catch (error) {
       console.error('Error submitting vote:', error);
       toast.error("Failed to submit vote");
+      return Promise.reject(error);
     }
   };
 

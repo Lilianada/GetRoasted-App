@@ -1,16 +1,17 @@
-import { BattleData, BattleParticipant } from '@/types/battle';
+
+import { BattleParticipant } from '@/types/battle';
 import { Vote } from '@/types/vote';
 import { useBattleInfo } from './useBattleInfo';
-import { useBattleParticipants } from './useBattleParticipants';
-import { useBattleVotes, useVoteMutation } from './useBattleVotes';
+import { useBattleParticipantsBase } from './useBattleParticipants';
+import { useBattleVotesBase, useVoteMutation } from './useBattleVotes';
 
 /**
  * Combined hook that provides all battle data
  */
 export function useBattleData(battleId: string | undefined) {
   const { battle, isLoading: battleLoading, error: battleError } = useBattleInfo(battleId);
-  const { participants, isLoading: participantsLoading, error: participantsError } = useBattleParticipants(battleId);
-  const { votes, isLoading: votesLoading, error: votesError } = useBattleVotes(battleId);
+  const { participants, isLoading: participantsLoading, error: participantsError } = useBattleParticipantsBase(battleId);
+  const { votes, isLoading: votesLoading, error: votesError } = useBattleVotesBase(battleId);
   
   const isLoading = battleLoading || participantsLoading || votesLoading;
   const error = battleError || participantsError || votesError;
@@ -31,21 +32,21 @@ export const useBattle = (battleId: string | undefined) => {
 };
 
 export const useBattleParticipants = (battleId: string | undefined) => {
-  const { participants, isLoading, error } = useBattleParticipants(battleId);
+  const { participants, isLoading, error } = useBattleParticipantsBase(battleId);
   return { data: participants, isLoading, isError: !!error, error };
 };
 
 export const useSpectatorCount = (battleId: string | undefined) => {
-  const { participants, isLoading, error } = useBattleParticipants(battleId);
+  const { participants, isLoading, error } = useBattleParticipantsBase(battleId);
   // This is a placeholder - you might want to implement actual spectator count logic
   const spectatorCount = participants?.length || 0;
   return { data: spectatorCount, isLoading, isError: !!error, error };
 };
 
 export const useBattleVotes = (battleId: string | undefined) => {
-  const { votes, isLoading, error } = useBattleVotes(battleId);
+  const { votes, isLoading, error } = useBattleVotesBase(battleId);
   return { data: votes, isLoading, isError: !!error, error };
 };
 
 export { useVoteMutation } from './useBattleVotes';
-export type { BattleData, BattleParticipant };
+export type { BattleParticipant };

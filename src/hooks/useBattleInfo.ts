@@ -1,13 +1,25 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
-import { BattleData } from '@/types/battle';
+
+interface BattleInfo {
+  id: string;
+  title: string;
+  status: 'waiting' | 'ready' | 'active' | 'completed';
+  type: 'public' | 'private';
+  round_count: number;
+  time_per_turn: number;
+  allow_spectators: boolean;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}
 
 /**
  * Hook to fetch and subscribe to battle information
  */
 export function useBattleInfo(battleId: string | undefined) {
-  const [battle, setBattle] = useState<BattleData | null>(null);
+  const [battle, setBattle] = useState<BattleInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   
@@ -31,7 +43,7 @@ export function useBattleInfo(battleId: string | undefined) {
           
         if (battleError) throw new Error(battleError.message);
         
-        setBattle(battleData as BattleData);
+        setBattle(battleData as BattleInfo);
       } catch (err: any) {
         setError(err);
         console.error('Error fetching battle data:', err);
@@ -48,7 +60,7 @@ export function useBattleInfo(battleId: string | undefined) {
       .on('postgres_changes', 
         { event: 'UPDATE', schema: 'public', table: 'battles', filter: `id=eq.${battleId}` }, 
         (payload) => {
-          setBattle(payload.new as BattleData);
+          setBattle(payload.new as BattleInfo);
       })
       .subscribe();
       

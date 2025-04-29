@@ -6,7 +6,7 @@ import { BattleParticipant } from '@/types/battle';
 /**
  * Hook to fetch and subscribe to battle participants
  */
-export function useBattleParticipants(battleId: string | undefined) {
+export function useBattleParticipantsBase(battleId: string | undefined) {
   const [participants, setParticipants] = useState<BattleParticipant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);

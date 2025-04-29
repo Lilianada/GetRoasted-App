@@ -6,7 +6,7 @@ import { Vote } from '@/types/vote';
 /**
  * Hook to fetch and subscribe to battle votes
  */
-export function useBattleVotes(battleId: string | undefined) {
+export function useBattleVotesBase(battleId: string | undefined) {
   const [votes, setVotes] = useState<Vote[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
