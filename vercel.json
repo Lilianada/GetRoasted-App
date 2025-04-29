@@ -1,0 +1,8 @@
+{
+  "cron": [
+    {
+      "path": "/api/cleanupOldBattles",
+      "schedule": "0 2 * * *"
+    }
+  ]
+}

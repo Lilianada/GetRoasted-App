@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { AccountSettings } from "@/components/SettingsSections";
+import { AccountSettings } from "@/components/settings/AccountSettings";
 
 const AccountSettingsCard: React.FC = () => {
   return (

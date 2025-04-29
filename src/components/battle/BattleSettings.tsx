@@ -15,7 +15,7 @@ interface BattleSettingsProps {
  * 
  * Allows users to configure battle settings such as allowing spectators and quick match
  */
-const BattleSettings: React.FC<BattleSettingsProps> = ({ allowSpectators, setAllowSpectators, quickMatch, setQuickMatch }) => {
+export const BattleSettings: React.FC<BattleSettingsProps> = ({ allowSpectators, setAllowSpectators, quickMatch, setQuickMatch }) => {
   return (
     <div className="space-y-4">
       {/* Allow spectators setting */}
