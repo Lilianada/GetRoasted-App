@@ -3,7 +3,7 @@ import { useCallback, useEffect } from 'react';
 import { useAuthContext } from '@/context/AuthContext';
 import { useBattleParticipantsManager } from '@/hooks/useBattleParticipantsManager';
 import { useBattleStateManager } from '@/hooks/useBattleStateManager';
-import { useBattlePresence } from '@/hooks/useBattlePresence';
+import { useBattlePresence } from '@/hooks/useBattleData';
 
 interface BattlePresenceManagerProps {
   battleId: string;
