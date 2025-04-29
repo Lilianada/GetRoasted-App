@@ -5,6 +5,15 @@ import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
 import '@testing-library/jest-dom';
 
+// Add type extension for testing-library
+declare global {
+  namespace jest {
+    interface Matchers<R> {
+      toBeInTheDocument(): R;
+    }
+  }
+}
+
 // Create a custom render method that includes providers
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   return (

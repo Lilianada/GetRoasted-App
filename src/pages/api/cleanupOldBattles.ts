@@ -1,7 +1,19 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+
 import { cleanupOldBattles } from '@/utils/cleanupOldBattles';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+// Define appropriate request and response types without relying on Next.js
+interface Request {
+  method: string;
+  headers: HeadersInit;
+  body?: any;
+}
+
+interface Response {
+  status: number;
+  json: (data: any) => Response;
+}
+
+export default async function handler(req: Request, res: Response) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
