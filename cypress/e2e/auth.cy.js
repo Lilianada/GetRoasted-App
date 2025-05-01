@@ -6,6 +6,10 @@ describe('Authentication Flow', () => {
     password: 'Password123!'
   };
 
+  before(() => {
+    cy.task('cleanupTestUsers');
+  });
+
   beforeEach(() => {
     // Clear cookies and localStorage between tests
     cy.clearCookies();
@@ -26,8 +30,8 @@ describe('Authentication Flow', () => {
     // Submit the form
     cy.get('button').contains('Sign Up').click();
     
-    // Verify the success message
-    cy.contains('Account created').should('be.visible');
+    // Verify the AccountCreatedDialog success message
+    cy.contains("You're Almost There!").should('be.visible');
   });
 
   it('should allow a user to log in', () => {

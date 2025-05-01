@@ -18,7 +18,7 @@ export default function Breadcrumbs() {
   }
 
   // Remove leading /battles from segments for breadcrumb trail
-  let segments = pathname.startsWith("/battles") ? pathname.slice(8).split("/").filter(Boolean) : pathname.split("/").filter(Boolean);
+  const segments = pathname.startsWith("/battles") ? pathname.slice(8).split("/").filter(Boolean) : pathname.split("/").filter(Boolean);
 
   // Special case for dynamic routes (not typical in react-router, but future-proof)
   const processedSegments = segments.map(segment => {
@@ -30,7 +30,7 @@ export default function Breadcrumbs() {
 
   // Build breadcrumb items (relative to /battles)
   const breadcrumbItems = processedSegments.map((segment, index) => {
-    let label = segment.replace(/-/g, " ").replace(/\b\w/g, char => char.toUpperCase());
+    const label = segment.replace(/-/g, " ").replace(/\b\w/g, char => char.toUpperCase());
     let path;
     // For join, waiting, results, always link to /battles
     if (["join", "waiting", "results"].includes(segment.toLowerCase()) && index === 0) {

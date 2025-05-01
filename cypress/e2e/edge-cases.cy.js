@@ -7,6 +7,7 @@ describe('Edge Cases and Error Handling', () => {
   };
   
   before(() => {
+    cy.task('cleanupTestUsers');
     // Create a test user before all tests
     cy.visit('/signup');
     cy.signup(testUser.username, testUser.email, testUser.password);

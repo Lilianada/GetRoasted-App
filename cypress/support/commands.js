@@ -17,8 +17,8 @@ Cypress.Commands.add('signup', (username, email, password) => {
   cy.get('input[id="signup-email"]').type(email);
   cy.get('input[id="signup-password"]').type(password);
   cy.get('button').contains('Sign Up').click();
-  // After signup, user should see a confirmation dialog
-  cy.contains('Account created').should('be.visible');
+  // After signup, user should see the AccountCreatedDialog
+  cy.contains("You're Almost There!").should('be.visible');
 });
 
 // Custom command to logout

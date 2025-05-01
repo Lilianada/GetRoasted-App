@@ -12,9 +12,8 @@ const FloatingNotificationBell = () => {
   const prevUnreadCount = useRef(unreadCount);
 
   useEffect(() => {
-    if (unreadCount > prevUnreadCount.current) {
-
-    }
+    // Update the reference value without additional side effects
+    // Future enhancement: Add notification sound or animation when unread count increases
     prevUnreadCount.current = unreadCount;
   }, [unreadCount]);
 

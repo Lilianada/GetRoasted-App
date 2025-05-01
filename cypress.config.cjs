@@ -1,11 +1,23 @@
+const { defineConfig } = require('cypress');
+const { execSync } = require('child_process');
 
-import { defineConfig } from 'cypress';
-
-export default defineConfig({
+module.exports = defineConfig({
   e2e: {
-    baseUrl: 'http://localhost:8080', // Vite default port
+    baseUrl: 'http://localhost:8082', // Current Vite server port
     supportFile: 'cypress/support/e2e.js',
     setupNodeEvents(on, config) {
+      on('task', {
+        async cleanupTestUsers(prefix = 'testuser') {
+          try {
+            execSync(`node ./cypress/support/cleanup.cjs ${prefix}`, { stdio: 'inherit' });
+            return null;
+          } catch (err) {
+            console.error('Cleanup failed:', err);
+            throw err;
+          }
+        }
+      });
+
       // Add performance monitoring
       on('before:browser:launch', (browser, launchOptions) => {
         if (browser.name === 'chrome' && browser.isHeadless) {
@@ -34,9 +46,6 @@ export default defineConfig({
       runMode: 2,
       openMode: 0
     },
-    // Ignore uncaught exceptions - this is important for our app
-    uncaughtExceptionHandling: {
-      skipErrorsInApplication: true
-    }
+
   },
 });

@@ -11,7 +11,7 @@ import BattlePresenceManager from "@/components/BattlePresenceManager";
 const BattleContainer = () => {
   const [showChat, setShowChat] = useState(false);
   const [chatInput, setChatInput] = useState('');
-  const { spectatorCount, setSpectatorCount, setBattleState, isLoading, error, isSpectator } = useBattleContext();
+  const { spectatorCount, setSpectatorCount, setBattleState, isLoading, error, isSpectator, battleId } = useBattleContext();
 
   if (isLoading) {
     return <div className="flex justify-center items-center min-h-[300px]"><Loader size="large" variant="colorful" /></div>;
@@ -30,7 +30,7 @@ const BattleContainer = () => {
   return (
     <div className="min-h-screen bg-night flex flex-col">
       <BattlePresenceManager 
-        battleId={useBattleContext().battleId || ''}
+        battleId={battleId || ''}
         onParticipantCountChange={() => {}}
         onSpectatorCountChange={setSpectatorCount}
         onBattleStateChange={setBattleState}
