@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import Loader from "@/components/ui/loader";
+import BattleReadyConfirmation from "@/components/battle/BattleReadyConfirmation";
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import BattleTimer from "@/components/BattleTimer";
@@ -27,8 +28,6 @@ const BattleWaitingRoom = () => {
   const [battleState, setBattleState] = useState<'waiting' | 'ready' | 'active' | 'completed'>('waiting');
   const [countdown, setCountdown] = useState(3);
   const [spectatorCount, setSpectatorCount] = useState(0);
-  
-  const battleUrl = `${window.location.origin}/battles/join/${battleId}`;
   
   useEffect(() => {
     if (!battleId || !user) return;
@@ -109,9 +108,11 @@ const BattleWaitingRoom = () => {
   }, [showGetReadyModal, countdown]);
   
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(battleUrl);
+    if (!battleData?.invite_code) return;
+    
+    navigator.clipboard.writeText(battleData.invite_code);
     setShowCopied(true);
-    toast.success("Invitation link copied!");
+    toast.success("Battle code copied!");
     
     // Hide the checkmark after 2 seconds
     setTimeout(() => {
@@ -130,14 +131,15 @@ const BattleWaitingRoom = () => {
   };
   
   const handleInviteContacts = () => {
-    const message = `Join my roast battle on GetRoasted! ${battleUrl}`;
+    if (!battleData?.invite_code) return;
+    
+    const message = `Join my roast battle on GetRoasted! Use code: ${battleData.invite_code}`;
     
     // Check if we can use the Share API
     if (navigator.share) {
       navigator.share({
         title: "Join my Roast Battle",
         text: message,
-        url: battleUrl
       }).catch((err) => {
         console.error('Error sharing:', err);
         fallbackShare(message);
@@ -172,15 +174,15 @@ const BattleWaitingRoom = () => {
             <a href="${whatsappUrl}" class="btn" target="_blank">Share via WhatsApp</a>
             <a href="${twitterUrl}" class="btn" target="_blank">Share via Twitter</a>
             <a href="${emailUrl}" class="btn" target="_blank">Share via Email</a>
-            <p style="margin-top: 20px;">Or copy this link:</p>
-            <input type="text" value="${battleUrl}" style="width: 100%; padding: 5px;" onclick="this.select();">
+            <p style="margin-top: 20px;">Or copy this code:</p>
+            <input type="text" value="${battleData?.invite_code || ''}" style="width: 100%; padding: 5px; font-size: 24px; text-align: center;" onclick="this.select();">
           </body>
         </html>
       `);
     } else {
       // If popup blocked, just copy to clipboard
       navigator.clipboard.writeText(message);
-      toast.success("Invitation copied to clipboard", {
+      toast.success("Battle code copied to clipboard", {
         description: "Share it with your friends"
       });
     }
@@ -198,7 +200,6 @@ const BattleWaitingRoom = () => {
   
   const handleGetReadyModal = () => {
     // Show Get Ready modal
-
     setShowGetReadyModal(true);
     
     // Auto-close the modal after 3 seconds
@@ -209,6 +210,21 @@ const BattleWaitingRoom = () => {
         navigate(`/battles/live/${battleId}`);
       }
     }, 3000);
+  };
+  
+  const handleBothPlayersReady = async () => {
+    if (!battleId) return;
+    
+    // Update battle status to active
+    await supabase
+      .from('battles')
+      .update({ status: 'active' })
+      .eq('id', battleId);
+      
+    toast.success("Both players are ready! Battle is starting...");
+    
+    // Show get ready modal and redirect
+    handleGetReadyModal();
   };
   
   if (loading) {
@@ -261,6 +277,47 @@ const BattleWaitingRoom = () => {
           </CardHeader>
           
           <CardContent className="space-y-6">
+            {/* Battle code display */}
+            <div className="bg-secondary/20 p-4 rounded-lg">
+              <div className="text-center mb-2">
+                <h3 className="text-sm text-muted-foreground">Battle Code</h3>
+                <div className="text-3xl font-mono font-bold tracking-widest">
+                  {battleData.invite_code || '------'}
+                </div>
+              </div>
+              
+              <div className="flex gap-2 mt-2">
+                <Button
+                  onClick={handleCopyLink}
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 gap-2"
+                >
+                  {showCopied ? (
+                    <>
+                      <Check className="h-4 w-4" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4" />
+                      Copy Code
+                    </>
+                  )}
+                </Button>
+                
+                <Button
+                  onClick={handleInviteContacts}
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 gap-2"
+                >
+                  <Share2 className="h-4 w-4" />
+                  Share
+                </Button>
+              </div>
+            </div>
+          
             <div className="flex flex-col items-center justify-center space-y-8">
               {/* Battle Timer Info */}
               <div className="w-full flex justify-center items-center space-x-2 bg-secondary/20 px-4 py-2 rounded-lg">
@@ -296,62 +353,14 @@ const BattleWaitingRoom = () => {
                 )}
               </div>
               
-              <div className="w-full max-w-md space-y-4">
-                {participants.length < 2 ? (
-                  <>
-                    <h3 className="text-lg font-semibold text-center">Invite an Opponent</h3>
-                    
-                    <div className="flex items-center gap-2 relative">
-                      <Input
-                        value={battleUrl}
-                        readOnly
-                        onClick={handleCopyLink}
-                        className="pr-10 border-night-700"
-                      />
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="absolute right-0 border-night-700"
-                        onClick={handleCopyLink}
-                      >
-                        {showCopied ? (
-                          <Check className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                    
-                    <Button 
-                      variant="outline" 
-                      className="w-full border-night-700 gap-2"
-                      onClick={handleInviteContacts}
-                    >
-                      <Share2 className="h-4 w-4" />
-                      Invite from Contacts
-                    </Button>
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center gap-4 mt-6">
-                    <p className="text-center text-green-500 font-medium">
-                      Opponent has joined! Ready to start the battle?
-                    </p>
-                    {battleState === 'waiting' ? (
-                      <p className="text-sm text-muted-foreground">
-                        The battle will begin automatically when both players are ready.
-                      </p>
-                    ) : (
-                      <Button
-                        className="bg-flame-500 hover:bg-flame-600 text-white gap-2"
-                        onClick={handleEnterBattleRoom}
-                      >
-                        Enter Battle Room
-                        <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </div>
+              {/* Ready confirmation for starting the battle */}
+              {participants.length > 0 && (
+                <BattleReadyConfirmation 
+                  battleId={battleId || ''}
+                  onBothPlayersReady={handleBothPlayersReady}
+                  participantCount={participants.length}
+                />
+              )}
             </div>
           </CardContent>
           
@@ -371,7 +380,7 @@ const BattleWaitingRoom = () => {
                 onClick={handleEnterBattleRoom}
               >
                 Enter Battle Room
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="h-4 w-4" />
               </Button>
             )}
           </CardFooter>

@@ -7,7 +7,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Flame, ArrowLeft, Eye } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 
-
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/context/AuthContext";
 import Loader from "@/components/ui/loader";
@@ -144,44 +143,8 @@ const JoinBattle = () => {
         
       if (joinError) throw joinError;
       
-      // If this is the second participant, update battle status to active
-      if (participants && participants.length === 1) {
-        await supabase
-          .from('battles')
-          .update({ status: 'active' })
-          .eq('id', battleId);
-
-        // Send notification to the creator
-        if (battleData && battleData.created_by && user) {
-          let joinerName = '';
-          // Try to get the joiner's username from the profile
-          const { data: joinerProfile } = await supabase
-            .from('profiles')
-            .select('username')
-            .eq('id', user.id)
-            .single();
-          if (joinerProfile && joinerProfile.username) {
-            joinerName = joinerProfile.username;
-          } else if (user.email) {
-            joinerName = user.email;
-          } else {
-            joinerName = 'A user';
-          }
-          await supabase.from('notifications').insert({
-            user_id: battleData.created_by,
-            title: 'Your battle is starting!',
-            message: `${joinerName} has joined your battle. Get ready to roast!`,
-            action_url: `/battles/live/${battleId}`,
-            created_at: new Date().toISOString(),
-          });
-        }
-
-        toast.success("Battle joined! Get ready to roast!");
-        navigate(`/battles/live/${battleId}`);
-      } else {
-        toast.success("Battle joined! Waiting for an opponent.");
-        navigate(`/battles/waiting/${battleId}`);
-      }
+      toast.success("Battle joined! Waiting in the battle room.");
+      navigate(`/battles/waiting/${battleId}`);
     } catch (error) {
       console.error('Error joining battle:', error);
       toast.error("Failed to join battle");
@@ -193,7 +156,6 @@ const JoinBattle = () => {
   if (!authLoading && !user) {
     return (
       <div className="min-h-screen bg-night flex flex-col">
-        
         <div className="container flex-1 flex items-center justify-center">
           <Card className="bg-yellow border-2 border-black w-full max-w-md">
             <CardHeader className="text-center">
@@ -216,7 +178,6 @@ const JoinBattle = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-night flex flex-col">
-        
         <div className="container flex-1 flex items-center justify-center">
           <Loader size="large" variant="colorful" />
         </div>
@@ -227,7 +188,6 @@ const JoinBattle = () => {
   if (!battleData) {
     return (
       <div className="min-h-screen bg-night flex flex-col">
-        
         <div className="container py-8">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">Battle Not Found</h2>
@@ -243,8 +203,6 @@ const JoinBattle = () => {
   
   return (
     <div className="min-h-screen bg-night flex flex-col">
-      
-      
       <div className="container py-8">
         <div className="flex items-center mb-6">
           <Button 
@@ -261,6 +219,11 @@ const JoinBattle = () => {
         <Card className="bg-yellow border-2 border-black max-w-lg mx-auto">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">{battleData.title}</CardTitle>
+            {battleData.invite_code && (
+              <div className="mt-2 inline-block bg-night-800 text-white font-mono tracking-widest py-1 px-4 rounded-full text-sm">
+                Code: {battleData.invite_code}
+              </div>
+            )}
           </CardHeader>
           
           <CardContent className="space-y-6">
@@ -291,7 +254,7 @@ const JoinBattle = () => {
           
           <CardFooter className="flex flex-col space-y-3">
             <Button 
-              className="w-full gap-2 bg-yellow hover:opacity-90" 
+              className="w-full gap-2 bg-yellow hover:opacity-90 text-night-900" 
               onClick={handleJoinBattle}
               disabled={isJoining}
             >

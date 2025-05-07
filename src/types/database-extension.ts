@@ -1,10 +1,53 @@
-
 import { Database } from "@/integrations/supabase/types";
 
 // Extend the Database interface to include our new tables
-export interface ExtendedDatabase extends Database {
-  public: Database["public"] & {
-    Tables: Database["public"]["Tables"] & {
+export interface ExtendedDatabase {
+  public: {
+    Tables: {
+      battles: {
+        Row: {
+          id: string;
+          title: string;
+          round_count: number;
+          created_at: string;
+          updated_at: string;
+          created_by: string | null;
+          allow_spectators: boolean;
+          time_per_turn: number;
+          status: string;
+          type: string;
+          invite_code: string | null;
+          player_ready_status: string | null; // JSON string with user IDs and ready status
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          round_count?: number;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string | null;
+          allow_spectators?: boolean;
+          time_per_turn?: number;
+          status?: string;
+          type?: string;
+          invite_code?: string | null;
+          player_ready_status?: string | null;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          round_count?: number;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string | null;
+          allow_spectators?: boolean;
+          time_per_turn?: number;
+          status?: string;
+          type?: string;
+          invite_code?: string | null;
+          player_ready_status?: string | null;
+        };
+      };
       battle_reactions: {
         Row: {
           id: string;

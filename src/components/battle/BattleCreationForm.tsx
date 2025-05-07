@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,8 +12,17 @@ import { useNewBattleForm } from "@/hooks/useNewBattleForm";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuthContext } from "@/context/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
-export const BattleCreationForm = () => {
+interface BattleCreationFormProps {
+  setBattleId?: (id: string | null) => void;
+  setInviteCode?: (code: string | null) => void;
+}
+
+export const BattleCreationForm = ({ 
+  setBattleId,
+  setInviteCode
+}: BattleCreationFormProps) => {
   const {
     isCreating,
     title, setTitle,
@@ -26,8 +35,7 @@ export const BattleCreationForm = () => {
   } = useNewBattleForm();
   
   const { user } = useAuthContext();
-  const [invitedUsers, setInvitedUsers] = useState<string[]>([]);
-
+  
   const handleCreateBattle = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -35,9 +43,20 @@ export const BattleCreationForm = () => {
     
     try {
       const battleId = await originalHandleCreateBattle(e);
-      
-      // Removed references to undefined functions
-      // Will implement these in a separate PR
+      if (battleId && setBattleId && setInviteCode) {
+        setBattleId(battleId);
+        
+        // Get the battle details to retrieve the invite code
+        const { data: battle } = await supabase
+          .from('battles')
+          .select('invite_code')
+          .eq('id', battleId)
+          .single();
+          
+        if (battle?.invite_code) {
+          setInviteCode(battle.invite_code);
+        }
+      }
       return battleId;
     } catch (error) {
       console.error('Error creating battle:', error);
