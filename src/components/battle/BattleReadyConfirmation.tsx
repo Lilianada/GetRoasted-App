@@ -1,91 +1,84 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CheckCircle, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 interface BattleReadyConfirmationProps {
   battleId: string;
-  onBothPlayersReady: () => void;
   participantCount: number;
+  onBothPlayersReady?: () => void;
 }
 
 const BattleReadyConfirmation = ({ 
   battleId,
-  onBothPlayersReady,
-  participantCount
+  participantCount,
+  onBothPlayersReady
 }: BattleReadyConfirmationProps) => {
   const { user } = useAuthContext();
-  const [inputValue, setInputValue] = useState('');
+  const [confirmText, setConfirmText] = useState('');
   const [isReady, setIsReady] = useState(false);
-  const [opponentReady, setOpponentReady] = useState(false);
+  const [otherPlayerReady, setOtherPlayerReady] = useState(false);
+  const [readyStatus, setReadyStatus] = useState<Record<string, boolean>>({});
   
-  // Listen to ready status changes
+  // Subscribe to battle ready status changes
   useEffect(() => {
     if (!battleId || !user) return;
-
-    // Initial fetch of ready status
+    
+    // First, get the current ready status
     const fetchReadyStatus = async () => {
-      const { data: battle } = await supabase
+      const { data } = await supabase
         .from('battles')
         .select('player_ready_status')
         .eq('id', battleId)
         .single();
         
-      if (battle?.player_ready_status) {
-        try {
-          const readyStatus = JSON.parse(battle.player_ready_status);
-          setIsReady(!!readyStatus[user.id]);
-          
-          // Check if opponent is ready
-          const opponentReadyStatus = Object.entries(readyStatus)
-            .some(([userId, ready]) => userId !== user.id && ready === true);
-            
-          setOpponentReady(opponentReadyStatus);
-          
-          // Check if both players are ready
-          if (Object.values(readyStatus).filter(Boolean).length >= 2) {
-            onBothPlayersReady();
-          }
-        } catch (e) {
-          console.error("Error parsing ready status:", e);
+      if (data?.player_ready_status) {
+        const status = data.player_ready_status as Record<string, boolean>;
+        setReadyStatus(status);
+        
+        // Check if current user is ready
+        if (status[user.id]) {
+          setIsReady(true);
         }
+        
+        // Check if any other player is ready
+        const otherReady = Object.entries(status)
+          .some(([userId, ready]) => userId !== user.id && ready);
+          
+        setOtherPlayerReady(otherReady);
       }
     };
     
     fetchReadyStatus();
-
+    
     // Subscribe to changes
     const channel = supabase
       .channel(`battle-ready-${battleId}`)
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'battles',
-        filter: `id=eq.${battleId}`
-      }, async (payload) => {
-        if (payload.new && payload.new.player_ready_status) {
-          try {
-            const readyStatus = JSON.parse(payload.new.player_ready_status);
-            setIsReady(!!readyStatus[user.id]);
+      .on('postgres_changes', 
+        { event: 'UPDATE', schema: 'public', table: 'battles', filter: `id=eq.${battleId}` }, 
+        (payload) => {
+          if (payload.new && payload.new.player_ready_status) {
+            const status = payload.new.player_ready_status as Record<string, boolean>;
+            setReadyStatus(status);
             
-            // Check if opponent is ready
-            const opponentReadyStatus = Object.entries(readyStatus)
-              .some(([userId, ready]) => userId !== user.id && ready === true);
+            // Check if any other player is ready
+            const otherReady = Object.entries(status)
+              .some(([userId, ready]) => userId !== user.id && ready);
               
-            setOpponentReady(opponentReadyStatus);
+            setOtherPlayerReady(otherReady);
             
-            // Check if both players are ready
-            if (Object.values(readyStatus).filter(Boolean).length >= 2) {
+            // Check if all participants are ready
+            const allReady = Object.values(status).every(ready => ready);
+            const participantsReady = Object.keys(status).length;
+            
+            if (allReady && participantsReady >= 2 && onBothPlayersReady) {
               onBothPlayersReady();
             }
-          } catch (e) {
-            console.error("Error parsing ready status:", e);
           }
         }
-      })
+      )
       .subscribe();
       
     return () => {
@@ -93,100 +86,99 @@ const BattleReadyConfirmation = ({
     };
   }, [battleId, user, onBothPlayersReady]);
   
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleConfirm = async () => {
+    if (!battleId || !user || isReady) return;
     
-    if (!user || !battleId || inputValue.toLowerCase() !== 'start') return;
+    if (confirmText.toLowerCase() !== 'start') {
+      toast.error('Please type "Start" to confirm');
+      return;
+    }
     
     try {
-      // Get current ready status
-      const { data: battle } = await supabase
+      // Update the player ready status
+      const { data, error } = await supabase
         .from('battles')
         .select('player_ready_status')
         .eq('id', battleId)
         .single();
         
-      let readyStatus = {};
-      if (battle?.player_ready_status) {
-        try {
-          readyStatus = JSON.parse(battle.player_ready_status);
-        } catch (e) {
-          console.error("Error parsing ready status:", e);
-        }
-      }
+      if (error) throw error;
       
-      // Update ready status for current user
-      readyStatus = {
-        ...readyStatus,
+      const existingStatus = data?.player_ready_status || {};
+      const updatedStatus = {
+        ...existingStatus,
         [user.id]: true
       };
       
-      // Update battle
-      await supabase
+      const { error: updateError } = await supabase
         .from('battles')
-        .update({
-          player_ready_status: JSON.stringify(readyStatus)
-        })
+        .update({ player_ready_status: updatedStatus })
         .eq('id', battleId);
         
+      if (updateError) throw updateError;
+      
       setIsReady(true);
+      toast.success("You're ready! Waiting for your opponent...");
       
     } catch (error) {
-      console.error("Error updating ready status:", error);
+      console.error('Error marking player as ready:', error);
+      toast.error("Failed to confirm ready status");
     }
   };
   
-  const isDisabled = isReady || participantCount < 2;
+  // If participant count is less than 2, show waiting message
+  if (participantCount < 2) {
+    return (
+      <div className="bg-secondary/20 p-4 rounded text-center">
+        <p className="text-muted-foreground">Waiting for opponent to join...</p>
+        <p className="text-sm text-muted-foreground mt-2">Share your battle code with them</p>
+      </div>
+    );
+  }
   
-  return (
-    <div className="mt-6 p-4 border border-night-700 rounded-lg bg-night-800/50">
-      <h3 className="text-lg font-medium text-center mb-4">Ready to Battle?</h3>
-      
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className={`w-3 h-3 rounded-full ${isReady ? 'bg-green-500' : 'bg-night-600'}`}></div>
-          <span>You: {isReady ? 'Ready' : 'Not Ready'}</span>
+  // If the player is already ready, show status
+  if (isReady) {
+    return (
+      <div className="bg-secondary/20 p-4 rounded text-center">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+          <p className="font-medium">You're ready!</p>
         </div>
         
-        <div className="flex items-center gap-2">
-          <div className={`w-3 h-3 rounded-full ${opponentReady ? 'bg-green-500' : 'bg-night-600'}`}></div>
-          <span>Opponent: {opponentReady ? 'Ready' : 'Not Ready'}</span>
-        </div>
+        {otherPlayerReady ? (
+          <p className="text-green-500 font-medium">Both players ready! Starting battle...</p>
+        ) : (
+          <p className="text-sm text-muted-foreground">Waiting for opponent to confirm...</p>
+        )}
+      </div>
+    );
+  }
+  
+  // Otherwise, show the confirmation form
+  return (
+    <div className="bg-secondary/20 p-4 rounded">
+      <div className="text-center mb-3">
+        <p className="font-medium">Both players must confirm to start</p>
+        {otherPlayerReady && (
+          <p className="text-sm text-green-500 mt-1">Your opponent is ready!</p>
+        )}
       </div>
       
-      {!isReady && (
-        <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
-          <Input
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder={isDisabled ? (participantCount < 2 ? 'Waiting for opponent...' : '') : 'Type "Start" to ready up'}
-            className="border-night-700"
-            disabled={isDisabled}
-          />
-          <Button 
-            type="submit"
-            disabled={isDisabled || inputValue.toLowerCase() !== 'start'}
-            variant={inputValue.toLowerCase() === 'start' ? 'default' : 'outline'}
-            className="whitespace-nowrap"
-          >
-            Ready Up
-          </Button>
-        </form>
-      )}
-      
-      {isReady && (
-        <div className="mt-4 p-2 bg-green-500/20 border border-green-500 rounded flex items-center gap-2 text-sm">
-          <CheckCircle className="h-4 w-4 text-green-500" />
-          <span>You are ready! Waiting for opponent...</span>
-        </div>
-      )}
-      
-      {participantCount < 2 && (
-        <div className="mt-4 p-2 bg-yellow-500/20 border border-yellow-500 rounded flex items-center gap-2 text-sm">
-          <XCircle className="h-4 w-4 text-yellow-500" />
-          <span>Waiting for opponent to join...</span>
-        </div>
-      )}
+      <div className="flex gap-2">
+        <Input 
+          value={confirmText}
+          onChange={(e) => setConfirmText(e.target.value)}
+          placeholder='Type "Start" to confirm'
+          className="flex-1"
+        />
+        
+        <Button 
+          onClick={handleConfirm}
+          disabled={confirmText.toLowerCase() !== 'start'}
+        >
+          Confirm
+        </Button>
+      </div>
     </div>
   );
 };

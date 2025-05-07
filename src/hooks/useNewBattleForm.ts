@@ -4,10 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/context/AuthContext";
+import { useBattleCode } from "@/hooks/useBattleCode";
 
 export function useNewBattleForm() {
   const navigate = useNavigate();
   const { user } = useAuthContext();
+  const { generateBattleCode } = useBattleCode();
 
   const [isCreating, setIsCreating] = useState(false);
   const [title, setTitle] = useState("");
@@ -17,6 +19,7 @@ export function useNewBattleForm() {
   const [allowSpectators, setAllowSpectators] = useState(true);
   const [quickMatch, setQuickMatch] = useState(false);
   const [battleId, setBattleId] = useState<string | null>(null);
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
 
   const handleCreateBattle = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +36,12 @@ export function useNewBattleForm() {
       return;
     }
     setIsCreating(true);
+    
     try {
+      // Generate a unique battle code
+      const code = generateBattleCode();
+      
+      // Create the battle with the code
       const { data: battleData, error: battleError } = await supabase
         .from('battles')
         .insert({
@@ -43,18 +51,27 @@ export function useNewBattleForm() {
           time_per_turn: Number(timePerTurn),
           created_by: user.id,
           status: 'waiting',
-          allow_spectators: allowSpectators
+          allow_spectators: allowSpectators,
+          invite_code: code,
+          player_ready_status: {}
         })
         .select()
         .single();
+        
       if (battleError) throw battleError;
+      
+      // Add user as a participant
       const { error: participantError } = await supabase
         .from('battle_participants')
         .insert({
           battle_id: battleData.id,
           user_id: user.id
         });
+        
       if (participantError) throw participantError;
+      
+      setBattleId(battleData.id);
+      setInviteCode(code);
       toast.success("Battle created successfully!");
       navigate(`/battles/waiting/${battleData.id}`);
       return battleData.id;
@@ -75,6 +92,7 @@ export function useNewBattleForm() {
     allowSpectators, setAllowSpectators,
     quickMatch, setQuickMatch,
     battleId, setBattleId,
+    inviteCode, setInviteCode,
     handleCreateBattle
   };
 }

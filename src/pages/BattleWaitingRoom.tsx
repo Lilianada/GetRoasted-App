@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -272,7 +271,7 @@ const BattleWaitingRoom = () => {
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">{battleData.title}</CardTitle>
             <CardDescription>
-              {participants.length < 2 ? "Waiting for opponent to join..." : "Battle starting soon!"}
+              {participants.length < 2 ? "Waiting for opponent to join..." : "Both players must type 'Start' to begin"}
             </CardDescription>
           </CardHeader>
           

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,6 @@ import { useNewBattleForm } from "@/hooks/useNewBattleForm";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuthContext } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 
 interface BattleCreationFormProps {
   setBattleId?: (id: string | null) => void;
@@ -31,42 +30,35 @@ export const BattleCreationForm = ({
     timePerTurn, setTimePerTurn,
     allowSpectators, setAllowSpectators,
     quickMatch, setQuickMatch,
-    handleCreateBattle: originalHandleCreateBattle
+    inviteCode,
+    handleCreateBattle
   } = useNewBattleForm();
   
   const { user } = useAuthContext();
   
-  const handleCreateBattle = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!user) return;
     
     try {
-      const battleId = await originalHandleCreateBattle(e);
-      if (battleId && setBattleId && setInviteCode) {
+      const battleId = await handleCreateBattle(e);
+      
+      if (battleId && setBattleId) {
         setBattleId(battleId);
-        
-        // Get the battle details to retrieve the invite code
-        const { data: battle } = await supabase
-          .from('battles')
-          .select('invite_code')
-          .eq('id', battleId)
-          .single();
-          
-        if (battle?.invite_code) {
-          setInviteCode(battle.invite_code);
-        }
       }
-      return battleId;
+      
+      if (inviteCode && setInviteCode) {
+        setInviteCode(inviteCode);
+      }
     } catch (error) {
       console.error('Error creating battle:', error);
-      throw error;
     }
   };
 
   return (
     <Card className="bg-secondary border-2 border-black p-6">
-      <form className="space-y-6" onSubmit={handleCreateBattle}>
+      <form className="space-y-6" onSubmit={handleSubmit}>
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title">Battle Title</Label>

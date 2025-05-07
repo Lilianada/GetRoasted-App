@@ -1,78 +1,110 @@
 
 import React from 'react';
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Copy, Users } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Check, Copy, Share2, Clock } from "lucide-react";
 
 interface BattleSidebarProps {
-  battleId?: string | null;
+  battleId: string | null;
+  inviteCode?: string | null;
   showCopied: boolean;
   handleCopyLink: () => void;
 }
 
 export const BattleSidebar = ({
   battleId,
+  inviteCode,
   showCopied,
   handleCopyLink
 }: BattleSidebarProps) => {
   return (
     <div className="space-y-6">
-      <Card className="bg-yellow border-2 border-black p-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <Users className="h-5 w-5 text-flame-500" />
-          Invite Opponents
-        </h3>
+      <Card className="border-night-800">
+        <CardHeader>
+          <CardTitle className="text-lg">Battle Code</CardTitle>
+        </CardHeader>
         
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            After creating your battle, you'll get a link to share with people you want to battle with.
-          </p>
-          
-          {battleId && (
+        <CardContent className="space-y-4">
+          {battleId ? (
             <>
-              <div className="flex items-center gap-2">
-                <Input
-                  value={`${window.location.origin}/battle/join/${battleId}`}
-                  readOnly
-                  className="border-night-700"
-                />
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className="border-night-700" 
+              <div className="bg-secondary/20 p-3 rounded flex items-center justify-between gap-2">
+                <div className="font-mono text-lg tracking-wider flex-grow text-center">
+                  {inviteCode || '------'}
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0"
                   onClick={handleCopyLink}
                 >
-                  {showCopied ? (
-                    <span className="text-xs font-medium text-green-500">Copied!</span>
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
+                  {showCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </Button>
               </div>
+              
+              <div className="text-sm text-muted-foreground">
+                Share this code with your opponent so they can join your battle.
+              </div>
+              
+              <Button 
+                className="w-full gap-2"
+                onClick={handleCopyLink}
+              >
+                {showCopied ? (
+                  <>
+                    <Check className="h-4 w-4" />
+                    Code Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4" />
+                    Copy Code
+                  </>
+                )}
+              </Button>
+              
+              <Button 
+                variant="outline"
+                className="w-full gap-2"
+              >
+                <Share2 className="h-4 w-4" />
+                Share with Contacts
+              </Button>
             </>
+          ) : (
+            <div className="text-center text-muted-foreground p-4">
+              <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p>Your battle code will appear here after creating a battle</p>
+            </div>
           )}
-        </div>
+        </CardContent>
       </Card>
       
-      <Card className="bg-yellow border-2 border-black p-6">
-        <h3 className="text-lg font-semibold mb-4">Community Guidelines</h3>
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Roasts should be clever and funny, not cruel. Focus on wit, not personal attacks.
-          </p>
+      <Card className="border-night-800">
+        <CardHeader>
+          <CardTitle className="text-lg">Battle Tips</CardTitle>
+        </CardHeader>
+        
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <h3 className="font-medium">How to Play</h3>
+            <ol className="text-sm space-y-1 list-decimal list-inside text-muted-foreground">
+              <li>Create a battle and share the code</li>
+              <li>Wait for your opponent to join</li>
+              <li>Both players must type "Start" to begin</li>
+              <li>Take turns roasting each other</li>
+              <li>Spectators can watch and vote</li>
+            </ol>
+          </div>
           
-          <ul className="text-sm text-muted-foreground space-y-2">
-            <li>• No hate speech or discrimination</li>
-            <li>• No threatening language</li>
-            <li>• Keep it creative and humorous</li>
-            <li>• Don't share private information</li>
-          </ul>
-          
-          <p className="text-sm text-muted-foreground">
-            Violating these guidelines may result in account suspension.
-          </p>
-        </div>
+          <div className="space-y-2">
+            <h3 className="font-medium">Rules</h3>
+            <ul className="text-sm space-y-1 list-disc list-inside text-muted-foreground">
+              <li>Keep it creative and funny</li>
+              <li>No hate speech or personal attacks</li>
+              <li>Submit your roast before the timer ends</li>
+            </ul>
+          </div>
+        </CardContent>
       </Card>
     </div>
   );

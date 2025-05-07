@@ -6,12 +6,12 @@ import { BattleSidebar } from "@/components/battle/BattleSidebar";
 const NewBattle = () => {
   const [showCopied, setShowCopied] = useState(false);
   const [battleId, setBattleId] = useState<string | null>(null);
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
   
   const handleCopyLink = () => {
-    if (!battleId) return;
+    if (!inviteCode) return;
     
-    const inviteLink = `${window.location.origin}/battles/join/${battleId}`;
-    navigator.clipboard.writeText(inviteLink);
+    navigator.clipboard.writeText(inviteCode);
     
     setShowCopied(true);
     setTimeout(() => {
@@ -29,11 +29,15 @@ const NewBattle = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <BattleCreationForm />
+            <BattleCreationForm 
+              setBattleId={setBattleId}
+              setInviteCode={setInviteCode}
+            />
           </div>
           
           <BattleSidebar 
             battleId={battleId}
+            inviteCode={inviteCode}
             showCopied={showCopied}
             handleCopyLink={handleCopyLink}
           />

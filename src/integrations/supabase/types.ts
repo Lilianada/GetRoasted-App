@@ -174,6 +174,8 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          invite_code: string | null
+          player_ready_status: Json | null
           round_count: number
           status: string
           time_per_turn: number
@@ -186,6 +188,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          invite_code?: string | null
+          player_ready_status?: Json | null
           round_count?: number
           status: string
           time_per_turn?: number
@@ -198,6 +202,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          invite_code?: string | null
+          player_ready_status?: Json | null
           round_count?: number
           status?: string
           time_per_turn?: number
