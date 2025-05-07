@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Flame, PlusCircle, Enter } from "lucide-react";
+import { Flame, PlusCircle, ArrowRight } from "lucide-react";
 import JoinBattleWithCode from "./JoinBattleWithCode";
 
 const BattleLobbyOptions = () => {

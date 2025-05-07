@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Enter, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { useBattleCode } from "@/hooks/useBattleCode";
 import { useNavigate } from "react-router-dom";
 
@@ -66,7 +66,7 @@ const JoinBattleWithCode = () => {
               </>
             ) : (
               <>
-                <Enter className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4" />
                 Join Battle
               </>
             )}
