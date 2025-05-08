@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useBattleCode } from "@/hooks/useBattleCode";
-import { useNavigate } from "react-router-dom";
 
 const JoinBattleWithCode = () => {
   const [battleCode, setBattleCode] = useState('');
