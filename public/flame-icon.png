@@ -1,0 +1,5 @@
+
+// This is a placeholder for the flame icon image file.
+// Since we can't directly create binary files like PNG through text,
+// we'll need to use a base64-encoded image or have the user upload the flame icon.
+// For now, we'll use the existing Flame icon from the app's logo component.
