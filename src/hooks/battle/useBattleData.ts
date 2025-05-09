@@ -9,7 +9,7 @@ import { useBattleVotes } from './useBattleVotes';
  */
 export function useBattleData(battleId: string | undefined) {
   const { battle, isLoading: battleLoading, error: battleError } = useBattleInfo(battleId);
-  const { participants, isLoading: participantsLoading, error: participantsError } = useBattleParticipants(battleId);
+  const { participants, isLoading: participantsLoading, error: participantsError } = useBattleParticipants({battleId});
   const { votes, isLoading: votesLoading, error: votesError } = useBattleVotes(battleId);
   
   const isLoading = battleLoading || participantsLoading || votesLoading;
@@ -31,8 +31,16 @@ export const useBattle = (battleId: string | undefined) => {
 };
 
 // Export adapter hooks for backward compatibility
-export { useBattleParticipantsAdapter as useBattleParticipantsBase } from './useBattleParticipants';
-export { useBattleVotesAdapter as useBattleVotesBase } from './useBattleVotes';
+export const useBattleParticipantsBase = (battleId: string | undefined) => {
+  const { participants } = useBattleParticipants({battleId});
+  return { data: participants };
+};
+
+export const useBattleVotesBase = (battleId: string | undefined) => {
+  const { votes } = useBattleVotes(battleId);
+  return { data: votes };
+};
+
 export { useVoteMutation } from './useBattleVotes';
 
 // Re-export from the types
