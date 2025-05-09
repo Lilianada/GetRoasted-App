@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/context/AuthContext";
 import { Battle, Participant } from "@/types/battle";
 import { toast } from "@/components/ui/sonner";
+
+// Import all the individual context providers
 import { BattleStateProvider, useBattleStateContext } from './BattleStateContext';
 import { BattleParticipationProvider, useBattleParticipationContext } from './BattleParticipationContext';
 import { BattleTimerProvider, useBattleTimerContext } from './BattleTimerContext';
@@ -147,7 +149,6 @@ const BattleContextConsumer = ({
   const { data: battle } = useBattle(battleId);
   const { data: participantsData = [] } = useBattleParticipantsBase(battleId);
   const { data: votes = [] } = useBattleVotesBase(battleId);
-  const voteMutation = useVoteMutation();
   
   // Consume all context providers
   const stateContext = useBattleStateContext();
