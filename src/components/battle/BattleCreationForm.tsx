@@ -13,8 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
-import BattleRoundsSelection from "./BattleRoundsSelection";
-import BattleTimeSelection from "./BattleTimeSelection";
+import { BattleRoundsSelection } from "./BattleRoundsSelection";
+import { BattleTimeSelection } from "./BattleTimeSelection";
 
 // Schema definition for form validation
 const battleFormSchema = z.object({
@@ -178,8 +178,8 @@ export function BattleCreationForm({ setBattleId, setInviteCode, onSuccess }: Ba
               <FormLabel>Number of Rounds</FormLabel>
               <FormControl>
                 <BattleRoundsSelection
-                  value={field.value}
-                  onChange={field.onChange}
+                  roundCount={String(field.value)}
+                  setRoundCount={(value) => field.onChange(parseInt(value))}
                 />
               </FormControl>
               <FormDescription>
@@ -199,8 +199,8 @@ export function BattleCreationForm({ setBattleId, setInviteCode, onSuccess }: Ba
               <FormLabel>Time Per Turn</FormLabel>
               <FormControl>
                 <BattleTimeSelection
-                  value={field.value}
-                  onChange={field.onChange}
+                  timePerTurn={String(field.value)}
+                  setTimePerTurn={(value) => field.onChange(parseInt(value))}
                 />
               </FormControl>
               <FormDescription>
