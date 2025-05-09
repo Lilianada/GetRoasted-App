@@ -19,6 +19,9 @@ const RoastInput: React.FC<RoastInputProps> = ({ className }) => {
     setRoastInput("");
   };
 
+  // Check if current player can type - they need to not be a spectator AND it needs to be their turn
+  const canType = !isSpectator && isPlayerTurn();
+
   return (
     <div className={className}>
       <Textarea
@@ -32,13 +35,13 @@ const RoastInput: React.FC<RoastInputProps> = ({ className }) => {
             : "Waiting for your turn..."
         }
         className="min-h-[100px] bg-white text-black"
-        disabled={isSpectator || !isPlayerTurn()}
+        disabled={!canType}
       />
 
       <div className="flex justify-end mt-2">
         <Button
           onClick={onSendRoast}
-          disabled={!roastInput.trim() || isSpectator || !isPlayerTurn()}
+          disabled={!roastInput.trim() || !canType}
           className="gap-2"
         >
           <Send className="h-4 w-4" />
