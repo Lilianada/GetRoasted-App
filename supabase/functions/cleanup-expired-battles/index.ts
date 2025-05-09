@@ -23,39 +23,71 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     console.log("Starting battle cleanup process");
     
-    // Get battles older than 24 hours
-    const { data: expiredBattles, error: findError } = await supabaseClient
+    // Get timestamp for 24 hours ago
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    
+    // Find unused battles - battles older than 24 hours that haven't been used
+    // We define "unused" as battles with status 'waiting' (never started) or
+    // battles with no participants
+    const { data: oldBattles, error: findError } = await supabaseClient
       .from('battles')
-      .select('id')
-      .lt('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+      .select('id, status, created_at')
+      .lt('created_at', twentyFourHoursAgo)
+      .in('status', ['waiting', 'ready']);
     
     if (findError) throw findError;
     
-    if (!expiredBattles || expiredBattles.length === 0) {
-      console.log("No expired battles found");
+    if (!oldBattles || oldBattles.length === 0) {
+      console.log("No old unused battles found");
       return new Response(
-        JSON.stringify({ success: true, message: "No expired battles found" }),
+        JSON.stringify({ success: true, message: "No old unused battles found" }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
-    const battleIds = expiredBattles.map(b => b.id);
-    console.log(`Found ${battleIds.length} expired battles to delete`);
+    // For each battle, check if it has participants
+    const battleIdsToDelete = [];
+    for (const battle of oldBattles) {
+      const { data: participants, error: participantsError } = await supabaseClient
+        .from('battle_participants')
+        .select('id')
+        .eq('battle_id', battle.id)
+        .limit(1);
+      
+      if (participantsError) throw participantsError;
+      
+      // If there are no participants or only 1 (meaning the battle never really started)
+      // mark for deletion
+      if (!participants || participants.length <= 1) {
+        battleIdsToDelete.push(battle.id);
+      }
+    }
+    
+    if (battleIdsToDelete.length === 0) {
+      console.log("No battles qualify for deletion");
+      return new Response(
+        JSON.stringify({ success: true, message: "No battles qualify for deletion" }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    console.log(`Found ${battleIdsToDelete.length} unused battles to delete`);
     
     // Delete the battles (RLS cascade will handle related records)
     const { error: deleteError } = await supabaseClient
       .from('battles')
       .delete()
-      .in('id', battleIds);
+      .in('id', battleIdsToDelete);
     
     if (deleteError) throw deleteError;
     
-    console.log(`Successfully deleted ${battleIds.length} expired battles`);
+    console.log(`Successfully deleted ${battleIdsToDelete.length} old unused battles`);
     
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `Successfully deleted ${battleIds.length} expired battles` 
+        message: `Successfully deleted ${battleIdsToDelete.length} old unused battles`,
+        deleted_ids: battleIdsToDelete
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
