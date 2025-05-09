@@ -13,11 +13,10 @@ export function useNewBattleForm() {
 
   const [isCreating, setIsCreating] = useState(false);
   const [title, setTitle] = useState("");
-  const [battleType, setBattleType] = useState<'public' | 'private'>('public');
-  const [roundCount, setRoundCount] = useState("3");
+  const [battleType, setBattleType] = useState<'public' | 'private'>('private'); // Changed default to private
+  const [roundCount, setRoundCount] = useState("1"); // Set default to 1 round
   const [timePerTurn, setTimePerTurn] = useState("180"); // Default to 3 minutes
   const [allowSpectators, setAllowSpectators] = useState(true);
-  const [quickMatch, setQuickMatch] = useState(false);
   const [battleId, setBattleId] = useState<string | null>(null);
   const [inviteCode, setInviteCode] = useState<string | null>(null);
 
@@ -25,15 +24,15 @@ export function useNewBattleForm() {
     e.preventDefault();
     if (!user) {
       toast.error("You must be logged in to create battles");
-      return;
+      return null;
     }
     if (!title.trim()) {
       toast.error("Please provide a battle title");
-      return;
+      return null;
     }
     if (!timePerTurn || isNaN(Number(timePerTurn)) || Number(timePerTurn) <= 0) {
       toast.error("Please provide a valid time per turn.");
-      return;
+      return null;
     }
     setIsCreating(true);
     
@@ -90,7 +89,6 @@ export function useNewBattleForm() {
     roundCount, setRoundCount,
     timePerTurn, setTimePerTurn,
     allowSpectators, setAllowSpectators,
-    quickMatch, setQuickMatch,
     battleId, setBattleId,
     inviteCode, setInviteCode,
     handleCreateBattle

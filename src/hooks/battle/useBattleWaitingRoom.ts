@@ -3,9 +3,11 @@ import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
 import { useNavigate } from "react-router-dom";
+import { useAuthContext } from "@/context/AuthContext";
 
 export function useBattleWaitingRoom(battleId: string | undefined) {
   const navigate = useNavigate();
+  const { user } = useAuthContext();
   const [battleData, setBattleData] = useState<any>(null);
   const [participants, setParticipants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -13,7 +15,9 @@ export function useBattleWaitingRoom(battleId: string | undefined) {
   const [battleState, setBattleState] = useState<'waiting' | 'ready' | 'active' | 'completed'>('waiting');
   const [countdown, setCountdown] = useState(3);
   const [spectatorCount, setSpectatorCount] = useState(0);
+  const [bothPlayersReady, setBothPlayersReady] = useState(false);
   
+  // Fetch initial battle data and set up subscriptions
   useEffect(() => {
     if (!battleId) return;
     
@@ -30,6 +34,11 @@ export function useBattleWaitingRoom(battleId: string | undefined) {
         
         setBattleData(battle);
         
+        // If the battle is already active, prepare to redirect
+        if (battle.status === 'active') {
+          setBattleState('active');
+        }
+        
         // Fetch initial participants
         const { data: participantsData, error: participantsError } = await supabase
           .from('battle_participants')
@@ -39,6 +48,12 @@ export function useBattleWaitingRoom(battleId: string | undefined) {
         if (participantsError) throw participantsError;
         
         setParticipants(participantsData);
+
+        // If there are already 2 participants, show the ready modal
+        if (participantsData && participantsData.length >= 2) {
+          setShowGetReadyModal(true);
+        }
+        
         setLoading(false);
       } catch (error) {
         console.error('Error fetching battle data:', error);
@@ -50,8 +65,8 @@ export function useBattleWaitingRoom(battleId: string | undefined) {
     fetchBattleData();
     
     // Set up real-time subscription for participants
-    const channel = supabase
-      .channel('battle_participants_changes')
+    const participantsChannel = supabase
+      .channel(`battle_participants_${battleId}`)
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'battle_participants', filter: `battle_id=eq.${battleId}` }, 
         async () => {
@@ -63,34 +78,61 @@ export function useBattleWaitingRoom(battleId: string | undefined) {
             
           if (newParticipantsData) {
             setParticipants(newParticipantsData);
+            
+            // If a second participant has joined, show the ready modal
+            if (newParticipantsData.length >= 2 && !showGetReadyModal) {
+              setShowGetReadyModal(true);
+            }
+          }
+        }
+      )
+      .subscribe();
+      
+    // Listen for battle status changes
+    const battleChannel = supabase
+      .channel(`battle_status_${battleId}`)
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'battles', filter: `id=eq.${battleId}` },
+        (payload) => {
+          const updatedBattle = payload.new as any;
+          setBattleData(updatedBattle);
+          
+          if (updatedBattle.status === 'active') {
+            setBattleState('active');
+            // Don't navigate immediately - let the countdown handle it
+            if (!showGetReadyModal) {
+              setShowGetReadyModal(true);
+            }
           }
         }
       )
       .subscribe();
       
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(participantsChannel);
+      supabase.removeChannel(battleChannel);
     };
-  }, [battleId, navigate]);
+  }, [battleId, navigate, showGetReadyModal]);
   
-  // Countdown effect for the Get Ready modal
+  // Handle countdown effect for the Get Ready modal
   useEffect(() => {
-    if (!showGetReadyModal) {
+    if (!bothPlayersReady || !showGetReadyModal) {
       setCountdown(3);
       return;
     }
     
     if (countdown <= 0) {
       setShowGetReadyModal(false);
+      handleEnterBattleRoom();
       return;
     }
     
     const timer = setTimeout(() => {
-      setCountdown(countdown - 1);
+      setCountdown(prev => prev - 1);
     }, 1000);
     
     return () => clearTimeout(timer);
-  }, [showGetReadyModal, countdown]);
+  }, [bothPlayersReady, showGetReadyModal, countdown]);
   
   const handleInviteContacts = () => {
     if (!battleData?.invite_code) return;
@@ -111,41 +153,25 @@ export function useBattleWaitingRoom(battleId: string | undefined) {
   };
   
   const handleEnterBattleRoom = () => {
-    if (battleData?.status === 'active') {
-      navigate(`/battles/live/${battleId}`);
-    } else if (participants.length >= 2) {
-      navigate(`/battles/live/${battleId}`);
-    } else {
-      toast.info("The battle hasn't started yet. Waiting for opponent to join.");
-    }
+    if (!battleId) return;
+    
+    navigate(`/battles/live/${battleId}`);
   };
   
   const handleBattleStateChange = (newState: 'waiting' | 'ready' | 'active' | 'completed') => {
     setBattleState(newState);
     
-    // If battle is now active or ready and wasn't before, we may want to auto-redirect or show a notification
+    // If battle is now active and wasn't before, show notification
     if (newState === 'active' && battleState !== 'active') {
-      // We could auto-redirect here, but we'll let the user click the button instead
       toast.success("Battle is now active! You can enter the battle room.");
     }
   };
   
-  const handleGetReadyModal = () => {
-    // Show Get Ready modal
-    setShowGetReadyModal(true);
-    
-    // Auto-close the modal after 3 seconds
-    setTimeout(() => {
-      setShowGetReadyModal(false);
-      // Auto-redirect to battle room after modal closes
-      if (battleId) {
-        navigate(`/battles/live/${battleId}`);
-      }
-    }, 3000);
-  };
-  
   const handleBothPlayersReady = async () => {
     if (!battleId) return;
+    
+    // Set ready flag to start countdown
+    setBothPlayersReady(true);
     
     // Update battle status to active
     await supabase
@@ -154,9 +180,6 @@ export function useBattleWaitingRoom(battleId: string | undefined) {
       .eq('id', battleId);
       
     toast.success("Both players are ready! Battle is starting...");
-    
-    // Show get ready modal and redirect
-    handleGetReadyModal();
   };
 
   return {
@@ -172,7 +195,6 @@ export function useBattleWaitingRoom(battleId: string | undefined) {
     handleInviteContacts,
     handleEnterBattleRoom,
     handleBattleStateChange,
-    handleGetReadyModal,
     handleBothPlayersReady
   };
 }

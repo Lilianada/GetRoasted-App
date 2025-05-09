@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowRight, LockOpen } from "lucide-react";
+import { ArrowRight, LockOpen, Lock } from "lucide-react";
 import { BattleRoundsSelection } from "./BattleRoundsSelection";
 import { BattleTimeSelection } from "./BattleTimeSelection";
 import { BattleSettings } from "./BattleSettings";
@@ -29,8 +29,6 @@ export const BattleCreationForm = ({
     roundCount, setRoundCount,
     timePerTurn, setTimePerTurn,
     allowSpectators, setAllowSpectators,
-    quickMatch, setQuickMatch,
-    inviteCode,
     handleCreateBattle
   } = useNewBattleForm();
   
@@ -48,8 +46,8 @@ export const BattleCreationForm = ({
         setBattleId(battleId);
       }
       
-      if (inviteCode && setInviteCode) {
-        setInviteCode(inviteCode);
+      if (setInviteCode) {
+        setInviteCode(battleId ? await handleCreateBattle(e) : null);
       }
     } catch (error) {
       console.error('Error creating battle:', error);
@@ -97,6 +95,7 @@ export const BattleCreationForm = ({
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="private" id="private" className="text-flame-500" />
                 <Label htmlFor="private" className="flex items-center gap-2 cursor-pointer">
+                  <Lock className="h-4 w-4 text-flame-500" />
                   Private
                   <span className="text-xs text-muted-foreground">
                     (Invite only)
@@ -106,35 +105,15 @@ export const BattleCreationForm = ({
             </RadioGroup>
           </div>
           
-          <BattleRoundsSelection roundCount={roundCount} setRoundCount={setRoundCount} />
           <BattleTimeSelection timePerTurn={timePerTurn} setTimePerTurn={setTimePerTurn} />
         </div>
         
         <BattleSettings 
           allowSpectators={allowSpectators}
           setAllowSpectators={setAllowSpectators}
-          quickMatch={quickMatch}
-          setQuickMatch={setQuickMatch}
         />
         
-        <div className="pt-4 flex justify-end gap-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  type="button"
-                  className="gap-2"
-                  disabled
-                >
-                  Quick Match
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Coming soon!</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
+        <div className="pt-4 flex justify-end">
           <Button 
             type="submit"
             className="gap-2 bg-yellow hover:opacity-90"
