@@ -57,7 +57,7 @@ export function useBattlePresence({
     };
   }, [battleId, userId]);
 
-  // Set up presence tracking when component mounts
+  // Set up presence tracking when component mounts - only once
   useEffect(() => {
     if (!battleId || !userId) return;
     

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { BattleParticipant, BattleSpectator } from '@/types/battle';
@@ -22,6 +23,7 @@ export function useBattleParticipantsManager({
   const [spectators, setSpectators] = useState<BattleSpectator[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [hasJoined, setHasJoined] = useState(false);
 
   // Fetch battle participants and spectators
   const fetchParticipantsData = useCallback(async () => {
@@ -61,17 +63,22 @@ export function useBattleParticipantsManager({
         onSpectatorCountChange(typedSpectators.length);
       }
       
+      // Check if current user is already a participant
+      if (userId && typedParticipants.some(p => p.user_id === userId)) {
+        setHasJoined(true);
+      }
+      
       setIsLoading(false);
     } catch (err) {
       console.error('Error fetching battle participants data:', err);
       setError(err instanceof Error ? err : new Error('Unknown error occurred'));
       setIsLoading(false);
     }
-  }, [battleId, onParticipantCountChange, onSpectatorCountChange]);
+  }, [battleId, onParticipantCountChange, onSpectatorCountChange, userId]);
 
   // Join battle as participant or spectator
   const joinBattle = useCallback(async () => {
-    if (!battleId || !userId) return;
+    if (!battleId || !userId || hasJoined) return;
     
     try {
       // First check if user is already a participant
@@ -83,8 +90,10 @@ export function useBattleParticipantsManager({
         .single();
         
       if (existingParticipant) {
+        // User is already a participant, only log once
         console.log('User is already a participant');
-        return; // User is already a participant
+        setHasJoined(true);
+        return;
       }
       
       // Check current participant count
@@ -108,6 +117,7 @@ export function useBattleParticipantsManager({
         
         // Show notification
         toast.success("You've joined as a participant!");
+        setHasJoined(true);
       } 
       // Otherwise join as spectator
       else {
@@ -130,6 +140,7 @@ export function useBattleParticipantsManager({
           if (spectatorError) throw spectatorError;
           
           toast.info("You've joined as a spectator");
+          setHasJoined(true);
         }
       }
       
@@ -139,7 +150,7 @@ export function useBattleParticipantsManager({
       console.error('Error joining battle:', err);
       setError(err instanceof Error ? err : new Error('Unknown error occurred'));
     }
-  }, [battleId, userId, maxParticipants, fetchParticipantsData]);
+  }, [battleId, userId, maxParticipants, fetchParticipantsData, hasJoined]);
 
   // Set up subscription to participant changes
   useEffect(() => {
@@ -164,8 +175,8 @@ export function useBattleParticipantsManager({
       )
       .subscribe();
     
-    // Use less frequent polling as a fallback
-    const intervalId = setInterval(fetchParticipantsData, 30000);
+    // Use less frequent polling as a fallback (reduced from 30s to 60s)
+    const intervalId = setInterval(fetchParticipantsData, 60000);
     
     // Cleanup function
     return () => {
@@ -174,6 +185,13 @@ export function useBattleParticipantsManager({
       supabase.removeChannel(spectatorsChannel);
     };
   }, [battleId, fetchParticipantsData]);
+
+  // Only attempt to join once on initial render
+  useEffect(() => {
+    if (battleId && userId && !hasJoined && !isLoading) {
+      joinBattle();
+    }
+  }, [battleId, userId, joinBattle, hasJoined, isLoading]);
 
   return {
     participants,

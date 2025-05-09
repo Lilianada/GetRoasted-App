@@ -3,7 +3,7 @@ import { useCallback, useEffect } from 'react';
 import { useAuthContext } from '@/context/AuthContext';
 import { useBattleParticipantsManager } from '@/hooks/useBattleParticipantsManager';
 import { useBattleStateManager } from '@/hooks/useBattleStateManager';
-import { useBattlePresence } from '@/hooks/useBattleData';
+import { useBattlePresence } from '@/hooks/battle/useBattlePresence';
 
 interface BattlePresenceManagerProps {
   battleId: string;
@@ -37,8 +37,8 @@ const BattlePresenceManager = ({
   // Use the participants manager hook
   const { 
     participants, 
-    error: participantsError,
-    joinBattle 
+    error: participantsError
+    // Note: We no longer call joinBattle directly, it's handled internally by the hook
   } = useBattleParticipantsManager({
     battleId,
     userId: user?.id,
@@ -74,13 +74,6 @@ const BattlePresenceManager = ({
       onError(stateError);
     }
   }, [participantsError, stateError, onError]);
-
-  // Effect to handle initial join
-  useEffect(() => {
-    if (battleId && user) {
-      joinBattle();
-    }
-  }, [battleId, user, joinBattle]);
 
   // This component doesn't render anything
   return null;
