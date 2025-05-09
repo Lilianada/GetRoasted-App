@@ -111,7 +111,7 @@ export function BattleCreationForm({ setBattleId, setInviteCode, onSuccess }: Ba
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 bg-purple/10 p-6 border-2 border-black shadow-neo rounded-none">
         {/* Battle Title */}
         <FormField
           control={form.control}
@@ -227,6 +227,7 @@ export function BattleCreationForm({ setBattleId, setInviteCode, onSuccess }: Ba
                 <Switch
                   checked={field.value}
                   onCheckedChange={field.onChange}
+                  className="data-[state=checked]:bg-flame-500"
                 />
               </FormControl>
             </FormItem>
