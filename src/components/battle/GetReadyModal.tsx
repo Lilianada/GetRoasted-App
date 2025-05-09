@@ -9,6 +9,7 @@ interface GetReadyModalProps {
   battleId: string;
   participantCount: number;
   onBothPlayersReady?: () => void;
+  countdown?: number;
 }
 
 const GetReadyModal = ({ 
@@ -16,7 +17,8 @@ const GetReadyModal = ({
   onOpenChange, 
   battleId, 
   participantCount, 
-  onBothPlayersReady 
+  onBothPlayersReady,
+  countdown
 }: GetReadyModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -24,6 +26,9 @@ const GetReadyModal = ({
         <DialogTitle className="text-3xl font-bold text-flame-500">Get Ready!</DialogTitle>
         <DialogDescription className="text-white">
           Your battle is about to begin
+          {countdown !== undefined && (
+            <div className="text-4xl font-bold mt-2">{countdown}</div>
+          )}
         </DialogDescription>
         <div className="flex flex-col items-center justify-center gap-6 py-6">
           <BattleReadyConfirmation 
