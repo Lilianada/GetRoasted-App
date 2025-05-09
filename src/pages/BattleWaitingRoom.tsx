@@ -26,6 +26,7 @@ const BattleWaitingRoom = () => {
   const [battleState, setBattleState] = useState<'waiting' | 'ready' | 'active' | 'completed'>('waiting');
   const [countdown, setCountdown] = useState(3);
   const [spectatorCount, setSpectatorCount] = useState(0);
+  const [playersReady, setPlayersReady] = useState(false);
   
   useEffect(() => {
     if (!battleId || !user) return;
@@ -93,16 +94,13 @@ const BattleWaitingRoom = () => {
       return;
     }
     
-    if (countdown <= 0) {
-      setShowGetReadyModal(false);
-      return;
+    if (countdown > 0) {
+      const timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
     }
-    
-    const timer = setTimeout(() => {
-      setCountdown(countdown - 1);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
   }, [showGetReadyModal, countdown]);
   
   const handleInviteContacts = () => {
@@ -111,9 +109,7 @@ const BattleWaitingRoom = () => {
   };
   
   const handleEnterBattleRoom = () => {
-    if (battleData?.status === 'active') {
-      navigate(`/battles/live/${battleId}`);
-    } else if (participants.length >= 2) {
+    if (battleData?.status === 'active' || participants.length >= 2) {
       navigate(`/battles/live/${battleId}`);
     } else {
       toast.info("The battle hasn't started yet. Waiting for opponent to join.");
@@ -133,15 +129,6 @@ const BattleWaitingRoom = () => {
   const handleGetReadyModal = () => {
     // Show Get Ready modal
     setShowGetReadyModal(true);
-    
-    // Auto-close the modal after 3 seconds
-    setTimeout(() => {
-      setShowGetReadyModal(false);
-      // Auto-redirect to battle room after modal closes
-      if (battleId) {
-        navigate(`/battles/live/${battleId}`);
-      }
-    }, 3000);
   };
   
   const handleBothPlayersReady = async () => {
@@ -154,9 +141,16 @@ const BattleWaitingRoom = () => {
       .eq('id', battleId);
       
     toast.success("Both players are ready! Battle is starting...");
+    setPlayersReady(true);
     
-    // Show get ready modal and redirect
+    // Show get ready modal
     handleGetReadyModal();
+  };
+
+  const handleEnterBattle = () => {
+    if (battleId) {
+      navigate(`/battles/live/${battleId}`);
+    }
   };
   
   if (loading) {
@@ -267,6 +261,8 @@ const BattleWaitingRoom = () => {
         open={showGetReadyModal} 
         onOpenChange={setShowGetReadyModal}
         countdown={countdown}
+        onComplete={handleEnterBattle}
+        canProceed={playersReady}
       />
     </div>
   );
