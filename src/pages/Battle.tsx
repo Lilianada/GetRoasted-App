@@ -1,17 +1,43 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Loader from "@/components/ui/loader";
 import { BattleProvider, useBattleContext } from "@/context/BattleContext";
 import BattleArenaContainer from "@/components/battle/BattleArenaContainer";
 import BattleChatPanel from "./BattleChatPanel";
 import BattlePresenceManager from "@/components/BattlePresenceManager";
+import GetReadyModal from "@/components/battle/GetReadyModal";
 
 // Main container component
 const BattleContainer = () => {
   const [showChat, setShowChat] = useState(false);
   const [chatInput, setChatInput] = useState('');
-  const { spectatorCount, setSpectatorCount, setBattleState, isLoading, error, isSpectator, battleId } = useBattleContext();
+  const [showReadyModal, setShowReadyModal] = useState(true);
+  
+  const { 
+    participants, 
+    spectatorCount, 
+    setSpectatorCount, 
+    setBattleState, 
+    isLoading, 
+    error, 
+    isSpectator, 
+    battleId,
+    battleState
+  } = useBattleContext();
+
+  useEffect(() => {
+    // Only show the ready modal once when the battle is ready
+    if (battleState === 'ready') {
+      setShowReadyModal(true);
+    }
+  }, [battleState]);
+
+  const handleBothPlayersReady = () => {
+    // Once both players are ready, close the modal and start the battle
+    setShowReadyModal(false);
+    setBattleState('active');
+  };
 
   if (isLoading) {
     return <div className="flex justify-center items-center min-h-[300px]"><Loader size="large" variant="colorful" /></div>;
@@ -53,6 +79,17 @@ const BattleContainer = () => {
           />
         </div>
       </main>
+
+      {/* Get Ready Modal */}
+      {!isSpectator && (
+        <GetReadyModal
+          open={showReadyModal}
+          onOpenChange={setShowReadyModal}
+          battleId={battleId || ''}
+          participantCount={participants.length}
+          onBothPlayersReady={handleBothPlayersReady}
+        />
+      )}
     </div>
   );
 };

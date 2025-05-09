@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useBattleContext } from '@/context/BattleContext';
 import BattleTimerDisplay from './BattleTimerDisplay';
@@ -20,9 +20,6 @@ const BattleArenaContainer: React.FC<BattleArenaContainerProps> = ({
   setShowChat, 
   showChat 
 }) => {
-  const [showStats, setShowStats] = useState(false);
-  const [showReplay, setShowReplay] = useState(false);
-  
   const {
     participants,
     spectatorCount,
@@ -47,33 +44,6 @@ const BattleArenaContainer: React.FC<BattleArenaContainerProps> = ({
           participants={participants}
           onRematch={handleRematch}
         />
-        
-        {/* Feature tabs for statistics and replay */}
-        <div className="flex flex-wrap gap-3 justify-center mt-4">
-          <Button 
-            variant={showStats ? "default" : "outline"}
-            className="gap-2"
-            onClick={() => {
-              setShowStats(true);
-              setShowReplay(false);
-            }}
-          >
-            <span className="h-4 w-4" />
-            Battle Statistics
-          </Button>
-          
-          <Button 
-            variant={showReplay ? "default" : "outline"}
-            className="gap-2"
-            onClick={() => {
-              setShowReplay(true);
-              setShowStats(false);
-            }}
-          >
-            <span className="h-4 w-4" />
-            Battle Replay
-          </Button>
-        </div>
         
         <BattleVotingPanel
           isSpectator={isSpectator}
@@ -131,6 +101,3 @@ const BattleArenaContainer: React.FC<BattleArenaContainerProps> = ({
 };
 
 export default BattleArenaContainer;
-
-// Import Button component for TypeScript support
-import { Button } from "@/components/ui/button";
