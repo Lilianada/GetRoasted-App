@@ -1,19 +1,18 @@
 
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React from 'react';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { ArrowLeft, ArrowRight } from "lucide-react";
-import BattleCodeDisplay from "@/components/battle/BattleCodeDisplay";
-import BattleParticipantsDisplay from "@/components/battle/BattleParticipantsDisplay";
-import BattleReadyConfirmation from "@/components/battle/BattleReadyConfirmation";
+import { Copy, Share2, Flame } from "lucide-react";
+import BattleCodeDisplay from './BattleCodeDisplay';
+import BattleParticipantsDisplay from './BattleParticipantsDisplay';
+import BattleReadyConfirmation from './BattleReadyConfirmation';
 
 interface BattleWaitingCardProps {
   battleData: any;
   participants: any[];
-  onInviteContacts: () => void;
-  onEnterBattleRoom: () => void;
-  onBothPlayersReady: () => void;
+  onInviteContacts?: () => void;
+  onEnterBattleRoom?: () => void;
+  onBothPlayersReady?: () => void;
 }
 
 const BattleWaitingCard = ({
@@ -23,67 +22,59 @@ const BattleWaitingCard = ({
   onEnterBattleRoom,
   onBothPlayersReady
 }: BattleWaitingCardProps) => {
-  const navigate = useNavigate();
-
+  const canEnterBattle = battleData?.status === 'active' || participants.length >= 2;
+  
   return (
-    <Card className="max-w-3xl mx-auto">
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl">{battleData.title}</CardTitle>
-        <CardDescription>
-          {participants.length < 2 ? "Waiting for opponent to join..." : "Both players must type 'Start' to begin"}
-        </CardDescription>
+    <Card className="border-2 border-black shadow-neo bg-purple/10">
+      <CardHeader>
+        <CardTitle className="flex justify-between items-center">
+          <span>Waiting Room</span>
+          <span className="text-sm font-normal bg-secondary/50 px-2 py-1 rounded">
+            {battleData?.status === 'active' ? 'Battle Active' : 'Waiting for Players'}
+          </span>
+        </CardTitle>
       </CardHeader>
       
       <CardContent className="space-y-6">
-        {/* Battle code display component */}
-        <BattleCodeDisplay 
-          inviteCode={battleData.invite_code || '------'} 
-          onInviteContacts={onInviteContacts} 
-        />
-      
-        <div className="flex flex-col items-center justify-center space-y-8">
-          {/* Battle Timer Info */}
-          <div className="w-full flex justify-center items-center space-x-2 bg-secondary/20 px-4 py-2 rounded-lg">
-            <div className="w-5 h-5 text-flame-500">⏱️</div>
-            <span>Time per turn: {battleData.time_per_turn / 60} minutes</span>
+        {/* Battle Info */}
+        <div>
+          <h3 className="text-lg font-semibold mb-1">{battleData?.title}</h3>
+          <div className="flex gap-2 text-sm text-muted-foreground">
+            <span>{battleData?.round_count} rounds</span>
+            <span>•</span>
+            <span>{Math.floor(battleData?.time_per_turn / 60)}m {battleData?.time_per_turn % 60}s per turn</span>
           </div>
-          
-          {/* Battle participants display */}
-          <BattleParticipantsDisplay 
-            participants={participants}
-            maxParticipants={2}
-          />
-          
-          {/* Ready confirmation for starting the battle */}
-          {participants.length > 0 && (
-            <BattleReadyConfirmation 
-              battleId={battleData.id || ''}
-              onBothPlayersReady={onBothPlayersReady}
-              participantCount={participants.length}
-            />
-          )}
         </div>
+        
+        {/* Battle Code */}
+        <BattleCodeDisplay 
+          inviteCode={battleData?.invite_code || ''} 
+          onInviteContacts={onInviteContacts || (() => {})}
+        />
+        
+        {/* Participants */}
+        <div>
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Participants</h3>
+          <BattleParticipantsDisplay participants={participants} />
+        </div>
+        
+        {/* Ready Confirmation */}
+        <BattleReadyConfirmation 
+          battleId={battleData?.id} 
+          participantCount={participants.length}
+          onBothPlayersReady={onBothPlayersReady}
+        />
       </CardContent>
       
-      <CardFooter className="flex justify-between border-t border-night-800 pt-6">
+      <CardFooter>
         <Button 
-          variant="ghost" 
-          onClick={() => navigate('/battles')}
-          className="gap-2"
+          onClick={onEnterBattleRoom} 
+          className="w-full bg-flame-500 hover:bg-flame-600 text-white gap-2"
+          disabled={!canEnterBattle}
         >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Lobby
+          <Flame className="h-4 w-4" />
+          {battleData?.status === 'active' ? 'Enter Battle Room' : 'Waiting for Opponent'}
         </Button>
-        
-        {participants.length >= 1 && (
-          <Button
-            className="bg-flame-500 hover:bg-flame-600 text-white gap-2"
-            onClick={onEnterBattleRoom}
-          >
-            Enter Battle Room
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        )}
       </CardFooter>
     </Card>
   );

@@ -8,7 +8,7 @@ import JoinWithCodeForm from "./JoinWithCodeForm";
 const BattleLobbyOptions = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Card className="bg-secondary border-2 border-black p-6">
+      <Card className="border-2 border-black p-6 bg-purple/10">
         <CardContent className="flex flex-col items-center justify-center gap-6 h-full p-0">
           <div className="bg-flame-500 rounded-full p-4">
             <Flame className="h-10 w-10 text-white" />
@@ -30,7 +30,7 @@ const BattleLobbyOptions = () => {
         </CardContent>
       </Card>
       
-      <Card className="bg-secondary border-2 border-black p-6">
+      <Card className="border-2 border-black p-6 bg-purple/10">
         <CardContent className="flex flex-col items-center justify-center gap-6 h-full p-0">
           <div className="bg-purple rounded-full p-4">
             <ArrowRight className="h-10 w-10 text-white" />

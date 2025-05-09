@@ -76,6 +76,7 @@ export function BattleCreationForm({ setBattleId, setInviteCode, onSuccess }: Ba
           status: "waiting",
           created_by: user.id,
           invite_code: inviteCode,
+          player_ready_status: {},
         })
         .select()
         .single();
