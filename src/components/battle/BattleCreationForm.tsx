@@ -1,248 +1,150 @@
 
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuthContext } from "@/context/AuthContext";
-import { toast } from "@/components/ui/sonner";
-
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Switch } from "@/components/ui/switch";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ArrowRight, LockOpen } from "lucide-react";
 import { BattleRoundsSelection } from "./BattleRoundsSelection";
 import { BattleTimeSelection } from "./BattleTimeSelection";
-
-// Schema definition for form validation
-const battleFormSchema = z.object({
-  title: z.string().min(3, "Title must be at least 3 characters").max(50, "Title cannot exceed 50 characters"),
-  type: z.enum(["public", "private"]),
-  roundCount: z.number().int().min(1).max(5),
-  timePerTurn: z.number().int().min(30).max(300),
-  allowSpectators: z.boolean().default(true),
-});
-
-type BattleFormValues = z.infer<typeof battleFormSchema>;
+import { BattleSettings } from "./BattleSettings";
+import { useNewBattleForm } from "@/hooks/useNewBattleForm";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useAuthContext } from "@/context/AuthContext";
 
 interface BattleCreationFormProps {
-  setBattleId?: (id: string) => void;
-  setInviteCode?: (code: string) => void;
-  onSuccess?: () => void;
+  setBattleId?: (id: string | null) => void;
+  setInviteCode?: (code: string | null) => void;
 }
 
-export function BattleCreationForm({ setBattleId, setInviteCode, onSuccess }: BattleCreationFormProps) {
+export const BattleCreationForm = ({ 
+  setBattleId,
+  setInviteCode
+}: BattleCreationFormProps) => {
+  const {
+    isCreating,
+    title, setTitle,
+    battleType, setBattleType,
+    roundCount, setRoundCount,
+    timePerTurn, setTimePerTurn,
+    allowSpectators, setAllowSpectators,
+    quickMatch, setQuickMatch,
+    inviteCode,
+    handleCreateBattle
+  } = useNewBattleForm();
+  
   const { user } = useAuthContext();
-  const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Default form values
-  const defaultValues: BattleFormValues = {
-    title: "",
-    type: "public",
-    roundCount: 3,
-    timePerTurn: 180, // 3 minutes in seconds
-    allowSpectators: true,
-  };
-  
-  const form = useForm<BattleFormValues>({
-    resolver: zodResolver(battleFormSchema),
-    defaultValues,
-  });
-  
-  const onSubmit = async (values: BattleFormValues) => {
-    if (!user) {
-      toast.error("You must be logged in to create a battle");
-      return;
-    }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    setIsSubmitting(true);
+    if (!user) return;
     
     try {
-      // Create invite code for the battle
-      const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const battleId = await handleCreateBattle(e);
       
-      // Save battle to database
-      const { data, error } = await supabase
-        .from("battles")
-        .insert({
-          title: values.title,
-          type: values.type,
-          round_count: values.roundCount,
-          time_per_turn: values.timePerTurn,
-          allow_spectators: values.allowSpectators,
-          status: "waiting",
-          created_by: user.id,
-          invite_code: inviteCode,
-          player_ready_status: {},
-        })
-        .select()
-        .single();
-        
-      if (error) throw error;
+      if (battleId && setBattleId) {
+        setBattleId(battleId);
+      }
       
-      // Save user as first participant
-      await supabase
-        .from("battle_participants")
-        .insert({
-          battle_id: data.id,
-          user_id: user.id,
-        });
-        
-      toast.success("Battle created successfully!");
-      
-      if (setBattleId) setBattleId(data.id);
-      if (setInviteCode) setInviteCode(inviteCode);
-      
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        // Navigate to the battle waiting room
-        navigate(`/battles/waiting/${data.id}`);
+      if (inviteCode && setInviteCode) {
+        setInviteCode(inviteCode);
       }
     } catch (error) {
-      console.error("Error creating battle:", error);
-      toast.error("Failed to create battle. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+      console.error('Error creating battle:', error);
     }
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 bg-purple/10 p-6 border-2 border-black shadow-neo rounded-none">
-        {/* Battle Title */}
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Battle Title</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Enter a title for your battle"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Choose a catchy title for your roast battle
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        {/* Battle Type */}
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel>Battle Type</FormLabel>
-              <FormControl>
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="flex flex-col space-y-1"
-                >
-                  <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="public" id="public" />
-                    </FormControl>
-                    <FormLabel className="font-normal" htmlFor="public">
-                      Public - Anyone can join or spectate
-                    </FormLabel>
-                  </FormItem>
-                  <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="private" id="private" />
-                    </FormControl>
-                    <FormLabel className="font-normal" htmlFor="private">
-                      Private - Invite-only (requires code)
-                    </FormLabel>
-                  </FormItem>
-                </RadioGroup>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        {/* Round Count Selection */}
-        <FormField
-          control={form.control}
-          name="roundCount"
-          render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel>Number of Rounds</FormLabel>
-              <FormControl>
-                <BattleRoundsSelection
-                  roundCount={String(field.value)}
-                  setRoundCount={(value) => field.onChange(parseInt(value))}
-                />
-              </FormControl>
-              <FormDescription>
-                Select how many rounds the battle should have
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        {/* Time Per Turn Selection */}
-        <FormField
-          control={form.control}
-          name="timePerTurn"
-          render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel>Time Per Turn</FormLabel>
-              <FormControl>
-                <BattleTimeSelection
-                  timePerTurn={String(field.value)}
-                  setTimePerTurn={(value) => field.onChange(parseInt(value))}
-                />
-              </FormControl>
-              <FormDescription>
-                Set the time limit for each turn
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        {/* Allow Spectators */}
-        <FormField
-          control={form.control}
-          name="allowSpectators"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">Allow Spectators</FormLabel>
-                <FormDescription>
-                  Let others watch your battle and vote on rounds
-                </FormDescription>
+    <Card className="bg-secondary border-2 border-black p-6">
+      <form className="space-y-6" onSubmit={handleSubmit}>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Battle Title</Label>
+            <Input 
+              id="title" 
+              placeholder="Enter a catchy title..."
+              className="border-night-700 focus-visible:ring-flame-500"
+              value={title}
+              onChange={(e) => setTitle(e.target.value.slice(0, 24))}
+              maxLength={24}
+              required
+            />
+            <p className="text-xs text-muted-foreground text-right">
+              {title.length}/24 characters
+            </p>
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Battle Type</Label>
+            <RadioGroup 
+              defaultValue="public" 
+              value={battleType}
+              onValueChange={(value) => setBattleType(value as 'public' | 'private')}
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="public" id="public" className="text-flame-500" />
+                <Label htmlFor="public" className="flex items-center gap-2 cursor-pointer">
+                  <LockOpen className="h-4 w-4 text-flame-500" />
+                  Public
+                  <span className="text-xs text-muted-foreground">
+                    (Anyone can join or watch)
+                  </span>
+                </Label>
               </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  className="data-[state=checked]:bg-flame-500"
-                />
-              </FormControl>
-            </FormItem>
-          )}
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="private" id="private" className="text-flame-500" />
+                <Label htmlFor="private" className="flex items-center gap-2 cursor-pointer">
+                  Private
+                  <span className="text-xs text-muted-foreground">
+                    (Invite only)
+                  </span>
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+          
+          <BattleRoundsSelection roundCount={roundCount} setRoundCount={setRoundCount} />
+          <BattleTimeSelection timePerTurn={timePerTurn} setTimePerTurn={setTimePerTurn} />
+        </div>
+        
+        <BattleSettings 
+          allowSpectators={allowSpectators}
+          setAllowSpectators={setAllowSpectators}
+          quickMatch={quickMatch}
+          setQuickMatch={setQuickMatch}
         />
         
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-flame-500 hover:bg-flame-600 text-white"
-        >
-          {isSubmitting ? "Creating..." : "Create Battle"}
-        </Button>
+        <div className="pt-4 flex justify-end gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  type="button"
+                  className="gap-2"
+                  disabled
+                >
+                  Quick Match
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Coming soon!</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <Button 
+            type="submit"
+            className="gap-2 bg-yellow hover:opacity-90"
+            disabled={isCreating}
+          >
+            {isCreating ? "Creating..." : "Create Battle"}
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
       </form>
-    </Form>
+    </Card>
   );
-}
+};

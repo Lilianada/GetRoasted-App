@@ -1,10 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/context/AuthContext";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 interface BattleReadyConfirmationProps {
   battleId: string;
@@ -130,7 +129,7 @@ const BattleReadyConfirmation = ({
   // If participant count is less than 2, show waiting message
   if (participantCount < 2) {
     return (
-      <div className="bg-purple/10 p-4 rounded text-center">
+      <div className="bg-secondary/20 p-4 rounded text-center">
         <p className="text-muted-foreground">Waiting for opponent to join...</p>
         <p className="text-sm text-muted-foreground mt-2">Share your battle code with them</p>
       </div>
@@ -140,7 +139,7 @@ const BattleReadyConfirmation = ({
   // If the player is already ready, show status
   if (isReady) {
     return (
-      <div className="bg-purple/10 p-4 rounded text-center">
+      <div className="bg-secondary/20 p-4 rounded text-center">
         <div className="flex items-center justify-center gap-2 mb-2">
           <div className="w-3 h-3 bg-green-500 rounded-full"></div>
           <p className="font-medium">You're ready!</p>
@@ -157,7 +156,7 @@ const BattleReadyConfirmation = ({
   
   // Otherwise, show the confirmation form
   return (
-    <div className="bg-purple/10 p-4 rounded">
+    <div className="bg-secondary/20 p-4 rounded">
       <div className="text-center mb-3">
         <p className="font-medium">Both players must confirm to start</p>
         {otherPlayerReady && (
