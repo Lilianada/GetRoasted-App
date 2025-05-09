@@ -19,7 +19,10 @@ export function useBattleWaitingRoom(battleId: string | undefined) {
   
   // Fetch initial battle data and set up subscriptions
   useEffect(() => {
-    if (!battleId) return;
+    if (!battleId) {
+      setLoading(false);
+      return;
+    }
     
     const fetchBattleData = async () => {
       try {
@@ -30,7 +33,12 @@ export function useBattleWaitingRoom(battleId: string | undefined) {
           .eq('id', battleId)
           .single();
           
-        if (battleError) throw battleError;
+        if (battleError) {
+          console.error('Error fetching battle data:', battleError);
+          toast.error("Failed to load battle information");
+          setLoading(false);
+          return;
+        }
         
         setBattleData(battle);
         
@@ -39,24 +47,32 @@ export function useBattleWaitingRoom(battleId: string | undefined) {
           setBattleState('active');
         }
         
-        // Fetch initial participants
-        const { data: participantsData, error: participantsError } = await supabase
-          .from('battle_participants')
-          .select('*, profiles:user_id(*)')
-          .eq('battle_id', battleId);
-          
-        if (participantsError) throw participantsError;
-        
-        setParticipants(participantsData);
-
-        // If there are already 2 participants, show the ready modal
-        if (participantsData && participantsData.length >= 2) {
-          setShowGetReadyModal(true);
+        try {
+          // Fetch initial participants
+          const { data: participantsData, error: participantsError } = await supabase
+            .from('battle_participants')
+            .select('*, profiles:user_id(*)')
+            .eq('battle_id', battleId);
+            
+          if (participantsError) {
+            console.error('Error fetching participants:', participantsError);
+            // Continue execution even if participants fetch fails
+          } else {
+            setParticipants(participantsData || []);
+            
+            // If there are already 2 participants, show the ready modal
+            if (participantsData && participantsData.length >= 2) {
+              setShowGetReadyModal(true);
+            }
+          }
+        } catch (err) {
+          console.error('Error in participants fetch:', err);
+          // Continue execution even if participants fetch fails
         }
         
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching battle data:', error);
+        console.error('Error in battle data fetch:', error);
         toast.error("Failed to load battle information");
         setLoading(false);
       }
@@ -70,23 +86,36 @@ export function useBattleWaitingRoom(battleId: string | undefined) {
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'battle_participants', filter: `battle_id=eq.${battleId}` }, 
         async () => {
-          // Refresh participants list
-          const { data: newParticipantsData } = await supabase
-            .from('battle_participants')
-            .select('*, profiles:user_id(*)')
-            .eq('battle_id', battleId);
-            
-          if (newParticipantsData) {
-            setParticipants(newParticipantsData);
-            
-            // If a second participant has joined, show the ready modal
-            if (newParticipantsData.length >= 2 && !showGetReadyModal) {
-              setShowGetReadyModal(true);
+          try {
+            // Refresh participants list
+            const { data: newParticipantsData, error: participantsError } = await supabase
+              .from('battle_participants')
+              .select('*, profiles:user_id(*)')
+              .eq('battle_id', battleId);
+              
+            if (participantsError) {
+              console.error('Error refreshing participants:', participantsError);
+              return;
             }
+            
+            if (newParticipantsData) {
+              setParticipants(newParticipantsData);
+              
+              // If a second participant has joined, show the ready modal
+              if (newParticipantsData.length >= 2 && !showGetReadyModal) {
+                setShowGetReadyModal(true);
+              }
+            }
+          } catch (err) {
+            console.error('Error in participants refresh:', err);
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status !== 'SUBSCRIBED') {
+          console.error('Failed to subscribe to participants channel:', status);
+        }
+      });
       
     // Listen for battle status changes
     const battleChannel = supabase
@@ -94,21 +123,30 @@ export function useBattleWaitingRoom(battleId: string | undefined) {
       .on('postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'battles', filter: `id=eq.${battleId}` },
         (payload) => {
-          const updatedBattle = payload.new as any;
-          setBattleData(updatedBattle);
-          
-          if (updatedBattle.status === 'active') {
-            setBattleState('active');
-            // Don't navigate immediately - let the countdown handle it
-            if (!showGetReadyModal) {
-              setShowGetReadyModal(true);
+          try {
+            const updatedBattle = payload.new as any;
+            setBattleData(updatedBattle);
+            
+            if (updatedBattle.status === 'active') {
+              setBattleState('active');
+              // Don't navigate immediately - let the countdown handle it
+              if (!showGetReadyModal) {
+                setShowGetReadyModal(true);
+              }
             }
+          } catch (err) {
+            console.error('Error processing battle update:', err);
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status !== 'SUBSCRIBED') {
+          console.error('Failed to subscribe to battle status channel:', status);
+        }
+      });
       
     return () => {
+      // Clean up subscriptions
       supabase.removeChannel(participantsChannel);
       supabase.removeChannel(battleChannel);
     };
@@ -136,7 +174,7 @@ export function useBattleWaitingRoom(battleId: string | undefined) {
   
   const handleInviteContacts = () => {
     if (!battleData?.invite_code) return;
-    // Use utility function from battleSharingUtils
+    
     if (typeof window !== 'undefined') {
       if (navigator.share) {
         navigator.share({
@@ -173,13 +211,18 @@ export function useBattleWaitingRoom(battleId: string | undefined) {
     // Set ready flag to start countdown
     setBothPlayersReady(true);
     
-    // Update battle status to active
-    await supabase
-      .from('battles')
-      .update({ status: 'active' })
-      .eq('id', battleId);
-      
-    toast.success("Both players are ready! Battle is starting...");
+    try {
+      // Update battle status to active
+      await supabase
+        .from('battles')
+        .update({ status: 'active' })
+        .eq('id', battleId);
+        
+      toast.success("Both players are ready! Battle is starting...");
+    } catch (err) {
+      console.error('Error updating battle status:', err);
+      toast.error("Failed to start the battle");
+    }
   };
 
   return {

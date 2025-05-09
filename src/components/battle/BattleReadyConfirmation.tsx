@@ -29,26 +29,30 @@ const BattleReadyConfirmation = ({
     
     // First, get the current ready status
     const fetchReadyStatus = async () => {
-      const { data } = await supabase
-        .from('battles')
-        .select('player_ready_status')
-        .eq('id', battleId)
-        .single();
-        
-      if (data?.player_ready_status) {
-        const status = data.player_ready_status as Record<string, boolean>;
-        setReadyStatus(status);
-        
-        // Check if current user is ready
-        if (status[user.id]) {
-          setIsReady(true);
-        }
-        
-        // Check if any other player is ready
-        const otherReady = Object.entries(status)
-          .some(([userId, ready]) => userId !== user.id && ready);
+      try {
+        const { data } = await supabase
+          .from('battles')
+          .select('player_ready_status')
+          .eq('id', battleId)
+          .single();
           
-        setOtherPlayerReady(otherReady);
+        if (data?.player_ready_status) {
+          const status = data.player_ready_status as Record<string, boolean>;
+          setReadyStatus(status);
+          
+          // Check if current user is ready
+          if (status[user.id]) {
+            setIsReady(true);
+          }
+          
+          // Check if any other player is ready
+          const otherReady = Object.entries(status)
+            .some(([userId, ready]) => userId !== user.id && ready);
+            
+          setOtherPlayerReady(otherReady);
+        }
+      } catch (error) {
+        console.error('Error fetching ready status:', error);
       }
     };
     
@@ -142,11 +146,12 @@ const BattleReadyConfirmation = ({
           onChange={(e) => setConfirmText(e.target.value)}
           placeholder='Type "Start" to confirm'
           className="flex-1"
+          disabled={isReady}
         />
         
         <Button 
           onClick={handleConfirm}
-          disabled={confirmText.toLowerCase() !== 'start'}
+          disabled={confirmText.toLowerCase() !== 'start' || isReady}
         >
           Confirm
         </Button>

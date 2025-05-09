@@ -13,7 +13,7 @@ export function useNewBattleForm() {
 
   const [isCreating, setIsCreating] = useState(false);
   const [title, setTitle] = useState("");
-  const [battleType, setBattleType] = useState<'public' | 'private'>('private'); // Changed default to private
+  const [battleType, setBattleType] = useState<'public' | 'private'>('private');
   const [roundCount, setRoundCount] = useState("1"); // Set default to 1 round
   const [timePerTurn, setTimePerTurn] = useState("180"); // Default to 3 minutes
   const [allowSpectators, setAllowSpectators] = useState(true);
