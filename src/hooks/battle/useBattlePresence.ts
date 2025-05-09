@@ -1,5 +1,5 @@
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 
 interface UseBattlePresenceProps {
@@ -14,12 +14,15 @@ export function useBattlePresence({
   battleId, 
   userId 
 }: UseBattlePresenceProps) {
+  const channelRef = useRef<any>(null);
+  
   // Handle tracking user presence
   const trackPresence = useCallback(async () => {
     if (!battleId || !userId) return;
     
     // Create a channel for user presence
     const channel = supabase.channel(`presence-${battleId}`);
+    channelRef.current = channel;
     
     await channel
       .on('presence', { event: 'sync' }, () => {
@@ -35,7 +38,7 @@ export function useBattlePresence({
       .subscribe(async (status) => {
         if (status !== 'SUBSCRIBED') return;
         
-        // Track user presence
+        // Only track presence once after subscription
         await channel.track({
           user_id: userId,
           online_at: new Date().toISOString(),
@@ -52,7 +55,9 @@ export function useBattlePresence({
     
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      supabase.removeChannel(channel);
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+      }
       console.log('Component unmounting, user leaving battle');
     };
   }, [battleId, userId]);

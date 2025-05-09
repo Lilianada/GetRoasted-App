@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { BattleParticipant, BattleSpectator } from '@/types/battle';
@@ -76,7 +75,7 @@ export function useBattleParticipantsManager({
     }
   }, [battleId, onParticipantCountChange, onSpectatorCountChange, userId]);
 
-  // Join battle as participant or spectator
+  // Join battle as participant or spectator - with improved logging
   const joinBattle = useCallback(async () => {
     if (!battleId || !userId || hasJoined) return;
     
@@ -175,7 +174,7 @@ export function useBattleParticipantsManager({
       )
       .subscribe();
     
-    // Use less frequent polling as a fallback (reduced from 30s to 60s)
+    // Use less frequent polling as a fallback
     const intervalId = setInterval(fetchParticipantsData, 60000);
     
     // Cleanup function
@@ -186,7 +185,7 @@ export function useBattleParticipantsManager({
     };
   }, [battleId, fetchParticipantsData]);
 
-  // Only attempt to join once on initial render
+  // Only attempt to join once on initial render or when dependencies change
   useEffect(() => {
     if (battleId && userId && !hasJoined && !isLoading) {
       joinBattle();
