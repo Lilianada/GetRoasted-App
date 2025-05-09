@@ -1,101 +1,147 @@
 
-import { useState, useEffect } from 'react';
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { BattleParticipant } from '@/types/battle';
+import { toast } from '@/components/ui/sonner';
 
-/**
- * Hook to fetch and subscribe to battle participants
- */
-export function useBattleParticipants(battleId: string | undefined) {
-  const [participants, setParticipants] = useState<BattleParticipant[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  
-  useEffect(() => {
-    if (!battleId) {
-      setIsLoading(false);
-      return;
-    }
-
-    const fetchParticipants = async () => {
-      setIsLoading(true);
-      setError(null);
-      
-      try {
-        // Fetch battle participants with their profiles
-        const { data: participantsData, error: participantsError } = await supabase
-          .from('battle_participants')
-          .select(`
-            *,
-            profiles:user_id(username, avatar_url)
-          `)
-          .eq('battle_id', battleId);
-          
-        if (participantsError) throw new Error(participantsError.message);
-        
-        // Map participant data to include username and avatar
-        const mappedParticipants = participantsData.map((p: any) => ({
-          id: p.id,
-          user_id: p.user_id,
-          battle_id: p.battle_id,
-          joined_at: p.joined_at,
-          username: p.profiles?.username,
-          avatar_url: p.profiles?.avatar_url
-        }));
-        
-        setParticipants(mappedParticipants);
-      } catch (err: any) {
-        setError(err);
-        console.error('Error fetching battle participants:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchParticipants();
-    
-    // Subscribe to participants changes  
-    const participantsChannel = supabase
-      .channel(`participants-changes-${battleId}`)
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'battle_participants', filter: `battle_id=eq.${battleId}` }, 
-        () => {
-          // Re-fetch participants when there's a change
-          supabase
-            .from('battle_participants')
-            .select(`
-              *,
-              profiles:user_id(username, avatar_url)
-            `)
-            .eq('battle_id', battleId)
-            .then(({ data }) => {
-              if (data) {
-                const mapped = data.map((p: any) => ({
-                  id: p.id,
-                  user_id: p.user_id,
-                  battle_id: p.battle_id,
-                  joined_at: p.joined_at,
-                  username: p.profiles?.username,
-                  avatar_url: p.profiles?.avatar_url
-                }));
-                setParticipants(mapped);
-              }
-            });
-      })
-      .subscribe();
-    
-    return () => {
-      supabase.removeChannel(participantsChannel);
-    };
-  }, [battleId]);
-  
-  return { participants, isLoading, error };
+interface UseBattleParticipantsProps {
+  battleId: string;
+  userId?: string;
+  maxParticipants?: number;
+  onParticipantCountChange?: (count: number) => void;
 }
 
 /**
- * Adapter hook for backward compatibility with existing code
+ * Hook to manage battle participants
  */
-export function useBattleParticipantsAdapter(battleId: string | undefined) {
-  const { participants, isLoading, error } = useBattleParticipants(battleId);
-  return { data: participants, isLoading, isError: !!error, error };
+export function useBattleParticipants({
+  battleId,
+  userId,
+  maxParticipants = 2,
+  onParticipantCountChange
+}: UseBattleParticipantsProps) {
+  const [participants, setParticipants] = useState<BattleParticipant[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [hasJoined, setHasJoined] = useState(false);
+
+  // Fetch battle participants
+  const fetchParticipants = useCallback(async () => {
+    if (!battleId) return;
+    
+    try {
+      setIsLoading(true);
+      
+      // Get participants
+      const { data: participantsData, error: participantsError } = await supabase
+        .from('battle_participants')
+        .select('*, profiles:user_id(username, avatar_url)')
+        .eq('battle_id', battleId);
+        
+      if (participantsError) throw participantsError;
+      
+      // Update state with fetched data
+      const typedParticipants = participantsData as BattleParticipant[] || [];
+      setParticipants(typedParticipants);
+      
+      if (onParticipantCountChange) {
+        onParticipantCountChange(typedParticipants.length);
+      }
+      
+      // Check if current user is already a participant
+      if (userId && typedParticipants.some(p => p.user_id === userId)) {
+        setHasJoined(true);
+      }
+      
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Error fetching battle participants data:', err);
+      setError(err instanceof Error ? err : new Error('Unknown error occurred'));
+      setIsLoading(false);
+    }
+  }, [battleId, onParticipantCountChange, userId]);
+
+  // Join battle as participant
+  const joinAsBattleParticipant = useCallback(async () => {
+    if (!battleId || !userId || hasJoined) return false;
+    
+    try {
+      // First check if user is already a participant
+      const { data: existingParticipant } = await supabase
+        .from('battle_participants')
+        .select('id')
+        .eq('battle_id', battleId)
+        .eq('user_id', userId)
+        .single();
+        
+      if (existingParticipant) {
+        // User is already a participant
+        console.log('User is already a participant');
+        setHasJoined(true);
+        return true;
+      }
+      
+      // Check current participant count
+      const { data: currentParticipants } = await supabase
+        .from('battle_participants')
+        .select('id')
+        .eq('battle_id', battleId);
+        
+      const participantCount = currentParticipants?.length || 0;
+      
+      // If there's room for another participant, join as participant
+      if (participantCount < maxParticipants) {
+        const { error: joinError } = await supabase
+          .from('battle_participants')
+          .insert({
+            battle_id: battleId,
+            user_id: userId
+          });
+          
+        if (joinError) throw joinError;
+        
+        // Show notification
+        toast.success("You've joined as a participant!");
+        setHasJoined(true);
+        return true;
+      }
+      
+      // No room for participant
+      return false;
+    } catch (err) {
+      console.error('Error joining as battle participant:', err);
+      return false;
+    }
+  }, [battleId, userId, maxParticipants, hasJoined]);
+
+  // Set up subscription to participant changes
+  useEffect(() => {
+    if (!battleId) return;
+    
+    fetchParticipants();
+    
+    // Set up realtime subscriptions
+    const participantsChannel = supabase
+      .channel(`battle-participants-${battleId}`)
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'battle_participants', filter: `battle_id=eq.${battleId}` }, 
+        () => fetchParticipants()
+      )
+      .subscribe();
+    
+    // Cleanup function
+    return () => {
+      supabase.removeChannel(participantsChannel);
+    };
+  }, [battleId, fetchParticipants]);
+
+  return {
+    participants,
+    isLoading,
+    error,
+    hasJoined,
+    fetchParticipants,
+    joinAsBattleParticipant,
+    setHasJoined
+  };
 }

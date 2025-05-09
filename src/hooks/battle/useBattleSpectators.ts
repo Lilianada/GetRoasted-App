@@ -1,47 +1,64 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
+import { BattleSpectator } from '@/types/battle';
+import { toast } from '@/components/ui/sonner';
+
+interface UseBattleSpectatorsProps {
+  battleId: string;
+  userId?: string;
+  onSpectatorCountChange?: (count: number) => void;
+}
 
 /**
  * Hook to manage battle spectators
  */
-export function useBattleSpectators(battleId: string | undefined) {
-  const [spectatorCount, setSpectatorCount] = useState(0);
+export function useBattleSpectators({
+  battleId,
+  userId,
+  onSpectatorCountChange
+}: UseBattleSpectatorsProps) {
+  const [spectators, setSpectators] = useState<BattleSpectator[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Fetch spectator count
-  const fetchSpectatorCount = useCallback(async () => {
-    if (!battleId) {
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
+  // Fetch battle spectators
+  const fetchSpectators = useCallback(async () => {
+    if (!battleId) return;
     
     try {
-      const { count, error: countError } = await supabase
+      setIsLoading(true);
+      
+      // Get spectators
+      const { data: spectatorsData, error: spectatorsError } = await supabase
         .from('battle_spectators')
-        .select('*', { count: 'exact', head: true })
+        .select('*')
         .eq('battle_id', battleId);
         
-      if (countError) throw new Error(countError.message);
+      if (spectatorsError) throw spectatorsError;
       
-      setSpectatorCount(count || 0);
-    } catch (err: any) {
-      setError(err);
-      console.error('Error fetching spectator count:', err);
-    } finally {
+      // Update state with fetched data
+      const typedSpectators = spectatorsData as BattleSpectator[] || [];
+      setSpectators(typedSpectators);
+      
+      if (onSpectatorCountChange) {
+        onSpectatorCountChange(typedSpectators.length);
+      }
+      
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Error fetching battle spectators data:', err);
+      setError(err instanceof Error ? err : new Error('Unknown error occurred'));
       setIsLoading(false);
     }
-  }, [battleId]);
+  }, [battleId, onSpectatorCountChange]);
 
-  // Join as spectator
-  const joinAsSpectator = useCallback(async (userId: string) => {
+  // Join battle as spectator
+  const joinAsSpectator = useCallback(async () => {
     if (!battleId || !userId) return false;
-
+    
     try {
+      // Check if already a spectator
       const { data: existingSpectator } = await supabase
         .from('battle_spectators')
         .select('id')
@@ -49,51 +66,53 @@ export function useBattleSpectators(battleId: string | undefined) {
         .eq('user_id', userId)
         .single();
         
-      if (!existingSpectator) {
-        const { error } = await supabase
-          .from('battle_spectators')
-          .insert({
-            battle_id: battleId,
-            user_id: userId
-          });
-          
-        if (error) throw error;
+      if (existingSpectator) {
+        return true; // Already a spectator
       }
       
-      await fetchSpectatorCount();
+      const { error: spectatorError } = await supabase
+        .from('battle_spectators')
+        .insert({
+          battle_id: battleId,
+          user_id: userId
+        });
+        
+      if (spectatorError) throw spectatorError;
+      
+      toast.info("You've joined as a spectator");
       return true;
     } catch (err) {
       console.error('Error joining as spectator:', err);
       return false;
     }
-  }, [battleId, fetchSpectatorCount]);
+  }, [battleId, userId]);
 
   // Set up subscription to spectator changes
   useEffect(() => {
     if (!battleId) return;
-
-    fetchSpectatorCount();
     
-    // Subscribe to spectator changes
+    fetchSpectators();
+    
+    // Set up realtime subscriptions
     const spectatorsChannel = supabase
-      .channel(`spectators-${battleId}`)
+      .channel(`battle-spectators-${battleId}`)
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'battle_spectators', filter: `battle_id=eq.${battleId}` }, 
-        () => {
-          fetchSpectatorCount();
-        })
+        () => fetchSpectators()
+      )
       .subscribe();
-      
+    
+    // Cleanup function
     return () => {
       supabase.removeChannel(spectatorsChannel);
     };
-  }, [battleId, fetchSpectatorCount]);
+  }, [battleId, fetchSpectators]);
 
-  return { 
-    spectatorCount, 
-    isLoading, 
-    error, 
-    joinAsSpectator,
-    fetchSpectatorCount
+  return {
+    spectators,
+    isLoading,
+    error,
+    fetchSpectators,
+    joinAsSpectator
   };
 }
