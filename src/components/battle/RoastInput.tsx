@@ -42,7 +42,7 @@ const RoastInput: React.FC<RoastInputProps> = ({
           onChange={(e) => setContent(e.target.value)}
           placeholder={isPlayerTurn ? "Type your roast..." : "Wait for your turn..."}
           className="resize-none min-h-[100px]"
-          disabled={!isPlayerTurn || disabled}
+          disabled={!isPlayerTurn && disabled} // Remove disabled when it's player's turn
         />
       </div>
       
@@ -51,7 +51,7 @@ const RoastInput: React.FC<RoastInputProps> = ({
           variant="outline"
           size="icon"
           onClick={toggleVoiceRecording}
-          disabled={!isPlayerTurn || disabled}
+          disabled={!isPlayerTurn && disabled} // Remove disabled when it's player's turn
           className="rounded-full"
         >
           {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
@@ -59,7 +59,7 @@ const RoastInput: React.FC<RoastInputProps> = ({
         
         <Button
           onClick={handleSendRoast}
-          disabled={!content.trim() || !isPlayerTurn || disabled}
+          disabled={!content.trim() || (!isPlayerTurn && disabled)} // Only disabled if no content or not player's turn
           className="flex items-center gap-2"
         >
           Send <Send className="h-4 w-4" />
