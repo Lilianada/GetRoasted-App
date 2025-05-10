@@ -34,7 +34,7 @@ const BattlePresenceManager = ({
 }: BattlePresenceManagerProps) => {
   const { user } = useAuthContext();
   
-  // Use the participants manager hook
+  // Use the participants manager hook - updated to match expected props
   const { 
     participants, 
     error: participantsError
@@ -43,7 +43,7 @@ const BattlePresenceManager = ({
     maxParticipants,
     onParticipantCountChange,
     onSpectatorCountChange,
-    userId: user?.id // Pass userId properly
+    currentUserId: user?.id // Use currentUserId instead of userId
   });
 
   // Use the battle state manager hook
