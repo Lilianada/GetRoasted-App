@@ -6,7 +6,7 @@ import { Send, Mic, MicOff } from "lucide-react";
 
 interface RoastInputProps {
   onSendRoast: (content: string, isVoice?: boolean) => Promise<void>;
-  isPlayerTurn: boolean;
+  isPlayerTurn: boolean; // We'll keep this prop for compatibility but won't use it for disabling
   disabled?: boolean;
 }
 
@@ -40,9 +40,9 @@ const RoastInput: React.FC<RoastInputProps> = ({
         <Textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder={isPlayerTurn ? "Type your roast..." : "Wait for your turn..."}
+          placeholder="Type your roast..."
           className="resize-none min-h-[100px]"
-          disabled={!isPlayerTurn && disabled} // Remove disabled when it's player's turn
+          disabled={disabled} // Only disabled if explicitly set from props
         />
       </div>
       
@@ -51,7 +51,7 @@ const RoastInput: React.FC<RoastInputProps> = ({
           variant="outline"
           size="icon"
           onClick={toggleVoiceRecording}
-          disabled={!isPlayerTurn && disabled} // Remove disabled when it's player's turn
+          disabled={disabled} // Only disabled if explicitly set from props
           className="rounded-full"
         >
           {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
@@ -59,7 +59,7 @@ const RoastInput: React.FC<RoastInputProps> = ({
         
         <Button
           onClick={handleSendRoast}
-          disabled={!content.trim() || (!isPlayerTurn && disabled)} // Only disabled if no content or not player's turn
+          disabled={!content.trim() || disabled} // Only disabled if no content or explicitly disabled
           className="flex items-center gap-2"
         >
           Send <Send className="h-4 w-4" />

@@ -85,7 +85,7 @@ const BattleArenaContainer: React.FC<BattleArenaContainerProps> = ({
         <RoastInput 
           onSendRoast={handleSendRoast}
           isPlayerTurn={isPlayerTurn()}
-          
+          disabled={isSpectator} // Only disable for spectators
         />
 
         <BattleControls 
