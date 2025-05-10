@@ -6,6 +6,7 @@ import { useAuthContext } from '@/context/AuthContext';
 
 interface UseBattleJoinProps {
   battleId?: string;
+  userId?: string; // Add userId property to the interface
   maxParticipants?: number;
   onParticipantCountChange?: (count: number) => void;
   onSpectatorCountChange?: (count: number) => void;
@@ -13,6 +14,7 @@ interface UseBattleJoinProps {
 
 export function useBattleJoin({
   battleId,
+  userId,
   maxParticipants = 2,
   onParticipantCountChange,
   onSpectatorCountChange
@@ -23,6 +25,9 @@ export function useBattleJoin({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [hasJoined, setHasJoined] = useState(false);
+  
+  // Use userId from props if provided, otherwise use from auth context
+  const effectiveUserId = userId || user?.id;
 
   // Fetch battle participants
   const fetchParticipants = useCallback(async () => {
@@ -71,7 +76,7 @@ export function useBattleJoin({
       }
       
       // Check if current user is already a participant
-      if (user && typedParticipants.some(p => p.user_id === user.id)) {
+      if (effectiveUserId && typedParticipants.some(p => p.user_id === effectiveUserId)) {
         setHasJoined(true);
       }
       
@@ -81,11 +86,11 @@ export function useBattleJoin({
       setError(err instanceof Error ? err : new Error('Unknown error fetching participants'));
       setIsLoading(false);
     }
-  }, [battleId, onParticipantCountChange, onSpectatorCountChange, user]);
+  }, [battleId, onParticipantCountChange, onSpectatorCountChange, effectiveUserId]);
 
   // Join battle function
   const joinBattle = useCallback(async (asSpectator: boolean = false) => {
-    if (!battleId || !user) {
+    if (!battleId || !effectiveUserId) {
       toast.error("You must be logged in to join a battle");
       return false;
     }
@@ -98,7 +103,7 @@ export function useBattleJoin({
         .from('battle_participants')
         .select('id')
         .eq('battle_id', battleId)
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveUserId)
         .single();
         
       if (existingParticipant) {
@@ -112,7 +117,7 @@ export function useBattleJoin({
         .from('battle_spectators')
         .select('id')
         .eq('battle_id', battleId)
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveUserId)
         .single();
         
       if (existingSpectator && asSpectator) {
@@ -125,7 +130,7 @@ export function useBattleJoin({
           .from('battle_spectators')
           .insert({
             battle_id: battleId,
-            user_id: user.id
+            user_id: effectiveUserId
           });
           
         if (joinSpectatorError) throw joinSpectatorError;
@@ -147,7 +152,7 @@ export function useBattleJoin({
             .from('battle_participants')
             .insert({
               battle_id: battleId,
-              user_id: user.id
+              user_id: effectiveUserId
             });
             
           if (joinError) throw joinError;
@@ -161,7 +166,7 @@ export function useBattleJoin({
             .from('battle_spectators')
             .insert({
               battle_id: battleId,
-              user_id: user.id
+              user_id: effectiveUserId
             });
             
           if (joinSpectatorError) throw joinSpectatorError;
@@ -175,7 +180,7 @@ export function useBattleJoin({
       toast.error("Failed to join the battle");
       return false;
     }
-  }, [battleId, user, maxParticipants, hasJoined]);
+  }, [battleId, effectiveUserId, maxParticipants, hasJoined]);
 
   // Set up subscription to participant changes
   useEffect(() => {
@@ -209,7 +214,7 @@ export function useBattleJoin({
       });
     
     // Auto-join as participant or spectator if not joined yet
-    if (user && !hasJoined) {
+    if (effectiveUserId && !hasJoined) {
       joinBattle(false).catch(err => {
         console.error('Failed to auto-join battle:', err);
       });
@@ -220,7 +225,7 @@ export function useBattleJoin({
       supabase.removeChannel(participantsChannel);
       supabase.removeChannel(spectatorsChannel);
     };
-  }, [battleId, fetchParticipants, hasJoined, joinBattle, user]);
+  }, [battleId, fetchParticipants, hasJoined, joinBattle, effectiveUserId]);
 
   return {
     participants,

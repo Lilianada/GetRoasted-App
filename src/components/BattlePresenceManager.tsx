@@ -38,13 +38,12 @@ const BattlePresenceManager = ({
   const { 
     participants, 
     error: participantsError
-    // Note: We no longer call joinBattle directly, it's handled internally by the hook
   } = useBattleParticipantsManager({
     battleId,
-    userId: user?.id,
     maxParticipants,
     onParticipantCountChange,
-    onSpectatorCountChange
+    onSpectatorCountChange,
+    userId: user?.id // Pass userId properly
   });
 
   // Use the battle state manager hook

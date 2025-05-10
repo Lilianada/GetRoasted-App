@@ -33,7 +33,9 @@ const BattleArenaContainer: React.FC<BattleArenaContainerProps> = ({
     userVote,
     handleNextRound,
     handleRematch,
-    handleVote
+    handleVote,
+    handleSendRoast,
+    isPlayerTurn
   } = useBattleContext();
 
   if (battleEnded && winner) {
@@ -80,7 +82,10 @@ const BattleArenaContainer: React.FC<BattleArenaContainerProps> = ({
       <CardContent className="p-4 space-y-4">
         <BattleTimerDisplay className="mb-4" />
         <BattleTurnIndicator />
-        <RoastInput />
+        <RoastInput 
+          onSendRoast={handleSendRoast}
+          isPlayerTurn={isPlayerTurn()}
+        />
 
         <BattleControls 
           isSpectator={isSpectator}
