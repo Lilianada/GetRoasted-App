@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Loader } from "@/components/ui/loader";
-import { Flame, Trash2, Users, Clock } from "lucide-react";
+import { Flame, Trash2, Users, Clock, ExternalLink } from "lucide-react";
 
 const UserBattlesList = () => {
   const navigate = useNavigate();
@@ -176,90 +177,126 @@ const UserBattlesList = () => {
   }
 
   return (
-    <Card className="bg-secondary border-2 border-black">
+    <Card className="bg-secondary border-2 border-black overflow-hidden">
       <CardContent className="p-0">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {battles.map((battle) => {
-              const participantsCount = battle.battle_participants?.length || 0;
-              
-              return (
-                <TableRow key={battle.id}>
-                  <TableCell className="font-medium">
-                    <Button 
-                      variant="link" 
-                      onClick={() => {
-                        if (battle.status === 'waiting') {
-                          navigate(`/battles/waiting/${battle.id}`);
-                        } else {
-                          navigate(`/battles/${battle.id}`);
-                        }
-                      }}
-                      className="p-0 h-auto font-medium text-left justify-start"
-                    >
-                      {battle.title}
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    {getBattleStatusDisplay(battle.status, participantsCount)}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {battle.created_at ? formatDistanceToNow(new Date(battle.created_at), { addSuffix: true }) : 'N/A'}
-                  </TableCell>
-                  <TableCell>
-                    <span className={`capitalize ${battle.type === 'private' ? 'text-purple-500' : 'text-green-500'}`}>
-                      {battle.type}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-secondary/80">
+                <TableHead className="text-black font-bold">Title</TableHead>
+                <TableHead className="text-black font-bold hidden md:table-cell">Status</TableHead>
+                <TableHead className="text-black font-bold hidden sm:table-cell">Created</TableHead>
+                <TableHead className="text-black font-bold hidden md:table-cell">Type</TableHead>
+                <TableHead className="text-black font-bold text-right">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {battles.map((battle) => {
+                const participantsCount = battle.battle_participants?.length || 0;
+                
+                return (
+                  <TableRow 
+                    key={battle.id} 
+                    className="hover:bg-purple/20 transition-colors border-b border-black/20 last:border-0"
+                  >
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
                         <Button 
-                          variant="ghost" 
-                          size="sm"
-                          className="text-red-500 hover:text-red-700 hover:bg-red-100"
-                          disabled={deletingId === battle.id}
+                          variant="link" 
+                          onClick={() => {
+                            if (battle.status === 'waiting') {
+                              navigate(`/battles/waiting/${battle.id}`);
+                            } else {
+                              navigate(`/battles/${battle.id}`);
+                            }
+                          }}
+                          className="p-0 h-auto font-medium text-left justify-start text-blue hover:text-blue/80"
                         >
-                          {deletingId === battle.id ? (
-                            <Loader size="small" />
-                          ) : (
-                            <Trash2 className="h-4 w-4" />
-                          )}
+                          {battle.title}
                         </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Battle</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete this battle? This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction 
-                            className="bg-red-500 hover:bg-red-600 text-white" 
-                            onClick={() => handleDeleteBattle(battle.id)}
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+                        <ExternalLink className="h-3 w-3 text-muted-foreground hidden sm:inline-block" />
+                      </div>
+                      <div className="block sm:hidden mt-1">
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                          battle.type === 'private' ? 'bg-purple/30 text-purple' : 'bg-green-500/30 text-green-600'
+                        }`}>
+                          {battle.type}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {getBattleStatusDisplay(battle.status, participantsCount)}
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell text-night-600">
+                      {battle.created_at ? formatDistanceToNow(new Date(battle.created_at), { addSuffix: true }) : 'N/A'}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        battle.type === 'private' ? 'bg-purple/30 text-purple' : 'bg-green-500/30 text-green-600'
+                      }`}>
+                        {battle.type}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="sm:hidden"
+                          onClick={() => {
+                            if (battle.status === 'waiting') {
+                              navigate(`/battles/waiting/${battle.id}`);
+                            } else {
+                              navigate(`/battles/${battle.id}`);
+                            }
+                          }}
+                        >
+                          <ExternalLink className="h-4 w-4 text-blue" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="text-red-500 hover:text-red-700 hover:bg-red-100"
+                              disabled={deletingId === battle.id}
+                            >
+                              {deletingId === battle.id ? (
+                                <Loader size="small" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Battle</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete this battle? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction 
+                                className="bg-red-500 hover:bg-red-600 text-white" 
+                                onClick={() => handleDeleteBattle(battle.id)}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                      <div className="block md:hidden text-xs text-night-600 mt-1">
+                        {getBattleStatusDisplay(battle.status, participantsCount)}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );
