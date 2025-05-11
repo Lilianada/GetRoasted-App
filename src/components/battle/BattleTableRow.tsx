@@ -36,7 +36,7 @@ const BattleTableRow = ({ battle, deletingId, onDeleteBattle }: BattleTableRowPr
           <Button 
             variant="link" 
             onClick={handleRowNavigation}
-            className="p-0 h-auto font-medium text-left justify-start text-blue hover:text-blue/80"
+            className="p-0 h-auto font-medium text-left justify-start text-night-900 hover:text-blue/80"
           >
             {battle.title}
           </Button>
@@ -44,7 +44,7 @@ const BattleTableRow = ({ battle, deletingId, onDeleteBattle }: BattleTableRowPr
         </div>
         <div className="block sm:hidden mt-1">
           <span className={`text-xs px-2 py-0.5 rounded-full ${
-            battle.type === 'private' ? 'bg-purple/30 text-purple' : 'bg-green-500/30 text-green-600'
+            battle.type === 'private' ? 'bg-flame-500/30 text-flame-500' : 'bg-green-500/30 text-green-800'
           }`}>
             {battle.type}
           </span>

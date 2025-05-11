@@ -17,8 +17,8 @@ const BattleLobby = () => {
         
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "join" | "my-battles")}>
           <TabsList className="mb-6">
-            <TabsTrigger value="join">Join Battle</TabsTrigger>
-            <TabsTrigger value="my-battles">My Battles</TabsTrigger>
+            <TabsTrigger value="join" className='text-night-500'>Join Battle</TabsTrigger>
+            <TabsTrigger value="my-battles" className='text-night-500'>My Battles</TabsTrigger>
           </TabsList>
           
           <TabsContent value="join">

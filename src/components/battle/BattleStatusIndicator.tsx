@@ -11,21 +11,21 @@ const BattleStatusIndicator = ({ status, participantsCount }: BattleStatusIndica
   switch (status) {
     case 'waiting':
       return (
-        <div className="flex items-center gap-2 text-yellow-500">
+        <div className="flex items-center gap-2 text-yellow-600">
           <Clock className="h-4 w-4" />
           <span>Waiting {participantsCount < 2 ? 'for opponent' : 'to start'}</span>
         </div>
       );
     case 'active':
       return (
-        <div className="flex items-center gap-2 text-green-500">
+        <div className="flex items-center gap-2 text-green-600">
           <Flame className="h-4 w-4" />
           <span>In Progress</span>
         </div>
       );
     case 'completed':
       return (
-        <div className="flex items-center gap-2 text-blue-500">
+        <div className="flex items-center gap-2 text-blue-600">
           <Users className="h-4 w-4" />
           <span>Completed</span>
         </div>
