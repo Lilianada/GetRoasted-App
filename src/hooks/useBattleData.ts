@@ -11,3 +11,4 @@ export * from './battle/useBattleRounds';
 export * from './battle/useBattleScoring';
 export * from './battle/useBattleData';
 export * from './battle/useBattleJoin';
+export * from './battle/useUserBattles';
