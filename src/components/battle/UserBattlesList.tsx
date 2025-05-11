@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
@@ -60,6 +59,38 @@ const UserBattlesList = () => {
     try {
       setDeletingId(battleId);
       
+      // First, delete battle votes associated with the battle
+      const { error: votesError } = await supabase
+        .from('battle_votes')
+        .delete()
+        .eq('battle_id', battleId);
+        
+      if (votesError) throw votesError;
+      
+      // Delete battle messages associated with the battle
+      const { error: messagesError } = await supabase
+        .from('battle_messages')
+        .delete()
+        .eq('battle_id', battleId);
+        
+      if (messagesError) throw messagesError;
+      
+      // Delete roasts associated with the battle
+      const { error: roastsError } = await supabase
+        .from('roasts')
+        .delete()
+        .eq('battle_id', battleId);
+        
+      if (roastsError) throw roastsError;
+      
+      // Delete battle spectators associated with the battle
+      const { error: spectatorsError } = await supabase
+        .from('battle_spectators')
+        .delete()
+        .eq('battle_id', battleId);
+        
+      if (spectatorsError) throw spectatorsError;
+      
       // Delete battle participants first (due to foreign key constraints)
       const { error: participantsError } = await supabase
         .from('battle_participants')
@@ -76,11 +107,14 @@ const UserBattlesList = () => {
         
       if (error) throw error;
       
-      // No need to manually update state, realtime subscription will handle it
+      // Update local state to immediately reflect the change
+      setBattles(prevBattles => prevBattles.filter(battle => battle.id !== battleId));
+      
       toast.success("Battle deleted successfully");
       
     } catch (error: any) {
       toast.error(`Failed to delete battle: ${error.message}`);
+      console.error("Error deleting battle:", error);
     } finally {
       setDeletingId(null);
     }
