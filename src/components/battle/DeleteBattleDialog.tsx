@@ -21,6 +21,12 @@ interface DeleteBattleDialogProps {
 }
 
 const DeleteBattleDialog = ({ isDeleting, onDelete }: DeleteBattleDialogProps) => {
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onDelete();
+  };
+
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -48,10 +54,7 @@ const DeleteBattleDialog = ({ isDeleting, onDelete }: DeleteBattleDialogProps) =
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction 
             className="bg-red-500 hover:bg-red-600 text-white" 
-            onClick={(e) => {
-              e.preventDefault();
-              onDelete();
-            }}
+            onClick={handleDelete}
           >
             Delete
           </AlertDialogAction>

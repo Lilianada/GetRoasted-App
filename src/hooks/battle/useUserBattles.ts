@@ -8,26 +8,29 @@ export const useUserBattles = (userId: string | undefined) => {
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const fetchUserBattles = async () => {
+    if (!userId) return;
+    
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('battles')
+        .select('*, battle_participants(user_id)')
+        .eq('created_by', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setBattles(data || []);
+      console.log("Fetched battles:", data);
+    } catch (error) {
+      console.error("Error fetching battles:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!userId) return;
-
-    const fetchUserBattles = async () => {
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('battles')
-          .select('*, battle_participants(user_id)')
-          .eq('created_by', userId)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        setBattles(data || []);
-      } catch (error) {
-        console.error("Error fetching battles:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
 
     fetchUserBattles();
 
@@ -123,8 +126,23 @@ export const useUserBattles = (userId: string | undefined) => {
       }
       console.log("Battle deleted successfully");
       
+      // Verify the battle is deleted
+      const { data: checkData } = await supabase
+        .from('battles')
+        .select('id')
+        .eq('id', battleId)
+        .single();
+        
+      if (checkData) {
+        console.error("Battle still exists after deletion attempt:", checkData);
+        throw new Error("Failed to delete battle from database");
+      }
+      
       // Update local state to immediately reflect the change
       setBattles(prevBattles => prevBattles.filter(battle => battle.id !== battleId));
+      
+      // Refresh the battles list to ensure we have the latest data
+      fetchUserBattles();
       
       toast.success("Battle deleted successfully");
       
