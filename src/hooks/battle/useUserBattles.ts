@@ -49,13 +49,19 @@ export const useUserBattles = (userId: string | undefined) => {
     try {
       setDeletingId(battleId);
       
+      console.log(`Deleting battle with ID: ${battleId}`);
+      
       // First, delete battle votes associated with the battle
       const { error: votesError } = await supabase
         .from('battle_votes')
         .delete()
         .eq('battle_id', battleId);
         
-      if (votesError) throw votesError;
+      if (votesError) {
+        console.error("Error deleting battle votes:", votesError);
+        throw votesError;
+      }
+      console.log("Battle votes deleted successfully");
       
       // Delete battle messages associated with the battle
       const { error: messagesError } = await supabase
@@ -63,7 +69,11 @@ export const useUserBattles = (userId: string | undefined) => {
         .delete()
         .eq('battle_id', battleId);
         
-      if (messagesError) throw messagesError;
+      if (messagesError) {
+        console.error("Error deleting battle messages:", messagesError);
+        throw messagesError;
+      }
+      console.log("Battle messages deleted successfully");
       
       // Delete roasts associated with the battle
       const { error: roastsError } = await supabase
@@ -71,7 +81,11 @@ export const useUserBattles = (userId: string | undefined) => {
         .delete()
         .eq('battle_id', battleId);
         
-      if (roastsError) throw roastsError;
+      if (roastsError) {
+        console.error("Error deleting roasts:", roastsError);
+        throw roastsError;
+      }
+      console.log("Roasts deleted successfully");
       
       // Delete battle spectators associated with the battle
       const { error: spectatorsError } = await supabase
@@ -79,7 +93,11 @@ export const useUserBattles = (userId: string | undefined) => {
         .delete()
         .eq('battle_id', battleId);
         
-      if (spectatorsError) throw spectatorsError;
+      if (spectatorsError) {
+        console.error("Error deleting battle spectators:", spectatorsError);
+        throw spectatorsError;
+      }
+      console.log("Battle spectators deleted successfully");
       
       // Delete battle participants first (due to foreign key constraints)
       const { error: participantsError } = await supabase
@@ -87,7 +105,11 @@ export const useUserBattles = (userId: string | undefined) => {
         .delete()
         .eq('battle_id', battleId);
         
-      if (participantsError) throw participantsError;
+      if (participantsError) {
+        console.error("Error deleting battle participants:", participantsError);
+        throw participantsError;
+      }
+      console.log("Battle participants deleted successfully");
       
       // Then delete the battle
       const { error } = await supabase
@@ -95,7 +117,11 @@ export const useUserBattles = (userId: string | undefined) => {
         .delete()
         .eq('id', battleId);
         
-      if (error) throw error;
+      if (error) {
+        console.error("Error deleting battle:", error);
+        throw error;
+      }
+      console.log("Battle deleted successfully");
       
       // Update local state to immediately reflect the change
       setBattles(prevBattles => prevBattles.filter(battle => battle.id !== battleId));
@@ -103,8 +129,8 @@ export const useUserBattles = (userId: string | undefined) => {
       toast.success("Battle deleted successfully");
       
     } catch (error: any) {
+      console.error("Error in handleDeleteBattle:", error);
       toast.error(`Failed to delete battle: ${error.message}`);
-      console.error("Error deleting battle:", error);
     } finally {
       setDeletingId(null);
     }

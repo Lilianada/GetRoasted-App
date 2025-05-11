@@ -48,7 +48,10 @@ const DeleteBattleDialog = ({ isDeleting, onDelete }: DeleteBattleDialogProps) =
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction 
             className="bg-red-500 hover:bg-red-600 text-white" 
-            onClick={onDelete}
+            onClick={(e) => {
+              e.preventDefault();
+              onDelete();
+            }}
           >
             Delete
           </AlertDialogAction>
