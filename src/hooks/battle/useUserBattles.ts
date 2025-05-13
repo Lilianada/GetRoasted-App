@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/use-toast";
 
 export const useUserBattles = (userId: string | undefined) => {
   const [battles, setBattles] = useState<any[]>([]);
@@ -49,106 +49,103 @@ export const useUserBattles = (userId: string | undefined) => {
   }, [userId]);
 
   const handleDeleteBattle = async (battleId: string) => {
+    if (!battleId) {
+      console.error("No battle ID provided for deletion");
+      toast({
+        title: "Error",
+        description: "Could not delete battle: Invalid battle ID",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
       setDeletingId(battleId);
-      
       console.log(`Deleting battle with ID: ${battleId}`);
       
-      // First, delete battle votes associated with the battle
+      // Step 1: Delete votes
       const { error: votesError } = await supabase
         .from('battle_votes')
         .delete()
         .eq('battle_id', battleId);
-        
+      
       if (votesError) {
         console.error("Error deleting battle votes:", votesError);
-        throw votesError;
+        throw new Error(`Failed to delete battle votes: ${votesError.message}`);
       }
-      console.log("Battle votes deleted successfully");
       
-      // Delete battle messages associated with the battle
+      // Step 2: Delete messages
       const { error: messagesError } = await supabase
         .from('battle_messages')
         .delete()
         .eq('battle_id', battleId);
-        
+      
       if (messagesError) {
         console.error("Error deleting battle messages:", messagesError);
-        throw messagesError;
+        throw new Error(`Failed to delete battle messages: ${messagesError.message}`);
       }
-      console.log("Battle messages deleted successfully");
       
-      // Delete roasts associated with the battle
+      // Step 3: Delete roasts
       const { error: roastsError } = await supabase
         .from('roasts')
         .delete()
         .eq('battle_id', battleId);
-        
+      
       if (roastsError) {
         console.error("Error deleting roasts:", roastsError);
-        throw roastsError;
+        throw new Error(`Failed to delete roasts: ${roastsError.message}`);
       }
-      console.log("Roasts deleted successfully");
       
-      // Delete battle spectators associated with the battle
+      // Step 4: Delete spectators
       const { error: spectatorsError } = await supabase
         .from('battle_spectators')
         .delete()
         .eq('battle_id', battleId);
-        
+      
       if (spectatorsError) {
         console.error("Error deleting battle spectators:", spectatorsError);
-        throw spectatorsError;
+        throw new Error(`Failed to delete battle spectators: ${spectatorsError.message}`);
       }
-      console.log("Battle spectators deleted successfully");
       
-      // Delete battle participants first (due to foreign key constraints)
+      // Step 5: Delete participants
       const { error: participantsError } = await supabase
         .from('battle_participants')
         .delete()
         .eq('battle_id', battleId);
-        
+      
       if (participantsError) {
         console.error("Error deleting battle participants:", participantsError);
-        throw participantsError;
+        throw new Error(`Failed to delete battle participants: ${participantsError.message}`);
       }
-      console.log("Battle participants deleted successfully");
       
-      // Then delete the battle
-      const { error } = await supabase
+      // Step 6: Finally, delete the battle
+      const { error: battleError } = await supabase
         .from('battles')
         .delete()
         .eq('id', battleId);
-        
-      if (error) {
-        console.error("Error deleting battle:", error);
-        throw error;
-      }
-      console.log("Battle deleted successfully");
       
-      // Verify the battle is deleted
-      const { data: checkData } = await supabase
-        .from('battles')
-        .select('id')
-        .eq('id', battleId)
-        .single();
-        
-      if (checkData) {
-        console.error("Battle still exists after deletion attempt:", checkData);
-        throw new Error("Failed to delete battle from database");
+      if (battleError) {
+        console.error("Error deleting battle:", battleError);
+        throw new Error(`Failed to delete battle: ${battleError.message}`);
       }
       
-      // Update local state to immediately reflect the change
+      console.log("Battle and all related data successfully deleted");
+      
+      // Update local state to reflect the deletion
       setBattles(prevBattles => prevBattles.filter(battle => battle.id !== battleId));
       
-      // Refresh the battles list to ensure we have the latest data
-      fetchUserBattles();
-      
-      toast.success("Battle deleted successfully");
+      toast({
+        title: "Success",
+        description: "Battle deleted successfully",
+      });
       
     } catch (error: any) {
       console.error("Error in handleDeleteBattle:", error);
-      toast.error(`Failed to delete battle: ${error.message}`);
+      toast({
+        title: "Error",
+        description: `Failed to delete battle: ${error.message}`,
+        variant: "destructive",
+      });
     } finally {
       setDeletingId(null);
     }

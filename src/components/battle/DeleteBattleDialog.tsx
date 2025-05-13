@@ -27,14 +27,20 @@ const DeleteBattleDialog = ({ isDeleting, onDelete }: DeleteBattleDialogProps) =
     onDelete();
   };
 
+  const handleOpenChange = (open: boolean) => {
+    // If dialog is closing without clicking delete button, do nothing
+    if (!open) return;
+  };
+
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
+    <AlertDialog onOpenChange={handleOpenChange}>
+      <AlertDialogTrigger asChild onClick={(e) => e.stopPropagation()}>
         <Button 
           variant="ghost" 
           size="sm"
           className="text-red-500 hover:text-red-700 hover:bg-red-100"
           disabled={isDeleting}
+          onClick={(e) => e.stopPropagation()}
         >
           {isDeleting ? (
             <Loader size="small" />
@@ -43,7 +49,7 @@ const DeleteBattleDialog = ({ isDeleting, onDelete }: DeleteBattleDialogProps) =
           )}
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent onClick={(e) => e.stopPropagation()}>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Battle</AlertDialogTitle>
           <AlertDialogDescription>
@@ -51,7 +57,7 @@ const DeleteBattleDialog = ({ isDeleting, onDelete }: DeleteBattleDialogProps) =
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancel</AlertDialogCancel>
           <AlertDialogAction 
             className="bg-red-500 hover:bg-red-600 text-white" 
             onClick={handleDelete}
