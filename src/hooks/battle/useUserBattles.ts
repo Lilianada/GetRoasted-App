@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -24,6 +23,12 @@ export const useUserBattles = (userId: string | undefined) => {
       console.log("Fetched battles:", data);
     } catch (error) {
       console.error("Error fetching battles:", error);
+      // Optionally, show a toast to the user if fetching fails
+      toast({
+        title: "Error",
+        description: "Could not fetch your battles. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -61,64 +66,9 @@ export const useUserBattles = (userId: string | undefined) => {
     
     try {
       setDeletingId(battleId);
-      console.log(`Deleting battle with ID: ${battleId}`);
+      console.log(`Attempting to delete battle with ID: ${battleId}`);
       
-      // Step 1: Delete votes
-      const { error: votesError } = await supabase
-        .from('battle_votes')
-        .delete()
-        .eq('battle_id', battleId);
-      
-      if (votesError) {
-        console.error("Error deleting battle votes:", votesError);
-        throw new Error(`Failed to delete battle votes: ${votesError.message}`);
-      }
-      
-      // Step 2: Delete messages
-      const { error: messagesError } = await supabase
-        .from('battle_messages')
-        .delete()
-        .eq('battle_id', battleId);
-      
-      if (messagesError) {
-        console.error("Error deleting battle messages:", messagesError);
-        throw new Error(`Failed to delete battle messages: ${messagesError.message}`);
-      }
-      
-      // Step 3: Delete roasts
-      const { error: roastsError } = await supabase
-        .from('roasts')
-        .delete()
-        .eq('battle_id', battleId);
-      
-      if (roastsError) {
-        console.error("Error deleting roasts:", roastsError);
-        throw new Error(`Failed to delete roasts: ${roastsError.message}`);
-      }
-      
-      // Step 4: Delete spectators
-      const { error: spectatorsError } = await supabase
-        .from('battle_spectators')
-        .delete()
-        .eq('battle_id', battleId);
-      
-      if (spectatorsError) {
-        console.error("Error deleting battle spectators:", spectatorsError);
-        throw new Error(`Failed to delete battle spectators: ${spectatorsError.message}`);
-      }
-      
-      // Step 5: Delete participants
-      const { error: participantsError } = await supabase
-        .from('battle_participants')
-        .delete()
-        .eq('battle_id', battleId);
-      
-      if (participantsError) {
-        console.error("Error deleting battle participants:", participantsError);
-        throw new Error(`Failed to delete battle participants: ${participantsError.message}`);
-      }
-      
-      // Step 6: Finally, delete the battle
+      // Only need to delete the battle itself; related data will be deleted by CASCADE rules
       const { error: battleError } = await supabase
         .from('battles')
         .delete()
@@ -129,7 +79,7 @@ export const useUserBattles = (userId: string | undefined) => {
         throw new Error(`Failed to delete battle: ${battleError.message}`);
       }
       
-      console.log("Battle and all related data successfully deleted");
+      console.log("Battle successfully deleted. Related data handled by CASCADE rules.");
       
       // Update local state to reflect the deletion
       setBattles(prevBattles => prevBattles.filter(battle => battle.id !== battleId));

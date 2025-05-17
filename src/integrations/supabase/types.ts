@@ -39,7 +39,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "battle_messages_battle_id_fkey"
+            foreignKeyName: "fk_battles_battle_messages"
             columns: ["battle_id"]
             isOneToOne: false
             referencedRelation: "battles"
@@ -68,17 +68,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "battle_participants_battle_id_fkey"
-            columns: ["battle_id"]
-            isOneToOne: false
-            referencedRelation: "battles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "battle_participants_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_battles_battle_participants"
+            columns: ["battle_id"]
+            isOneToOne: false
+            referencedRelation: "battles"
             referencedColumns: ["id"]
           },
         ]
@@ -104,17 +104,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "battle_spectators_battle_id_fkey"
-            columns: ["battle_id"]
-            isOneToOne: false
-            referencedRelation: "battles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "battle_spectators_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_battles_battle_spectators"
+            columns: ["battle_id"]
+            isOneToOne: false
+            referencedRelation: "battles"
             referencedColumns: ["id"]
           },
         ]
@@ -145,6 +145,13 @@ export type Database = {
           voter_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_battles_battle_votes"
+            columns: ["battle_id"]
+            isOneToOne: false
+            referencedRelation: "battles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "votes_battle_id_fkey"
             columns: ["battle_id"]
@@ -370,7 +377,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "roasts_battle_id_fkey"
+            foreignKeyName: "fk_battles_roasts"
             columns: ["battle_id"]
             isOneToOne: false
             referencedRelation: "battles"
