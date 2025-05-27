@@ -4,41 +4,42 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+// useNavigate is not needed here anymore as deleteAccount from context handles navigation
+// import { useNavigate } from "react-router-dom"; 
 import { useAuthContext } from "@/context/AuthContext";
 import { toast } from "@/components/ui/sonner";
 
 export function AccountSettings() {
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
-  const { user, signOut } = useAuthContext();
-  const navigate = useNavigate();
+  // Get deleteAccount from context. signOut and navigate are handled by context's deleteAccount.
+  const { user, deleteAccount } = useAuthContext(); 
+  // const navigate = useNavigate(); // Not needed
 
   const handleDeleteAccount = async () => {
-    if (!user || deleteConfirmation !== "DELETE") return;
+    if (!user || deleteConfirmation !== "DELETE") {
+      if (deleteConfirmation !== "DELETE") {
+        toast.warning("Please type DELETE to confirm account deletion.");
+      }
+      return;
+    }
     
     setIsDeleting(true);
     try {
-      const res = await fetch('/api/delete-account', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ user_id: user.id }),
-      });
-      
-      const data = await res.json();
-      
-      if (!res.ok) throw new Error(data.error || 'Failed to delete account');
-      
-      toast.success("Account deleted successfully");
-      signOut();
-      navigate('/');
+      // Use the deleteAccount function from AuthContext
+      await deleteAccount();
+      // Success toast, signOut, and navigation are handled by the deleteAccount function in useAuth.tsx
     } catch (error) {
-      console.error('Error deleting account:', error);
-      toast.error("Failed to delete account");
+      // Error is already logged and toasted by the deleteAccount function in useAuth.tsx
+      // We just need to ensure isDeleting is reset.
+      // A generic toast here might be redundant but can be kept as a fallback if desired,
+      // though usually the more specific one from useAuth is better.
+      // For now, we'll rely on the toast from useAuth.tsx.
+      console.error('Error during account deletion process in component:', error);
     } finally {
       setIsDeleting(false);
+      // Optionally clear confirmation text after attempt
+      // setDeleteConfirmation(''); 
     }
   };
 
@@ -66,11 +67,12 @@ export function AccountSettings() {
             className="border-night-700"
             value={deleteConfirmation}
             onChange={(e) => setDeleteConfirmation(e.target.value)}
+            disabled={isDeleting}
           />
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button type="button" variant="ghost">
+            <Button type="button" variant="ghost" disabled={isDeleting}>
               Cancel
             </Button>
           </DialogClose>

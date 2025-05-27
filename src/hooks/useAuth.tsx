@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
@@ -118,16 +117,17 @@ export const useAuth = () => {
     
     try {
       // Call the Supabase function to delete the user's account
+      // Corrected: send user_id (snake_case) as expected by the Edge Function
       const { error } = await supabase.functions.invoke('delete-account', {
-        body: { userId: user.id }
+        body: { user_id: user.id } 
       });
       
       if (error) throw error;
       
       // Sign out after deletion
-      await signOut();
+      await signOut(); // signOut already navigates to '/'
       toast.success("Account deleted successfully");
-      navigate('/');
+      // navigate('/'); // Not needed here as signOut handles it
     } catch (error: any) {
       toast.error("Failed to delete account", {
         description: error instanceof Error ? error.message : "An unknown error occurred"
@@ -146,7 +146,7 @@ export const useAuth = () => {
     signUpWithEmail,
     signInWithGoogle,
     deleteAccount
-  }), [session, user, loading]);
+  }), [session, user, loading, signOut, signInWithEmail, signUpWithEmail, signInWithGoogle, deleteAccount]); // Ensure all dependencies are listed for useMemo
 };
 
 export default useAuth;
