@@ -1,11 +1,20 @@
 
 import React, { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
+// Explicitly import 'render' as 'rtlRender' to avoid naming conflicts,
+// and also import other commonly used utilities like screen, waitFor, fireEvent.
+import { 
+  render as rtlRender, 
+  RenderOptions, 
+  screen, 
+  waitFor, 
+  fireEvent 
+} from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom'; // For side effects like adding .toBeInTheDocument()
 
-// Add type extension for testing-library
+// Add type extension for testing-library matchers
+// This helps if you're using Vitest with Jest-like assertions
 declare global {
   namespace jest {
     interface Matchers<R> {
@@ -25,13 +34,18 @@ const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+// Custom render function now uses rtlRender internally
 const customRender = (
   ui: ReactElement,
   options?: Omit<RenderOptions, 'wrapper'>
-) => render(ui, { wrapper: AllTheProviders, ...options });
+) => rtlRender(ui, { wrapper: AllTheProviders, ...options });
 
-// Re-export everything from testing-library
-export * from '@testing-library/react';
+// Explicitly re-export the custom render function (aliased as 'render')
+// and the other utilities from @testing-library/react.
+// We are no longer using 'export * from "@testing-library/react";'
+// to make our exports more deliberate.
+export { customRender as render, screen, waitFor, fireEvent };
 
-// Override render method
-export { customRender as render };
+// If you find you need other utilities from @testing-library/react later on
+// (e.g., within, act), you'll need to add them to the import statement at the top
+// and then also to the export statement above.
