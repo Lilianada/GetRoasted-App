@@ -1,14 +1,16 @@
 
 import React, { ReactElement } from 'react';
-// Explicitly import 'render' as 'rtlRender' to avoid naming conflicts,
-// and also import other commonly used utilities like screen, waitFor, fireEvent.
+// Import 'render' and 'RenderOptions' from @testing-library/react
 import { 
   render as rtlRender, 
-  RenderOptions, 
+  RenderOptions 
+} from '@testing-library/react';
+// Import 'screen', 'waitFor', and 'fireEvent' from @testing-library/dom
+import { 
   screen, 
   waitFor, 
   fireEvent 
-} from '@testing-library/react';
+} from '@testing-library/dom'; 
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
 import '@testing-library/jest-dom'; // For side effects like adding .toBeInTheDocument()
@@ -41,12 +43,10 @@ const customRender = (
 ) => rtlRender(ui, { wrapper: AllTheProviders, ...options });
 
 // Explicitly re-export the custom render function (aliased as 'render')
-// and the other utilities from @testing-library/react.
-// We are no longer using 'export * from "@testing-library/react";'
-// to make our exports more deliberate.
+// and the other utilities. 'screen', 'waitFor', 'fireEvent' now come from @testing-library/dom.
 export { customRender as render, screen, waitFor, fireEvent };
 
-// If you find you need other utilities from @testing-library/react later on
-// (e.g., within, act), you'll need to add them to the import statement at the top
+// If you find you need other utilities from @testing-library/react or @testing-library/dom later on
+// (e.g., within, act), you'll need to add them to the import statements at the top
 // and then also to the export statement above.
 
