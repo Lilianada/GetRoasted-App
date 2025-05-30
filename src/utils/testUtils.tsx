@@ -3,11 +3,10 @@ import React, { ReactElement } from 'react';
 // Import 'render' and 'RenderOptions' from @testing-library/react
 import { 
   render as rtlRender, 
-  RenderOptions,
-  screen,
-  waitFor,
-  fireEvent
+  RenderOptions
 } from '@testing-library/react';
+// Import screen, waitFor, fireEvent from @testing-library/dom which is a peer dependency
+import { screen, waitFor, fireEvent } from '@testing-library/dom';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
 import '@testing-library/jest-dom'; // For side effects like adding .toBeInTheDocument()
@@ -40,7 +39,7 @@ const customRender = (
 ) => rtlRender(ui, { wrapper: AllTheProviders, ...options });
 
 // Explicitly re-export the custom render function (aliased as 'render')
-// and the other utilities from @testing-library/react
+// and the other utilities from @testing-library/dom
 export { customRender as render, screen, waitFor, fireEvent };
 
 // If you find you need other utilities from @testing-library/react later on
